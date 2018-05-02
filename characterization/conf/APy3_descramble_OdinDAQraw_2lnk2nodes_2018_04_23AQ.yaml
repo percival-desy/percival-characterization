@@ -1,0 +1,59 @@
+general:
+    data_type: raw
+    #run: DLSraw
+    run: test_04.05_2_frame_sat_fl0
+
+    plot_sample: False
+    plot_reset: False
+    plot_combined: True
+
+all:
+    output: &output /home/marras/PERCIVAL/PercFramework/data/h5_scrmbl_view/
+
+raw:
+    input: /home/marras/PERCIVAL/PercFramework/data/h5_scrmbl_view/h5in/test_10-11_2_frame_sat_fl0.hdf5
+    #input: /home/marras/PERCIVAL/PercFramework/data/h5_scrmbl_view/h5in/horse01_fl0.h5
+    #input: /home/marras/PERCIVAL/PercFramework/data/h5_scrmbl_view/h5in/illum01_fl0.h5
+    input: /home/marras/PERCIVAL/PercFramework/data/h5_scrmbl_view/h5in/test003_fl0.h5
+    metadata_file: /home/marras/PERCIVAL/PercFramework/data/h5_scrmbl_view/h5in/file.dat
+
+    output: *output
+
+    measurement: adccal
+
+    adc: null
+    frame: 0
+    col: 100
+    row: 100
+
+    #method: [viewer]
+    #method: [image, plot_coarse_vs_fine]
+    #method: [image]
+    #method: [APy3_debug]
+    method: [APy3_descramble_OdinDAQraw_2lnk2nodes_2018_04_23AQ]
+
+gathered:
+    input: *output
+    output: *output
+
+    measurement: adccal
+
+    adc: 0
+    frame: null
+    col: 100
+    row: null
+
+    method: [plot, hist, hist_2d]
+
+processed:
+    input: *output
+    output: *output
+
+    measurement: adccal
+
+    adc: 0
+    frame: null
+    col: 100
+    row: null
+
+    method: [plot]
