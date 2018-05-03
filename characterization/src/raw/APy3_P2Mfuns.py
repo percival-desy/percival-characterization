@@ -145,7 +145,7 @@ def convert_DLSraw_2_GnCrsFn(in_Smpl_DLSraw, in_Rst_DLSraw, inErr, outERR):
 #%% percival-specific debug-plot dunctions
 
 def percDebug_plot_6x2D(GnSmpl,CrsSmpl,FnSmpl, GnRst,CrsRst,FnRst, label_title,ErrBelow):
-    """ 2D scatter plot of Smpl/Rst, Gn/Crs/Fn, give mark as error (white) the values << ErrBelow """ 
+    """ 2D plot of Smpl/Rst, Gn/Crs/Fn, give mark as error (white) the values << ErrBelow """ 
     cmap = matplotlib.pyplot.cm.jet
     cmap.set_under(color='white') 
     #fig = matplotlib.pyplot.figure(figsize=(18,12))
