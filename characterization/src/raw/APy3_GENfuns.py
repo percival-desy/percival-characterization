@@ -188,13 +188,14 @@ def sort_nicely(myList):
 #Trow=0
 #Tcol=1
 #
-#def my_indices_rectangle(Rows2look,Cols2look):
-#    indices=[]
-#    #
-#    for iRow in Rows2look:
-#        for iCol in Cols2look:
-#            indices += [(iRow,iCol)]
-#    return indices
+def indices_rectangle(Rows2look,Cols2look):
+    ''' list of tuples covering the rectangle [Rows2look,Cols2look]'''
+    indices=[]
+    #
+    for iRow in Rows2look:
+        for iCol in Cols2look:
+            indices += [(iRow,iCol)]
+    return indices
 #
 #def my_indices_cuboid(Imgs2look,Rows2look,Cols2look):
 #    indices=[]
@@ -230,7 +231,8 @@ def write_csv(filenamepath, data):
 #
 def read_tst(filenamepath):
     ''' read text from tab-separated-texts file '''
-    my_data= numpy.genfromtxt(filenamepath, delimiter= '\t', dtype='string')
+    #my_data= numpy.genfromtxt(filenamepath, delimiter= '\t', dtype='string')
+    my_data= numpy.genfromtxt(filenamepath, delimiter= '\t', dtype=str)
     return my_data
 #
 def write_tst(filenamepath, data):
@@ -363,12 +365,25 @@ def color_y_axis(ax, color):
 def plot_1D(arrayX, arrayY, label_x,label_y,label_title):
     ''' 1D scatter plot ''' 
     fig = matplotlib.pyplot.figure()
-    matplotlib.pyplot.plot(arrayX, arrayY, 'o')
+    matplotlib.pyplot.plot(arrayX, arrayY, 'o', fillstyle='none')
     matplotlib.pyplot.xlabel(label_x)
     matplotlib.pyplot.ylabel(label_y)
     matplotlib.pyplot.title(label_title)    
     matplotlib.pyplot.show(block=False)
     return (fig)
+#
+def plot_multi1D(arrayX, arrayY_2D, infoSets_List, label_x,label_y,label_title):
+    """ plot1D multiple datasets (arrayX[:], arrayY_2D[i,:]) , identified by infoSets_List[i] """
+    fig = matplotlib.pyplot.figure()
+    (Nsets,Npoints)= arrayY_2D.shape
+    for iSet, thisSet in enumerate(infoSets_List):
+        matplotlib.pyplot.plot(arrayX, arrayY_2D[iSet,:],'o-', fillstyle='none')
+    matplotlib.pyplot.xlabel(label_x)
+    matplotlib.pyplot.ylabel(label_y)
+    matplotlib.pyplot.title(label_title)   
+    matplotlib.pyplot.legend(infoSets_List, loc='upper right')
+    matplotlib.pyplot.show(block=False) 
+    return fig
 #
 def plot_1D_2scales(dataX, dataY0, dataY1, labelX, labelY0, labelY1, labelTitle):
     ''' scatter plot dataY0/1 on left/right axes'''
