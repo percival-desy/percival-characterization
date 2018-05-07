@@ -1,0 +1,53 @@
+general:
+    data_type: raw
+    #run: DLSraw
+    run: test_04.05_2_frame_sat_fl0
+
+    plot_sample: False
+    plot_reset: False
+    plot_combined: True
+
+all:
+    output: &output /home/marras/PERCIVAL/PercFramework/data/h5_scrmbl_view/
+
+raw:
+    input: /home/marras/PERCIVAL/PercFramework/data/h5_scrmbl_view/h5in/test003_fl0.h5
+    #input: /home/marras/PERCIVAL/PercFramework/data/h5_scrmbl_view/h5in/p2018.03.15crdAD_h10
+    metadata_file: /home/marras/PERCIVAL/PercFramework/data/h5_scrmbl_view/h5in/file.dat
+
+    output: *output
+
+    measurement: adccal
+
+    adc: null
+    frame: 0
+    col: 100
+    row: 100
+
+    method: [APy3_descramble_tcpdump_2018_03_15AD]
+
+gathered:
+    input: *output
+    output: *output
+
+    measurement: adccal
+
+    adc: 0
+    frame: null
+    col: 100
+    row: null
+
+    method: [plot, hist, hist_2d]
+
+processed:
+    input: *output
+    output: *output
+
+    measurement: adccal
+
+    adc: 0
+    frame: null
+    col: 100
+    row: null
+
+    method: [plot]
