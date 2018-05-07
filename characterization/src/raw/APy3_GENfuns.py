@@ -372,12 +372,13 @@ def plot_1D(arrayX, arrayY, label_x,label_y,label_title):
     matplotlib.pyplot.show(block=False)
     return (fig)
 #
-def plot_multi1D(arrayX, arrayY_2D, infoSets_List, label_x,label_y,label_title):
+def plot_multi1D(arrayX, arrayY_2D, infoSets_List, label_x,label_y,label_title, showLineFlag):
     """ plot1D multiple datasets (arrayX[:], arrayY_2D[i,:]) , identified by infoSets_List[i] """
     fig = matplotlib.pyplot.figure()
     (Nsets,Npoints)= arrayY_2D.shape
     for iSet, thisSet in enumerate(infoSets_List):
-        matplotlib.pyplot.plot(arrayX, arrayY_2D[iSet,:],'o-', fillstyle='none')
+        if showLineFlag: matplotlib.pyplot.plot(arrayX, arrayY_2D[iSet,:],'o-', fillstyle='none')
+        else: matplotlib.pyplot.plot(arrayX, arrayY_2D[iSet,:],'o', fillstyle='none')
     matplotlib.pyplot.xlabel(label_x)
     matplotlib.pyplot.ylabel(label_y)
     matplotlib.pyplot.title(label_title)   

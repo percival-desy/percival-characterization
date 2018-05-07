@@ -70,6 +70,7 @@ class Plot(PlotBase):
         dflt_Row2show_mtlb='140:146'
         dflt_Col2show_mtlb='100:101'
         dflt_showSmplRst='Y'
+        dflt_showLineFlag='Y'
         #
         dflt_kindOfScanLabel= 'VRST [V]'        
         #
@@ -93,6 +94,8 @@ class Plot(PlotBase):
         GUIwin_arguments+= [dflt_Col2show_mtlb]
         GUIwin_arguments+= ['show Sample? [Y=Sample/N=Reset]'] 
         GUIwin_arguments+= [dflt_showSmplRst]
+        GUIwin_arguments+= ['show Lines? [Y/N]'] 
+        GUIwin_arguments+= [dflt_showLineFlag]
         GUIwin_arguments+= ['which kind of scan is it?'] 
         GUIwin_arguments+= [dflt_kindOfScanLabel]        
         #
@@ -114,6 +117,7 @@ class Plot(PlotBase):
         Row2show_str=dataFromUser[iparam]; iparam+=1; Row2show= APy3_GENfuns.matlabLike_range(Row2show_str)
         Col2show_str=dataFromUser[iparam]; iparam+=1; Col2show= APy3_GENfuns.matlabLike_range(Col2show_str)
         showSmpl_Flag= APy3_GENfuns.isitYes(dataFromUser[iparam]); iparam+=1
+        showLineFlag= APy3_GENfuns.isitYes(dataFromUser[iparam]); iparam+=1
         kindOfScanLabel= dataFromUser[iparam]; iparam+=1 
         #
         debugFlag=APy3_GENfuns.isitYes(dataFromUser[iparam]); iparam+=1
@@ -177,8 +181,8 @@ class Plot(PlotBase):
             aux_fnSets2show_2D[iSet,:]= data_GnCrsFn[:,iSmplRst,thisRow,thisCol,iFn]
             aux_infoSets_List+=[str(thisT)]
         #
-        APy3_GENfuns.plot_multi1D(scanParameter, aux_crsSets2show_2D, aux_infoSets_List, kindOfScanLabel,'crs',aux_title)
-        APy3_GENfuns.plot_multi1D(scanParameter, aux_fnSets2show_2D, aux_infoSets_List, kindOfScanLabel,'fn',aux_title)
+        APy3_GENfuns.plot_multi1D(scanParameter, aux_crsSets2show_2D, aux_infoSets_List, kindOfScanLabel,'crs',aux_title,showLineFlag)
+        APy3_GENfuns.plot_multi1D(scanParameter, aux_fnSets2show_2D, aux_infoSets_List, kindOfScanLabel,'fn',aux_title,showLineFlag)
         # - - -
         #
         # debug
