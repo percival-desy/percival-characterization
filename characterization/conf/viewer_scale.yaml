@@ -2,8 +2,8 @@ general:
     data_type: raw
     run: DLSraw
 
-    plot_sample: True
-    plot_reset: True
+    plot_sample: False
+    plot_reset: False
     plot_combined: True
 
 all:
