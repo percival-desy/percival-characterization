@@ -11,27 +11,15 @@ class PlotBase():
     LoadedData = namedtuple("loaded_data", ["x",
                                             "data"])
 
-    def __init__(self,
-             input_fname_templ,
-             metadata_fname,
-             output_dir,
-             adc,
-             frame,
-             row,
-             col,
-             loaded_data=None,
-             dims_overwritten=False):
+    def __init__(self, loaded_data=None, dims_overwritten=False, **kwargs):
 
-        self._input_fname_templ = input_fname_templ
-        self._metadata_fname = metadata_fname
-        self._output_dir = os.path.normpath(output_dir)
-        self._adc = adc
-        self._frame = frame
-        self._row = row
-        self._col = col
+        # add all entries of the kwargs dictionary into the class namespace
+        for key, value in kwargs.items():
+            setattr(self, "_" + key, value)
+
         self._dims_overwritten = dims_overwritten
 
-        loader = LoadGathered(input_fname_templ=self._input_fname_templ,
+        loader = LoadGathered(input_fname_templ=self._input_fname,
                               output_dir=self._output_dir,
                               adc=self._adc,
                               frame=self._frame,
@@ -43,6 +31,27 @@ class PlotBase():
         else:
             self._x = loaded_data.x
             self._data = loaded_data.data
+
+        # to ease nameing plots
+        if self._adc == slice(None):
+            self._adc_title = None
+        else:
+            self._adc_title = self._adc
+
+        if self._frame == slice(None):
+            self._frame_title = None
+        else:
+            self._frame_title = self._frame
+
+        if self._row == slice(None):
+            self._row_title = None
+        else:
+            self._row_title = self._row
+
+        if self._col == slice(None):
+            self._col_title = None
+        else:
+            self._col_title = self._col
 
     def create_dir(self):
         if not os.path.exists(self._output_dir):
@@ -76,9 +85,9 @@ class PlotBase():
     def plot_sample(self):
         self.create_dir()
 
-        pos = "ADC={}, Col={}".format(self._adc, self._col)
-        suffix = "_adc{}_col{}".format(self._adc, self._col)
-        out = self._output_dir+"/"
+        pos = "ADC={}, Col={}".format(self._adc_title, self._col_title)
+        suffix = "_adc{}_col{}".format(self._adc_title, self._col_title)
+        out = self._output_dir + "/"
 
         self._generate_single_plot(x=self._x,
                                    data=self._data["s_coarse"],
@@ -99,9 +108,9 @@ class PlotBase():
     def plot_reset(self):
         self.create_dir()
 
-        pos = "ADC={}, Col={}".format(self._adc, self._col)
-        suffix = "_adc{}_col{}".format(self._adc, self._col)
-        out = self._output_dir+"/"
+        pos = "ADC={}, Col={}".format(self._adc_title, self._col_title)
+        suffix = "_adc{}_col{}".format(self._adc_title, self._col_title)
+        out = self._output_dir + "/"
 
         self._generate_single_plot(x=self._x,
                                    data=self._data["r_coarse"],

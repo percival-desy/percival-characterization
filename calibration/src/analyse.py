@@ -16,17 +16,18 @@ SRC_DIR = os.path.join(CALIBRATION_DIR, "src")
 BASE_DIR = os.path.dirname(CALIBRATION_DIR)
 SHARED_DIR = os.path.join(BASE_DIR, "shared")
 
+GATHER_DIR = os.path.join(SRC_DIR, "gather")
+ADCCAL_GATHER_METHOD_DIR = os.path.join(GATHER_DIR, "adccal", "methods")
+PTCCAL_GATHER_METHOD_DIR = os.path.join(GATHER_DIR, "ptccal", "methods")
+
 PROCESS_DIR = os.path.join(SRC_DIR, "process")
-ADCCAL_METHOD_DIR = os.path.join(PROCESS_DIR, "adccal", "methods")
-PTCCAL_METHOD_DIR = os.path.join(PROCESS_DIR, "ptccal", "methods")
+ADCCAL_PROCESS_METHOD_DIR = os.path.join(PROCESS_DIR, "adccal", "methods")
+PTCCAL_PROCESS_METHOD_DIR = os.path.join(PROCESS_DIR, "ptccal", "methods")
 
 if SHARED_DIR not in sys.path:
     sys.path.insert(0, SHARED_DIR)
 
 import utils  # noqa E402
-
-if ADCCAL_METHOD_DIR not in sys.path:
-    sys.path.insert(0, ADCCAL_METHOD_DIR)
 
 
 class Analyse(object):
@@ -158,14 +159,19 @@ class Analyse(object):
 
 
     def _call_gather(self, **kwargs):
+
         if self.measurement == "adccal":
-            from gather.gather_adccal import Gather
+            if ADCCAL_GATHER_METHOD_DIR not in sys.path:
+                sys.path.insert(0, ADCCAL_GATHER_METHOD_DIR)
         elif self.measurement == "ptccal":
-            from gather.gather_base import GatherBase as Gather
+            if PTCCAL_GATHER_METHOD_DIR not in sys.path:
+                sys.path.insert(0, PTCCAL_GATHER_METHOD_DIR)
         else:
             print("Unsupported type.")
 
-        obj = Gather(**kwargs)
+        self.gather_m = __import__(self.method).Gather
+
+        obj = self.gather_m(**kwargs)
         obj.run()
 
     def run_process(self):
@@ -209,6 +215,13 @@ class Analyse(object):
                 job.join()
 
     def _call_process(self, **kwargs):
+        if self.measurement == "adccal":
+            if ADCCAL_PROCESS_METHOD_DIR not in sys.path:
+                sys.path.insert(0, ADCCAL_PROCESS_METHOD_DIR)
+        elif self.measurement == "ptccal":
+            if PTCCAL_PROCESS_METHOD_DIR not in sys.path:
+                sys.path.insert(0, PTCCAL_PROCESS_METHOD_DIR)
+
         self.process_m = __import__(self.method).Process
 
         obj = self.process_m(**kwargs)
@@ -349,6 +362,7 @@ def insert_args_into_config(args, config):
     except:
         raise Exception("No method type specified. Abort.")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     args = get_arguments()
