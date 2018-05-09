@@ -1,3 +1,6 @@
+''' This module applies a linear fit to a dataset and store the results
+    in a HDF5 file. '''
+
 import numpy as np
 
 import __init__  # noqa F401
@@ -5,6 +8,8 @@ from process_adccal_base import ProcessAdccalBase
 
 
 class Process(ProcessAdccalBase):
+    ''' Class to process a ADC calibration
+    '''
 
     def _initiate(self):
         shapes = {
