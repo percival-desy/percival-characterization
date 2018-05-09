@@ -240,16 +240,16 @@ def write_tst(filenamepath, data):
     numpy.savetxt(filenamepath, data, delimiter= '\t', fmt='%s')
 #
 def read_bin_uint8(filenamepath):
-    ''' read data from binary file '''
-    thisfile= open(filenamepath, 'r')
-    fileContent=numpy.fromfile(thisfile, dtype=numpy.uint8); 
-    thisfile.close()
+    ''' read uint8 data from binary file '''
+    with open(filenamepath) as thisfile:
+        fileContent=numpy.fromfile(thisfile, dtype=numpy.uint8)
+        thisfile.close()
     return fileContent
 #
-#def read_binary(filenamepath):
-#    ''' read data from binary file '''
-#    thisfile= open(filenamepath, 'rb')
-#    fileContent=thisfile.read()
+#def read_bin_uint8(filenamepath):
+#    ''' read uint8 data from binary file '''
+#    thisfile= open(filenamepath, 'r')
+#    fileContent=numpy.fromfile(thisfile, dtype=numpy.uint8); 
 #    thisfile.close()
 #    return fileContent
 #
@@ -269,20 +269,37 @@ def write_1xh5(filenamepath, data2write, path_2write):
 #
 def read_2xh5(filenamepath, path1_2read, path2_2read):
     ''' read 2xXD h5 file (paths_2read: '/data/','/reset/' ) '''
-    my5hfile= h5py.File(filenamepath, 'r')
-    myh5dataset=my5hfile[path1_2read]
-    my_data1_2D= numpy.array(myh5dataset)
-    myh5dataset=my5hfile[path2_2read]
-    my_data2_2D= numpy.array(myh5dataset)
-    my5hfile.close()
-    return (my_data1_2D,my_data2_2D) 
+    with h5py.File(filenamepath, "r", libver='latest') as my5hfile:
+        my_data1_2D= numpy.array(my5hfile[path1_2read])
+        my_data2_2D= numpy.array(my5hfile[path2_2read])
+        my5hfile.close()
+    return (my_data1_2D,my_data2_2D)
 #
-def write_2xh5(filenamepath, data1_2write, path1_2write, data2_2write, path2_2write):
+#def read_2xh5(filenamepath, path1_2read, path2_2read):
+#    ''' read 2xXD h5 file (paths_2read: '/data/','/reset/' ) '''
+#    my5hfile= h5py.File(filenamepath, 'r')
+#    myh5dataset=my5hfile[path1_2read]
+#    my_data1_2D= numpy.array(myh5dataset)
+#    myh5dataset=my5hfile[path2_2read]
+#    my_data2_2D= numpy.array(myh5dataset)
+#    my5hfile.close()
+#    return (my_data1_2D,my_data2_2D)
+#
+def write_2xh5(filenamepath, 
+               data1_2write, path1_2write, 
+               data2_2write, path2_2write):
     ''' write 2xXD h5 file (paths_2write: '/data/','/reset/' ) '''
-    my5hfile= h5py.File(filenamepath, 'w')
-    my5hfile.create_dataset(path1_2write, data=data1_2write) #
-    my5hfile.create_dataset(path2_2write, data=data2_2write) #
-    my5hfile.close()
+    with h5py.File(filenamepath, "w", libver='latest') as my5hfile:
+        my5hfile.create_dataset(path1_2write, data=data1_2write) #
+        my5hfile.create_dataset(path2_2write, data=data2_2write) #
+        my5hfile.close()
+#
+#def write_2xh5(filenamepath, data1_2write, path1_2write, data2_2write, path2_2write):
+#    ''' write 2xXD h5 file (paths_2write: '/data/','/reset/' ) '''
+#    my5hfile= h5py.File(filenamepath, 'w')
+#    my5hfile.create_dataset(path1_2write, data=data1_2write) #
+#    my5hfile.create_dataset(path2_2write, data=data2_2write) #
+#    my5hfile.close()
 #
 def list_files(folderpath, expectedPrefix, expectedSuffix):
     ''' look for files in directory having the expected prefix and suffix ('*' to have any) '''
