@@ -1,0 +1,51 @@
+general:
+    data_type: raw
+    run: DLSraw
+
+    plot_sample: False
+    plot_reset: False
+    plot_combined: True
+
+all:
+    output: &output /home/marras/PERCIVAL/PercFramework/data/h5_scrmbl_view/
+
+raw:
+    input: /home/marras/PERCIVAL/PercFramework/data/h5_scrmbl_view/h5in/test003_dscrmbld_DLSraw.h5
+    metadata_file: /home/marras/PERCIVAL/PercFramework/data/h5_scrmbl_view/h5in/file.dat
+
+    output: *output
+
+    measurement: adccal
+
+    adc: null
+    frame: 2
+    col: 100
+    row: 100
+
+    method: [APy3_viewer_1ScanFile]
+
+gathered:
+    input: *output
+    output: *output
+
+    measurement: adccal
+
+    adc: 0
+    frame: null
+    col: 100
+    row: null
+
+    method: [plot, hist, hist_2d]
+
+processed:
+    input: *output
+    output: *output
+
+    measurement: adccal
+
+    adc: 0
+    frame: null
+    col: 100
+    row: null
+
+    method: [plot]
