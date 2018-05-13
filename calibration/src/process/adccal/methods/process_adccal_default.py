@@ -26,6 +26,14 @@ class Process(ProcessAdccalBase):
                 "data": np.zeros(shapes["offset"]),
                 "path": "sample/coarse/slope"
             },
+            "s_fine_offset": {
+                "data": np.zeros(shapes["offset"]),
+                "path": "sample/fine/offset"
+            },
+            "s_fine_slope": {
+                "data": np.zeros(shapes["offset"]),
+                "path": "sample/fine/slope"
+            },
         }
 
     def _calculate(self):
@@ -43,8 +51,8 @@ class Process(ProcessAdccalBase):
         # create as many entries for each vin as there were original frames
         vin = self._fill_up_vin(data["vin"])
         sample_coarse = data["s_coarse"]
-        offset = self._result["s_coarse_offset"]["data"]
-        slope = self._result["s_coarse_slope"]["data"]
+        offset_coarse = self._result["s_coarse_offset"]["data"]
+        slope_coarse = self._result["s_coarse_slope"]["data"]
 
         for adc in range(self._n_adcs):
             for col in range(self._n_cols):
@@ -53,12 +61,12 @@ class Process(ProcessAdccalBase):
                                               adu_coarse > 1))
                 if np.any(idx):
                     fit_result = self._fit_linear(vin[idx], adu_coarse[idx])
-                    slope[adc, col], offset[adc, col] = fit_result.solution
+                    slope_coarse[adc, col], offset_coarse[adc, col] = fit_result.solution
                 else:
-                    slope[adc, col] = np.NaN
-                    offset[adc, col] = np.NaN
+                    slope_coarse[adc, col] = np.NaN
+                    offset_coarse[adc, col] = np.NaN
 
-        self._result["s_coarse_slope"]["data"] = slope
-        self._result["s_coarse_offset"]["data"] = offset
+        self._result["s_coarse_slope"]["data"] = slope_coarse
+        self._result["s_coarse_offset"]["data"] = offset_coarse
 
         print("Coarse fitting is done.")
