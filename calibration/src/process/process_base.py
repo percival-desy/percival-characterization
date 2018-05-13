@@ -29,11 +29,11 @@ class ProcessBase(object):
                                                        "singular_values",
                                                        "r_squared"])
 
-    def __init__(self, in_fname, out_fname, method):
+    def __init__(self, **kwargs):
 
-        self._in_fname = in_fname
-        self._out_fname = out_fname
-        self.method = method
+        # add all entries of the kwargs dictionary into the class namespace
+        for key, value in kwargs.items():
+            setattr(self, "_" + key, value)
 
         self._result = {}
 
@@ -121,7 +121,7 @@ class ProcessBase(object):
             offset = y_mean
 
             res = [
-                (slope, offset),  #solution
+                (slope, offset),  # solution
                 None,  # residuals
                 None,  # rang
                 None  # singular_values
@@ -132,7 +132,7 @@ class ProcessBase(object):
             #                residuals,
             #                rank,
             #                singular values
-            res = np.linalg.lstsq(A, y_masked)
+            res = np.linalg.lstsq(A, y_masked, rcond=None)
 
         if enable_r_squared:
             if all_zero:
@@ -177,7 +177,6 @@ class ProcessBase(object):
                     f.create_dataset(self._result[key]['path'],
                                      data=self._result[key]['data'])
 
-
             # write metadata
 
             metadata_base_path = "collection"
@@ -190,6 +189,6 @@ class ProcessBase(object):
             f.create_dataset(name, data=__version__)
 
             name = "{}/{}".format(metadata_base_path, "method")
-            f.create_dataset(name, data=self.method)
+            f.create_dataset(name, data=self._method)
 
             f.flush()
