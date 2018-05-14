@@ -23,6 +23,10 @@ class LoadProcessed():
             "s_coarse": {
                 "slope": "sample/coarse/slope",
                 "offset": "sample/coarse/offset"
+            },
+            "s_fine": {
+                "slope": "sample/fine/slope",
+                "offset": "sample/fine/offset"
             }
         }
 

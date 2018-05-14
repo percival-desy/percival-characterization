@@ -1,5 +1,5 @@
 general:
-    data_type: gathered
+    data_type: processed
     run: DLSraw
 
     plot_sample: True

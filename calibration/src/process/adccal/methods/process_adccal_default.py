@@ -47,6 +47,7 @@ class Process(ProcessAdccalBase):
         # convert (n_adcs, n_cols, n_groups, n_frames)
         #      -> (n_adcs, n_cols, n_groups * n_frames)
         self._merge_groups_with_frames(data["s_coarse"])
+        self._merge_groups_with_frames(data["s_fine"])
 
         # create as many entries for each vin as there were original frames
         vin = self._fill_up_vin(data["vin"])
@@ -61,6 +62,7 @@ class Process(ProcessAdccalBase):
             for col in range(self._n_cols):
                 adu_coarse = sample_coarse[adc, col, :]
                 adu_fine = sample_fine[adc, col, :]
+                #print(len(vin), len(adu_fine), len(adu_coarse))
                 idx = np.where(np.logical_and(adu_coarse < 30,
                                               adu_coarse > 1))
                 idx_fine = np.where(np.logical_and(adu_fine < 150,
