@@ -53,20 +53,34 @@ class Process(ProcessAdccalBase):
         sample_coarse = data["s_coarse"]
         offset_coarse = self._result["s_coarse_offset"]["data"]
         slope_coarse = self._result["s_coarse_slope"]["data"]
+        sample_fine = data["s_fine"]
+        offset_fine = self._result["s_fine_offset"]["data"]
+        slope_fine = self._result["s_fine_slope"]["data"]
 
         for adc in range(self._n_adcs):
             for col in range(self._n_cols):
                 adu_coarse = sample_coarse[adc, col, :]
+                adu_fine = sample_fine[adc, col, :]
                 idx = np.where(np.logical_and(adu_coarse < 30,
                                               adu_coarse > 1))
+                idx_fine = np.where(np.logical_and(adu_fine < 150,
+                                                   adu_fine > 1))
                 if np.any(idx):
                     fit_result = self._fit_linear(vin[idx], adu_coarse[idx])
                     slope_coarse[adc, col], offset_coarse[adc, col] = fit_result.solution
                 else:
                     slope_coarse[adc, col] = np.NaN
                     offset_coarse[adc, col] = np.NaN
+                if np.any(idx_fine):
+                    fit_result_fine = self._fit_linear(vin[idx_fine], adu_fine[idx_fine])
+                    slope_fine[adc, col], offset_fine[adc, col] = fit_result_fine.solution
+                else:
+                    slope_fine[adc, col] = np.NaN
+                    offset_fine[adc, col] = np.NaN
 
         self._result["s_coarse_slope"]["data"] = slope_coarse
         self._result["s_coarse_offset"]["data"] = offset_coarse
+        self._result["s_fine_slope"]["data"] = slope_fine
+        self._result["s_fine_offset"]["data"] = offset_fine
 
         print("Coarse fitting is done.")
