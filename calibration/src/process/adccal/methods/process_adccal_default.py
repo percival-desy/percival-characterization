@@ -35,14 +35,16 @@ class Process(ProcessAdccalBase):
                 "path": "sample/fine/slope"
             },
         }
+        self._coarse_fitting_range = self._method_properties["coarse_fitting_range"]
+        self._fine_fitting_range = self._method_properties["fine_fitting_range"]
 
     def _calculate(self):
-        ''' Perform a linear fit on sample ADC coarse and store the offset
+        ''' Perform a linear fit on sample ADC coarse/fine and store the offset
             and slope in a HDF5 file.
         '''
         print("Start loading data from {} ...".format(self._in_fname), end="")
         data = self._load_data(self._in_fname)
-        print("Data loaded, fitting coarse data...")
+        print("Data loaded, fitting coarse and data...")
 
         # convert (n_adcs, n_cols, n_groups, n_frames)
         #      -> (n_adcs, n_cols, n_groups * n_frames)
@@ -63,10 +65,10 @@ class Process(ProcessAdccalBase):
                 adu_coarse = sample_coarse[adc, col, :]
                 adu_fine = sample_fine[adc, col, :]
                 #print(len(vin), len(adu_fine), len(adu_coarse))
-                idx = np.where(np.logical_and(adu_coarse < 30,
-                                              adu_coarse > 1))
-                idx_fine = np.where(np.logical_and(adu_fine < 150,
-                                                   adu_fine > 1))
+                idx = np.where(np.logical_and(adu_coarse < self._coarse_fitting_range[1],
+                                              adu_coarse > self._coarse_fitting_range[0]))
+                idx_fine = np.where(np.logical_and(adu_fine < self._fine_fitting_range[1],
+                                                   adu_fine > self._fine_fitting_range[0]))
                 if np.any(idx):
                     fit_result = self._fit_linear(vin[idx], adu_coarse[idx])
                     slope_coarse[adc, col], offset_coarse[adc, col] = fit_result.solution
@@ -85,4 +87,4 @@ class Process(ProcessAdccalBase):
         self._result["s_fine_slope"]["data"] = slope_fine
         self._result["s_fine_offset"]["data"] = offset_fine
 
-        print("Coarse fitting is done.")
+        print("Fitting is done.")
