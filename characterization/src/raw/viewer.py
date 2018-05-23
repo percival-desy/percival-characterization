@@ -1,85 +1,119 @@
-from collections import namedtuple
-import h5py
 import matplotlib.pyplot as plt
-import numpy as np
-import os
 
-from load_raw import LoadRaw
-import utils
+from utils import IndexTracker
+from viewer_base import ViewerBase
 
 
-class Plot():
-    LoadedData = namedtuple("loaded_data", ["data"])
+class ViewTracker(IndexTracker):
+    def initiate(self):
+        self._subplots_rows = 2
+        self._subplots_cols = 3
 
-    def __init__(self,
-             input_fname_templ,
-             metadata_fname,
-             output_dir,
-             adc,
-             frame,
-             col,
-             row,
-             loaded_data=None,
-             dims_overwritten=False):
+        self._n_rows = 1440
+        self._n_cols = 1484
 
-        self._input_fname = input_fname_templ
-        self._metadata_fname = metadata_fname
-        self._output_dir = os.path.normpath(output_dir)
-        self._adc = adc
-        self._frame = frame
-        self._col = col
-        self._row = row
-        self._dims_overwritten = dims_overwritten
+        self._fig, self._ax = plt.subplots(nrows=self._subplots_rows,
+                                           ncols=self._subplots_cols,
+                                           figsize=(14, 8))
+#                                           figsize=(12.5, 8))
+#                                           sharex=True,
+#                                           sharey=True)
 
-        if self._frame is not None:
-            self._frame = None
-            self._dims_overwritten = True
+        plt.subplots_adjust(wspace=0.35, hspace=0.35)
 
-        loader = LoadRaw(input_fname=self._input_fname,
-                         metadata_fname=self._metadata_fname,
-                         output_dir=self._output_dir,
-                         frame=self._frame)
+        self._slices, _, _ = self._data["s_coarse"].shape
+        self._frame = 0
 
-        if loaded_data is None or self._dims_overwritten:
-            self._data = loader.load_data()
-        else:
-            self._data = loaded_data.data
+        self._cmap = plt.cm.jet
+        self._cmap.set_under(color='white')
 
-    def get_dims_overwritten(self):
-        """If the dimension originally configures overwritten.
+        self._label_x = "col"
+        self._label_y = "row"
 
-        Return:
-            A boolean if the config war overwritten or not.
+        self._plot_kwargs = dict(
+            interpolation="none",
+            cmap=self._cmap,
+            vmin=self._method_properties["err_below"]
+        )
+
+        # initiate with None as placeholder
+        self._im = [[None for i in range(self._subplots_cols)]
+                    for j in range(self._subplots_rows)]
+
+    def set_data(self):
         """
-        return self._dims_overwritten
-
-    def get_data(self):
-        """Exposes data outside the class.
-
-        Return:
-            A named tuble with the loaded data. Entries
-                x: filled up Vin read (to match the dimension of data)
-                data: sample and reset data
+        2D scatter plot of Smpl/Rst, Gn/Crs/Fn, give mark as error (white)
+        the values << err_below.
         """
 
-        return Plot.LoadedData(data=self._data)
+        # for convenience
+        d = self._data
+        f = self._frame
 
-    def plot_sample(self):
-        pass
+        self._im[0][0] = self._ax[0][0].imshow(d["s_gain"][f],
+                                               **self._plot_kwargs)
+        self._im[0][1] = self._ax[0][1].imshow(d["s_coarse"][f],
+                                               **self._plot_kwargs)
+        self._im[0][2] = self._ax[0][2].imshow(d["s_fine"][f],
+                                               **self._plot_kwargs)
 
-    def plot_reset(self):
-        pass
+        self._im[1][0] = self._ax[1][0].imshow(d["r_gain"][f],
+                                               **self._plot_kwargs)
+        self._im[1][1] = self._ax[1][1].imshow(d["r_coarse"][f],
+                                               **self._plot_kwargs)
+        self._im[1][2] = self._ax[1][2].imshow(d["r_fine"][f],
+                                               **self._plot_kwargs)
 
-    def plot_combined(self):
+        # settings applying to all axes
+        c_bar = [[None for i in range(self._subplots_cols)]
+                 for j in range(self._subplots_rows)]
+        for i, ax_rows in enumerate(self._ax):
+            for j, a in enumerate(ax_rows):
+                a.set_xlabel(self._label_x)
+                a.set_ylabel(self._label_y)
 
-        fig, ax = plt.subplots(2, 3, sharex=True, sharey=True)
+                a.set_xlim([0, self._n_rows])
+                a.set_ylim([0, self._n_cols])
 
-        tracker = utils.IndexTracker(fig, ax, self._data)
+                a.invert_xaxis()
+                a.invert_yaxis()
 
-        # connect to mouse wheel
-        fig.canvas.mpl_connect("scroll_event", tracker.onscroll)
+                c_bar[i][j] = self._fig.colorbar(self._im[i][j],
+                                                 ax=self._ax[i][j],
+                                                 fraction=0.047,
+                                                 pad=0.04)
 
-        # connect to arrow keys
-        fig.canvas.mpl_connect("key_press_event", tracker.on_key_press)
+        self._ax[0][0].set_title("Sample Gain")
+        c_bar[0][0].set_clim(0, 3)
+        self._ax[0][1].set_title("Sample Coarse")
+        c_bar[0][1].set_clim(0, 31)
+        self._ax[0][2].set_title("Sample Fine")
+        c_bar[0][2].set_clim(0, 255)
 
-        plt.show()
+        self._ax[1][0].set_title("Reset Gain")
+        c_bar[1][0].set_clim(0, 3)
+        self._ax[1][1].set_title("Reset Coarse")
+        c_bar[1][1].set_clim(0, 31)
+        self._ax[1][2].set_title("Reset Fine")
+        c_bar[1][2].set_clim(0, 255)
+
+    def update_plots(self):
+        """Updates the plots.
+        """
+        self._im[0][0].set_data(self._data["s_gain"][self._frame])
+        self._im[0][1].set_data(self._data["s_coarse"][self._frame])
+        self._im[0][2].set_data(self._data["s_fine"][self._frame])
+
+        self._im[1][0].set_data(self._data["r_gain"][self._frame])
+        self._im[1][1].set_data(self._data["r_coarse"][self._frame])
+        self._im[1][2].set_data(self._data["r_fine"][self._frame])
+
+        self._window_title = "Frame {}".format(self._frame)
+
+
+class Plot(ViewerBase):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self._tracker = ViewTracker(data=self._data,
+                                    method_properties=self._method_properties)

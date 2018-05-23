@@ -4,7 +4,7 @@ import matplotlib
 # this prevents sending remote data to locale PC for rendering
 matplotlib.use('Agg')  # Must be before importing matplotlib.pyplot or pylab!
 import matplotlib.pyplot as plt  # noqa E402
-import os
+import os  # noqa E402
 
 from plot_base import PlotBase  # noqa E402
 
@@ -22,10 +22,10 @@ class Plot(PlotBase):
         self.create_dir()
 
         title = ("Vin={}V, Sample: Row={}, Col={}"
-                 .format(self._vin, self._row, self._col))
+                 .format(self._vin, self._row_title, self._col_title))
         out = os.path.join(self._output_dir,
-                           "sample_coarse_vs_fine_row{}_col{}"
-                           .format(self._row, self._col))
+                           "sample_coarse-fine_vs_image_row{}_col{}"
+                           .format(self._row_title, self._col_title))
 
         self._generate_single_plot(x=range(self._data["s_coarse"].shape[0]),
                                    data_coarse=self._data["s_coarse"],
@@ -37,20 +37,26 @@ class Plot(PlotBase):
         self.create_dir()
 
         title = ("Vin={}V, Reset: Row={}, Col={}"
-                 .format(self._vin, self._row, self._col))
+                 .format(self._vin, self._row_title, self._col_title))
         out = os.path.join(self._output_dir,
-                           "reset_coarse_vs_fine_row{}_col{}"
-                           .format(self._row, self._col))
+                           "reset_coarse-fine_vs_image_row{}_col{}"
+                           .format(self._row_title, self._col_title))
 
         self._generate_single_plot(x=range(self._data["r_coarse"].shape[0]),
                                    data_coarse=self._data["r_coarse"],
                                    data_fine=self._data["r_fine"],
                                    plot_title=title,
                                    out_fname=out)
+
     def plot_combined(self):
         pass
 
-    def _generate_single_plot(self, x, data_coarse, data_fine, plot_title, out_fname):
+    def _generate_single_plot(self,
+                              x,
+                              data_coarse,
+                              data_fine,
+                              plot_title,
+                              out_fname):
         fig, ax1 = plt.subplots()
 
         ax2 = ax1.twinx()

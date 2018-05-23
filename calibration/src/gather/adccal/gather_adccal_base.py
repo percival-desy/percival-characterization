@@ -1,4 +1,3 @@
-import h5py
 import numpy as np
 import os
 import sys
@@ -8,7 +7,11 @@ try:
 except:
     CURRENT_DIR = os.path.dirname(os.path.realpath('__file__'))
 
-CALIBRATION_DIR = os.path.dirname(os.path.dirname(os.path.dirname(CURRENT_DIR)))
+CALIBRATION_DIR = os.path.dirname(
+                    os.path.dirname(
+                        os.path.dirname(CURRENT_DIR)
+                    )
+                  )
 BASE_DIR = os.path.dirname(CALIBRATION_DIR)
 SHARED_DIR = os.path.join(BASE_DIR, "shared")
 GATHER_DIR = os.path.join(CALIBRATION_DIR, "src", "gather")
@@ -42,5 +45,58 @@ class GatherAdcBase(GatherBase):
         self._paths = {
             "sample": "data",
             "reset": "reset"
+        }
+
+    def _set_data_to_write(self):
+
+        self._metadata = {
+            "n_frames_per_run": self._n_frames_per_run,
+            "n_frames": self._n_frames,
+            "n_runs": self._n_runs,
+            "n_adc": self. _n_adc,
+            "colums_used": [self._part * self._n_cols,
+                            (self._part + 1) * self._n_cols]
+        }
+
+        self._raw_tmp_shape = (self._n_frames,
+                               self._n_rows,
+                               self._n_cols)
+
+        self._data_to_write = {
+            "s_coarse": {
+                "path": "sample/coarse",
+                "data": np.zeros(self._raw_tmp_shape, dtype=np.uint8),
+                "type": np.uint8
+            },
+            "s_fine": {
+                "path": "sample/fine",
+                "data": np.zeros(self._raw_tmp_shape, dtype=np.uint8),
+                "type": np.uint8
+            },
+            "s_gain": {
+                "path": "sample/gain",
+                "data": np.zeros(self._raw_tmp_shape, dtype=np.uint8),
+                "type": np.uint8
+            },
+            "r_coarse": {
+                "path": "reset/coarse",
+                "data": np.zeros(self._raw_tmp_shape, dtype=np.uint8),
+                "type": np.uint8
+            },
+            "r_fine": {
+                "path": "reset/fine",
+                "data": np.zeros(self._raw_tmp_shape, dtype=np.uint8),
+                "type": np.uint8
+            },
+            "r_gain": {
+                "path": "reset/gain",
+                "data": np.zeros(self._raw_tmp_shape, dtype=np.uint8),
+                "type": np.uint8
+            },
+            "vin": {
+                "path": "vin",
+                "data": np.zeros(self._n_runs, dtype=np.float16),
+                "type": np.float16
+            }
         }
 

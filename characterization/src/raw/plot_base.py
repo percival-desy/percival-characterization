@@ -1,7 +1,4 @@
 from collections import namedtuple
-import glob
-import h5py
-import numpy as np
 import os
 
 from load_raw import LoadRaw
@@ -10,24 +7,12 @@ from load_raw import LoadRaw
 class PlotBase():
     LoadedData = namedtuple("loaded_data", ["data"])
 
-    def __init__(self,
-             input_fname_templ,
-             metadata_fname,
-             output_dir,
-             adc,
-             frame,
-             col,
-             row,
-             loaded_data=None,
-             dims_overwritten=False):
+    def __init__(self, loaded_data=None, dims_overwritten=False, **kwargs):
 
-        self._input_fname = input_fname_templ
-        self._metadata_fname = metadata_fname
-        self._output_dir = os.path.normpath(output_dir)
-        self._adc = adc
-        self._frame = frame
-        self._col = col
-        self._row = row
+        # add all entries of the kwargs dictionary into the class namespace
+        for key, value in kwargs.items():
+            setattr(self, "_" + key, value)
+
         self._dims_overwritten = dims_overwritten
 
         loader = LoadRaw(input_fname=self._input_fname,
@@ -43,6 +28,27 @@ class PlotBase():
             self._data = loaded_data.data
 
         self._vin = loader.get_vin()
+
+        # to ease nameing plots
+        if self._adc == slice(None):
+            self._adc_title = None
+        else:
+            self._adc_title = self._adc
+
+        if self._frame == slice(None):
+            self._frame_title = None
+        else:
+            self._frame_title = self._frame
+
+        if self._row == slice(None):
+            self._row_title = None
+        else:
+            self._row_title = self._row
+
+        if self._col == slice(None):
+            self._col_title = None
+        else:
+            self._col_title = self._col
 
     def create_dir(self):
         if not os.path.exists(self._output_dir):

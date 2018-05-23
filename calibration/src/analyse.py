@@ -2,6 +2,7 @@
 
 import argparse
 import datetime
+import json
 import math
 import multiprocessing
 import os
@@ -39,10 +40,11 @@ class Analyse(object):
                  measurement,
                  n_cols,
                  method,
+                 method_properties,
                  n_processes):
 
-        self.in_base_dir = in_base_dir
-        self.out_base_dir = out_base_dir
+        self._in_base_dir = in_base_dir
+        self._out_base_dir = out_base_dir
 
         self._n_rows_total = 1484
         self._n_cols_total = 1440
@@ -59,10 +61,11 @@ class Analyse(object):
         self._set_job_sets()
 
         self._run_id = run_id
-        self.run_type = run_type
+        self._run_type = run_type
 
-        self.measurement = measurement
-        self.method = method
+        self._measurement = measurement
+        self._method = method
+        self._method_properties = method_properties
 
     def _set_job_sets(self):
         all_jobs = range(self._n_parts)
@@ -78,12 +81,12 @@ class Analyse(object):
         print("\nStarted at", str(datetime.datetime.now()))
         t = time.time()
 
-        if self.run_type == "gather":
+        if self._run_type == "gather":
             self.run_gather()
-        elif self.run_type == "process":
+        elif self._run_type == "process":
             self.run_process()
         else:
-            print("Unsupported argument: run_type {}".format(self.run_type))
+            print("Unsupported argument: run_type {}".format(self._run_type))
 
         print("\nFinished at", str(datetime.datetime.now()))
         print("took time: ", time.time() - t)
@@ -114,17 +117,17 @@ class Analyse(object):
 
     def run_gather(self):
         # define input files
-        in_dir, in_file_name = self.generate_raw_path(self.in_base_dir)
+        in_dir, in_file_name = self.generate_raw_path(self._in_base_dir)
         in_fname = os.path.join(in_dir, in_file_name)
 
         # define metadata file
         meta_dir, meta_file_name = (
-            self.generate_metadata_path(self.in_base_dir)
+            self.generate_metadata_path(self._in_base_dir)
         )
         meta_fname = os.path.join(meta_dir, meta_file_name)
 
         # define output files
-        out_dir, out_file_name = self.generate_gather_path(self.out_base_dir)
+        out_dir, out_file_name = self.generate_gather_path(self._out_base_dir)
         out_fname = os.path.join(out_dir, out_file_name)
 
         for job_set in self._job_sets:
@@ -133,55 +136,61 @@ class Analyse(object):
                 col_start = p * self._n_cols
                 col_stop = (p+1) * self._n_cols - 1
 
-                out_f = out_fname.format(col_start=col_start, col_stop=col_stop)
+                out_f = out_fname.format(col_start=col_start,
+                                         col_stop=col_stop)
 
 #                if os.path.exists(out_f):
 #                    print("output filename = {}".format(out_f))
-#                    print("WARNING: output file already exist. Skipping gather.")
+#                    print("WARNING: output file already exist. "
+#                          "Skipping gather.")
 #                else:
                 utils.create_dir(out_dir)
 
                 kwargs = dict(
+                    input=self._in_base_dir,
                     in_fname=in_fname,
+                    output=self._out_base_dir,
                     out_fname=out_f,
                     meta_fname=meta_fname,
+                    run=self._run_id,
                     n_rows=self._n_rows,
                     n_cols=self._n_cols,
-                    part=p
+                    part=p,
+                    method_properties=self._method_properties
                 )
 
-                proc = multiprocessing.Process(target=self._call_gather, kwargs=kwargs)
+                proc = multiprocessing.Process(target=self._call_gather,
+                                               kwargs=kwargs)
                 jobs.append(proc)
                 proc.start()
 
             for job in jobs:
                 job.join()
 
-
     def _call_gather(self, **kwargs):
 
-        if self.measurement == "adccal":
+        if self._measurement == "adccal":
             if ADCCAL_GATHER_METHOD_DIR not in sys.path:
                 sys.path.insert(0, ADCCAL_GATHER_METHOD_DIR)
-        elif self.measurement == "ptccal":
+        elif self._measurement == "ptccal":
             if PTCCAL_GATHER_METHOD_DIR not in sys.path:
                 sys.path.insert(0, PTCCAL_GATHER_METHOD_DIR)
         else:
             print("Unsupported type.")
 
-        self.gather_m = __import__(self.method).Gather
+        gather_m = __import__(self._method).Gather
 
-        obj = self.gather_m(**kwargs)
+        obj = gather_m(**kwargs)
         obj.run()
 
     def run_process(self):
         # define input files
         # the input files for process is the output from gather
-        in_dir, in_file_name = self.generate_gather_path(self.in_base_dir)
+        in_dir, in_file_name = self.generate_gather_path(self._in_base_dir)
         in_fname = os.path.join(in_dir, in_file_name)
 
         # define output files
-        out_dir, out_file_name = self.generate_process_path(self.out_base_dir)
+        out_dir, out_file_name = self.generate_process_path(self._out_base_dir)
         out_fname = os.path.join(out_dir, out_file_name)
 
         for job_set in self._job_sets:
@@ -195,19 +204,23 @@ class Analyse(object):
                 out_f = out_fname.format(col_start=col_start,
                                          col_stop=col_stop)
 
-    #            if os.path.exists(out_f):
-    #                print("output filename = {}".format(out_f))
-    #                print("WARNING: output file already exist. Skipping process.")
-    #            else:
+#                if os.path.exists(out_f):
+#                    print("output filename = {}".format(out_f))
+#                    print("WARNING: output file already exist. "
+#                          "Skipping process.")
+#                else:
                 utils.create_dir(out_dir)
 
                 kwargs = dict(
                     in_fname=in_f,
                     out_fname=out_f,
-                    method=self.method
+                    run=self._run_id,
+                    method=self._method,
+                    method_properties=self._method_properties
                 )
 
-                proc = multiprocessing.Process(target=self._call_process, kwargs=kwargs)
+                proc = multiprocessing.Process(target=self._call_process,
+                                               kwargs=kwargs)
                 jobs.append(proc)
                 proc.start()
 
@@ -215,16 +228,16 @@ class Analyse(object):
                 job.join()
 
     def _call_process(self, **kwargs):
-        if self.measurement == "adccal":
+        if self._measurement == "adccal":
             if ADCCAL_PROCESS_METHOD_DIR not in sys.path:
                 sys.path.insert(0, ADCCAL_PROCESS_METHOD_DIR)
         elif self.measurement == "ptccal":
             if PTCCAL_PROCESS_METHOD_DIR not in sys.path:
                 sys.path.insert(0, PTCCAL_PROCESS_METHOD_DIR)
 
-        self.process_m = __import__(self.method).Process
+        process_m = __import__(self._method).Process
 
-        obj = self.process_m(**kwargs)
+        obj = process_m(**kwargs)
         obj.run()
 
     def cleanup(self):
@@ -291,19 +304,19 @@ def insert_args_into_config(args, config):
 
     try:
         c_general["run_type"] = args.run_type or c_general["run_type"]
-    except:
+    except KeyError:
         raise Exception("No run_type specified. Abort.")
         sys.exit(1)
 
     try:
         c_general["run"] = args.run_id or c_general["run"]
-    except:
+    except KeyError:
         raise Exception("No run_id specified. Abort.")
         sys.exit(1)
 
     try:
         c_general["n_cols"] = args.n_cols or c_general["n_cols"]
-    except:
+    except KeyError:
         raise Exception("No n_cols type specified. Abort.")
         sys.exit(1)
 
@@ -359,9 +372,13 @@ def insert_args_into_config(args, config):
 
     try:
         c_run_type["method"] = args.method or c_run_type["method"]
-    except:
+    except KeyError:
         raise Exception("No method type specified. Abort.")
         sys.exit(1)
+
+    # method specific config
+    if c_run_type["method"] not in c_run_type:
+        c_run_type[c_run_type["method"]] = None
 
 
 if __name__ == "__main__":
@@ -376,8 +393,8 @@ if __name__ == "__main__":
     else:
         config["general"]["n_cols"] = int(config["general"]["n_cols"])
 
-    for key, value in config.items():
-        print(key, value)
+    print("Configuration:")
+    print(json.dumps(config, sort_keys=True, indent=4))
 
     run_type = config["general"]["run_type"]
     run_id = config["general"]["run"]
@@ -388,6 +405,7 @@ if __name__ == "__main__":
     out_base_dir = config[run_type]["output"]
     in_base_dir = config[run_type]["input"]
     method = config[run_type]["method"]
+    method_properties = config[run_type][method]
 
     # generate file paths
     if run_type == "gather":
@@ -404,5 +422,6 @@ if __name__ == "__main__":
                   measurement=measurement,
                   n_cols=n_cols,
                   method=method,
-                  n_processes = n_processes)
+                  method_properties=method_properties,
+                  n_processes=n_processes,)
     obj.run()

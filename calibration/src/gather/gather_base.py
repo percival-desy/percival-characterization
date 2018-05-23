@@ -16,18 +16,17 @@ if SHARED_DIR not in sys.path:
     sys.path.insert(0, SHARED_DIR)
 
 import utils  # noqa E402
-from _version import __version__
+from _version import __version__  # noqa E402
 
 
 class GatherBase(object):
-    def __init__(self,
-                 in_fname,
-                 out_fname,
-                 meta_fname):
+    def __init__(self, **kwargs):
 
-        self._in_fname = in_fname
-        self._out_fname = out_fname
-        self._meta_fname = meta_fname
+        # add all entries of the kwargs dictionary into the class namespace
+        for key, value in kwargs.items():
+            setattr(self, "_" + key, value)
+
+#        print("attributes in  GatherBase", vars(self))
 
         self._data_to_write = {}
         self._metadata = {}
@@ -44,9 +43,7 @@ class GatherBase(object):
 
         self._load_data()
 
-        print("Start saving at {} ... ".format(self._out_fname), end="")
         self._write_data()
-        print("Done.")
 
         print("Gather took time:", time.time() - totalTime, "\n")
 
@@ -54,6 +51,8 @@ class GatherBase(object):
         pass
 
     def _write_data(self):
+        print("Start saving at {} ... ".format(self._out_fname), end="")
+
         if self._data_to_write == {}:
             raise Exception("Write data: No data found.")
 
@@ -78,3 +77,5 @@ class GatherBase(object):
             f.create_dataset(name, data=__version__)
 
             f.flush()
+
+        print("Done.")

@@ -55,8 +55,8 @@ def get_arguments():
                         type=int,
                         nargs="+",
                         default=None,
-                        help="The row(s) of the ADC group to create plots for.\n"
-                             "Options:\n"
+                        help="The row(s) of the ADC group to create plots for."
+                             "\nOptions:\n"
                              "specify one value, e.g. --row 0 means take "
                              "only first row of ADC group"
                              "specify start and stop value, e.g. --row 0 5 "
@@ -119,7 +119,8 @@ def insert_args_into_config(args, config):
         sys.exit(1)
 
     try:
-        c_general["plot_combined"] = args.plot_combined or c_general["plot_combined"]
+        c_general["plot_combined"] = (args.plot_combined
+                                      or c_general["plot_combined"])
     except:
         raise Exception("No data type specified. Abort.")
         sys.exit(1)
@@ -152,7 +153,7 @@ def insert_args_into_config(args, config):
 
         try:
             c_data_type["metadata_file"] = (args.metadata_file
-                                             or c_data_type["metadata_file"])
+                                            or c_data_type["metadata_file"])
         except:
             raise Exception("No input specified. Abort.")
             sys.exit(1)
@@ -196,20 +197,21 @@ class Analyse(object):
         config = utils.load_config(args.config_file)
         insert_args_into_config(args, config)
 
-        self._data_type = config["general"]["data_type"]
-        self._run_id = config["general"]["run"]
-        self._plot_sample = config["general"]["plot_sample"]
-        self._plot_reset = config["general"]["plot_reset"]
-        self._plot_combined = config["general"]["plot_combined"]
-        self._input_dir = config[self._data_type]["input"]
-        self._metadata_file = config[self._data_type]["metadata_file"]
-        self._output_dir = config[self._data_type]["output"]
-        self._adc = config[self._data_type]["adc"]
-        self._frame = config[self._data_type]["frame"]
-        self._col = config[self._data_type]["col"]
-        self._row = config[self._data_type]["row"]
-        self._method_list = config[self._data_type]["method"]
+        self._config = config
 
+        self._data_type = self._config["general"]["data_type"]
+        self._run_id = self._config["general"]["run"]
+        self._plot_sample = self._config["general"]["plot_sample"]
+        self._plot_reset = self._config["general"]["plot_reset"]
+        self._plot_combined = self._config["general"]["plot_combined"]
+        self._input_dir = self._config[self._data_type]["input"]
+        self._metadata_file = self._config[self._data_type]["metadata_file"]
+        self._output_dir = self._config[self._data_type]["output"]
+        self._adc = self._config[self._data_type]["adc"]
+        self._frame = self._config[self._data_type]["frame"]
+        self._col = self._config[self._data_type]["col"]
+        self._row = self._config[self._data_type]["row"]
+        self._method_list = self._config[self._data_type]["method"]
 
         if self._row is None:
             self._row = slice(None)
@@ -241,16 +243,18 @@ class Analyse(object):
             input_fname_templ = os.path.join(self._input_dir,
                                              self._run_id,
                                              file_name)
-            metadata_fname = None
+            self._metadata_file = None
 
         kwargs = dict(
-            input_fname_templ=input_fname_templ,
+            input_fname=input_fname_templ,
             metadata_fname=self._metadata_file,
             output_dir=None,
             adc=self._adc,
             frame=self._frame,
             row=self._row,
-            col=self._col
+            col=self._col,
+            run=self._run_id,
+            method_properties=None
         )
 
         print("Configured: adc={}, frame={}, row={}, col={}"
@@ -260,6 +264,11 @@ class Analyse(object):
         for method in self._method_list:
             print("loading method: {}".format(method))
             method_m = __import__(method).Plot
+
+            # loading method properties
+            if method in self._config[self._data_type]:
+                prop =  self._config[self._data_type][method]
+                kwargs["method_properties"] = prop
 
             kwargs["output_dir"] = os.path.join(self._output_dir,
                                                 self._run_id,
