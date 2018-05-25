@@ -75,7 +75,7 @@ class Plot(PlotBase):
 
         ## now generate the histogram itself
         
-        plt.hist2d(frames, s_fine.flatten(), cmap=cmap, vmin=0.1, bins=[n_frame,(fine_max-fine_min+1)])
+        plt.hist2d(frames, s_fine.flatten(), cmap=cmap, vmin=0.1, bins=[n_frame,(fine_max-fine_min+1)], range=[[-0.5,(n_frame+0.5)],[(fine_min-0.5),(fine_max+0.5)]])
 
         plt.colorbar()
 
