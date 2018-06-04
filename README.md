@@ -16,6 +16,8 @@ System dependencies:
   * Matplotlib - 2D plotting library for Python
   * YAML -  human-readable data serialization language 
 
+For running PEP8 checker, we would recommend to install flake8 for using the git pre-commit hook.
+
 N.B.: Testing procedures are underdevelopment.  
 
 ## Installation
@@ -29,6 +31,24 @@ To update the framework:
 ```
 % cd /path/to/percival-characterisation
 % git pull
+```
+
+### Using pre-commit script
+
+Pre-commit script is a hook that checks if the python files added to the stash are PEP8 compliant.
+If they are not, the commit will be rejected until it is corrected.
+The use of this hook is not mandatory, but nevertheless highly recommended :)
+
+For using it, simply copy the script 'pre-commit' from root directory to '.git/hooks/':
+```
+$ cp pre-commit .git/hooks/
+$ chmod r+x .git/hooks/pre-commit
+```
+
+Every time 'git commit' is called, this script is automatically launched.
+To temporary deactivate it, use:
+```
+% git commit --no-verify
 ```
 
 ## Execution
