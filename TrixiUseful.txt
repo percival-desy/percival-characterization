@@ -1,0 +1,29 @@
+update my local to current head (plus keep my "good" edits -> "sync my fork")
+
+git fetch https://github.com/percival-desy/percival-characterization.git
+
+git status
+/// lists where I am now, "branch master" is MY master branch (i.e. on my fork), locally.
+
+git remote
+/// lists remote locations known.
+I have
+TrixisMasterRepo
+origin
+
+
+git checkout master
+// seat myself on "my" master
+
+git branch
+// show all local branches
+
+** git pull https://github.com/percival-desy/percival-characterization.git
+// this fetches & merges ... seems to have worked?
+
+** // now I need to also get my remote fork updated to this status
+git commit -m "merged remote overall head with my local work"
+
+** // while sitting on master :
+git push https://github.com/Wunderer/percival-characterization.git master
+
