@@ -21,7 +21,8 @@ class PlotBase():
                          output_dir=self._output_dir,
                          frame=self._frame,
                          row=self._row,
-                         col=self._col)
+                         col=self._col,
+                         interactive=self._interactive)
 
         if loaded_data is None or self._dims_overwritten:
             self._data = loader.load_data()
@@ -66,7 +67,7 @@ class PlotBase():
 
         return PlotBase.LoadedData(data=self._data)
 
-    def _generate_single_plot(self, data, plot_title, label, out_fname):
+    def _generate_single_plot(self, data, plot_title, label, out_fname, interactive_flag):
         print("_generate_single_plot method is not implemented.")
 
     def plot_sample(self):
