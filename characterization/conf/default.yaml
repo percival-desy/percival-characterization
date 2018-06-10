@@ -17,14 +17,14 @@ raw:
 
     measurement: adccal
 
-    interactive: False
+    interactive: True
     
     viewer:
         err_below: -0.1
 
     adc: null
-    frame: 2
-    col: 100
+    frame: 10
+    col: 10
     row: 100
 
     #method: [viewer]
