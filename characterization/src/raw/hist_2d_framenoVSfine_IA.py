@@ -1,12 +1,7 @@
-## coded by Trixi (with Manuelas & Alessandros help)
-## look at distribution of fines for different frames/Vins as 2d histogram
-## Vin/frame vs fine
-
+''' Plot 2D histograms of fines' distribution for different frames or Vin
+'''
 
 import matplotlib
-# Generate images without having a window appear:
-# this prevents sending remote data to locale PC for rendering
-# matplotlib.use('Agg')  # Must be before importing matplotlib.pyplot or pylab!
 # Generate images with having a window appear:
 # this sends remote data to locale PC for rendering
 matplotlib.use('TkAgg')  # Must be before importing matplotlib.pyplot or pylab!
@@ -30,14 +25,23 @@ class Plot(PlotBase):
     def plot_sample(self):
         self.create_dir()
 
-#        title = ("Vin={}V, Sample: Row={}, Col={}"
-#                 .format(self._vin, self._row, self._col))
         title = ("allFrames, Sample: Row={}, Col={}, ADC={}"
                  .format(self._row, self._col, self._adc))
+ 
         out = os.path.join(self._output_dir,
                            "raw_2dHist_frame_vs_fine_row{}_col{}_adc{}"
                            .format(self._row, self._col, self._adc))
 
+        self._generate_histogram_2d(self._data["s_fine"].flatten(),
+                                    plot_title=title,
+                                    out_fname=out,
+                                    interactive_flag=self._interactive)
+
+    def _generate_histogram_2d(self,
+                               data_fine,
+                               plot_title,
+                               out_fname,
+                               interactive_flag):
 
         fig = plt.figure(figsize=None)
 
@@ -50,15 +54,18 @@ class Plot(PlotBase):
         
         print("shape", self._data["s_fine"].shape)
 
-        fine_min = np.min(self._data["s_fine"])
-        fine_max = np.max(self._data["s_fine"])
+        fine_min, fine_max = self._get_range(self._data["s_fine"])
+        #fine_min = np.min(self._data["s_fine"])
+        #fine_max = np.max(self._data["s_fine"])
         print("fine_min", fine_min)
         print("fine_max", fine_max)
 
-        s_fine = self._data["s_fine"]
-        print(s_fine.shape)
-        s_fine = s_fine.transpose(1,0)
-        print(s_fine.shape)
+        #s_fine = self._data["s_fine"]
+        #print(s_fine.shape)
+        #s_fine = s_fine.transpose(1,0)
+        #print(s_fine.shape)
+        print("Bite", data_fine.shape)
+        data_fine = data_fine.transpose(1, 0)
 
         ## once we know the dimensions of the array, create one single column with
         ## the right repetitions of the frame number for all rows / adcs included
@@ -75,19 +82,24 @@ class Plot(PlotBase):
 
         ## now generate the histogram itself
         
-        plt.hist2d(frames, s_fine.flatten(), cmap=cmap, vmin=0.1, bins=[n_frame,(fine_max-fine_min+1)], range=[[-0.5,(n_frame+0.5)],[(fine_min-0.5),(fine_max+0.5)]])
+        plt.hist2d(frames,
+                   s_fine.flatten(),
+                   cmap=cmap,
+                   vmin=0.1,
+                   bins=[n_frame,(fine_max-fine_min+1)], 
+                   range=[[-0.5,(n_frame+0.5)],[(fine_min-0.5),(fine_max+0.5)]])
 
         plt.colorbar()
 
         fig.suptitle(title)
-        plt.xlabel("frame")
-        plt.ylabel("fn")
+        plt.xlabel("Frames")
+        plt.ylabel("Fine [ADU]")
 
         fig.savefig(out)
 
-        fig.show()
-
-        input('Press enter to end')
+        if interactive_flag is True:
+            fig.show()
+            input('Press enter to end')
 
         fig.clf()
         plt.close(fig)
@@ -98,3 +110,4 @@ class Plot(PlotBase):
     def plot_combined(self):
         pass
     
+

@@ -1,5 +1,6 @@
 from collections import namedtuple
 import os
+import numpy as np
 
 from load_raw import LoadRaw
 import utils
@@ -69,6 +70,12 @@ class PlotBase():
 
     def _generate_single_plot(self, data, plot_title, label, out_fname, interactive_flag):
         print("_generate_single_plot method is not implemented.")
+    
+    def _get_range(self, input_data):
+        ''' Return boundary limits of a vector
+        '''
+
+        return np.min(input_data), np.max(input_data)
 
     def plot_sample(self):
         self.create_dir()
