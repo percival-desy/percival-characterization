@@ -29,15 +29,23 @@ class Plot(PlotBase):
                  .format(self._row, self._col, self._adc))
  
         out = os.path.join(self._output_dir,
-                           "raw_2dHist_frame_vs_fine_row{}_col{}_adc{}"
+                           "raw_hist_2d_frame_vs_fine_row{}_col{}_adc{}"
                            .format(self._row, self._col, self._adc))
 
-        self._generate_histogram_2d(self._data["s_fine"].flatten(),
+        self._generate_histogram_2d(self.get_nb_frames(self._data["s_fine"]),
+                                    self._data["s_fine"].flatten(),
                                     plot_title=title,
                                     out_fname=out,
                                     interactive_flag=self._interactive)
 
+    def plot_reset(self):
+        pass
+
+    def plot_combined(self):
+        pass
+
     def _generate_histogram_2d(self,
+                               frames,
                                data_fine,
                                plot_title,
                                out_fname,
@@ -48,40 +56,29 @@ class Plot(PlotBase):
         cmap = matplotlib.pyplot.cm.jet
         cmap.set_under(color='white')
 
-        ## this segment of code sorts out the array needed to have the
-        ## proper frame number available for the X axis of the histogram
-        ## before filling data into the histogram
-        
         print("shape", self._data["s_fine"].shape)
 
         fine_min, fine_max = self._get_range(self._data["s_fine"])
-        #fine_min = np.min(self._data["s_fine"])
-        #fine_max = np.max(self._data["s_fine"])
         print("fine_min", fine_min)
         print("fine_max", fine_max)
 
-        #s_fine = self._data["s_fine"]
-        #print(s_fine.shape)
-        #s_fine = s_fine.transpose(1,0)
-        #print(s_fine.shape)
+        s_fine = self._data["s_fine"]
+        print(s_fine.shape)
+        s_fine = s_fine.transpose(1,0)
+        print(s_fine.shape)
         print("Bite", data_fine.shape)
         data_fine = data_fine.transpose(1, 0)
 
-        ## once we know the dimensions of the array, create one single column with
-        ## the right repetitions of the frame number for all rows / adcs included
-        ## in the data set.
-        
-        n_frame = self._data["s_fine"].shape[0]
-        print("n_frame", n_frame)
-        n_dp_per_frame = self._data["s_fine"].shape[1]
-        print("n_dp_per_frame", n_dp_per_frame)
+        #n_frame = self._data["s_fine"].shape[0]
+        #print("n_frame", n_frame)
+        #n_dp_per_frame = self._data["s_fine"].shape[1]
+        #print("n_dp_per_frame", n_dp_per_frame)
 
-        frames = np.array([np.arange(n_frame)
-                           for i in np.arange(n_dp_per_frame)]).flatten()
+        #frames = np.array([np.arange(n_frame)
+        #                   for i in np.arange(n_dp_per_frame)]).flatten()
+        #frames = self.get_nb_frame(data_fine)
         print("frames", frames)
 
-        ## now generate the histogram itself
-        
         plt.hist2d(frames,
                    s_fine.flatten(),
                    cmap=cmap,
@@ -104,10 +101,13 @@ class Plot(PlotBase):
         fig.clf()
         plt.close(fig)
 
-    def plot_reset(self):
-        pass
-
-    def plot_combined(self):
-        pass
-    
+    def get_nb_frames(self, input_data):
+        ''' For a given data input (fine or coarse ADC output)
+            return number of frames acquired
+        '''
+        n_frame = input_data.shape[0]
+        n_dp_per_frame = input_data.shape[1]
+        
+        return np.array([np.arrange(n_frame)
+                         for i in np.arange(n_dp_per_frame)]).flatten() 
 
