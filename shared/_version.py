@@ -1,1 +1,3 @@
-__version__ = '0.1.0'
+"""The Version of the framework.
+"""
+__version__ = '0.2.1'

@@ -1,9 +1,27 @@
-import h5py
-import numpy as np
+"""Collection of utilities
+"""
+
+import json
 import os
 import sys
+import h5py
+import numpy as np
 
-from reading_config import *
+from utils_config import load_config, update_dict
+from utils_data import (decode_dataset_8bit,
+                        convert_bitlist_to_int,
+                        convert_bytelist_to_int,
+                        convert_intarray_to_bitarray,
+                        convert_bitarray_to_intarray,
+                        convert_slice_to_tuple,
+                        swap_bits,
+                        split_alessandro,
+                        split_ulrik,
+                        split,
+                        get_adc_col_array,
+                        get_col_grp,
+                        reorder_pixels_gncrsfn,
+                        convert_gncrsfn_to_dlsraw)
 
 
 def create_dir(directory_name):
@@ -22,24 +40,24 @@ def create_dir(directory_name):
                 pass
 
 
-def check_file_exists(file_name, quit=True):
+def check_file_exists(file_name, exit_program=True):
     """Checks if a file already exists.
 
     Args:
         file_name: The file to check for existence
-        quit (optional): Quit the program if the file exists or not.
+        exit_program (optional): Exit the program if the file exists or not.
     """
 
     print("file_name = {}".format(file_name))
     if os.path.exists(file_name):
         print("File already exists")
-        if quit:
+        if exit_program:
             sys.exit(1)
     else:
         print("File: ok")
 
 
-def load_file_content(fname, excluded=[]):
+def load_file_content(fname, excluded=None):
     """Load the HDF5 file into a dictionary.
 
     Args:
@@ -58,12 +76,21 @@ def load_file_content(fname, excluded=[]):
         dictionary:
             "mygroup/mydataset": numpy array
     """
+    if excluded is None:
+        excluded = []
 
     file_content = {}
 
     def get_file_content(name, obj):
+        """Callable to be used to read the file content into a dictionary.
+        Args:
+            name: The name of the object relative to the current group
+            obj: A reference to the data
+        """
         if isinstance(obj, h5py.Dataset) and name not in excluded:
+
             file_content[name] = obj[()]
+
             # if object types are not converted writing gives the error
             # TypeError: Object dtype dtype('O') has no native HDF5 equivalent
             if (isinstance(file_content[name], np.ndarray) and
@@ -76,150 +103,24 @@ def load_file_content(fname, excluded=[]):
     return file_content
 
 
-def decode_dataset_8bit(arr_in, bit_mask, bit_shift):
-    """Masks out bits and shifts.
+class PythonObjectEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, slice):
+            return str(obj)
+        elif type(obj).__module__ == np.__name__:
+            return str(type(obj))
 
-    For every entry in the input array is the undelying binary representation
-    of the integegers the bit-wise AND is computed with the bit mask.
-    Bit wise AND means:
-    e.g. number 13 in binary representation: 00001101
-         number 17 in binary representation: 00010001
-         The bit-wise AND of these two is:   00000001, or 1
-    Then the result if shifted and converted to uint8.
-
-    Args:
-        arr_in: Array to decode.
-        bit_mask: Bit mask to apply on the arra.
-        bit_shift: How much the bits should be shifted.
-
-    Return:
-        Array where for each entry in the input array the bit mask is applied,
-        the result is shifted and converted to uint8.
-
-    """
-
-    arr_out = np.bitwise_and(arr_in, bit_mask)
-    arr_out = np.right_shift(arr_out, bit_shift)
-    arr_out = arr_out.astype(np.uint8)
-
-    return arr_out
-
-
-def split_Alessandro(raw_dset):
-    """Extracts the coarse, fine and gain bits.
-
-    Readout bit number
-    15  14  13  12  11  10  9   8   7   6   5   4   3   2   1   0
-    C0  C1  C2  C3  C4  F0  F1  F2  F3  F4  F5  F6  F7  B0  B1  -
-    ADC bit numbers
-
-    C: ADC coarse
-    F: ADC fine
-    B: Gain bit
-
-    Args:
-        raw_dset: Array containing 16 bit entries.
-
-    Return:
-        Each a coarse, fine and gain bit array.
-
-    """
-
-    # 0xF800 -> 1111100000000000
-    coarse_adc = decode_dataset_8bit(arr_in=raw_dset,
-                                     bit_mask=0xF800,
-                                     bit_shift=1+2+8)
-
-    # 0x07F8 -> 0000011111111000
-    fine_adc = decode_dataset_8bit(arr_in=raw_dset,
-                                   bit_mask=0x07F8,
-                                   bit_shift=1+2)
-
-    # 0x0006 -> 0000000000000110
-    gain_bits = decode_dataset_8bit(arr_in=raw_dset,
-                                    bit_mask=0x0006,
-                                    bit_shift=1)
-
-    return coarse_adc, fine_adc, gain_bits
-
-
-def split_Ulrik(raw_dset):
-    """Extracts the coarse, fine and gain bits.
-
-    Readout bit number
-    15  14  13  12  11  10  9   8   7   6   5   4   3   2   1   0
-    -   C0  C1  C2  C3  C4  F0  F1  F2  F3  F4  F5  F6  F7  B0  B1
-    ADC bit numbers
-
-    C: ADC coarse
-    F: ADC fine
-    B: Gain bit
-
-    Args:
-        raw_dset: Array containing 16 bit entries.
-
-    Return:
-        Each a coarse, fine and gain bit array.
-
-    """
-
-    # 0x7C00 -> 0111110000000000
-    coarse_adc = decode_dataset_8bit(arr_in=raw_dset,
-                                     bit_mask=0x7C00,
-                                     bit_shift=2+8)
-
-    # 0x03FC -> 0000001111111100
-    fine_adc = decode_dataset_8bit(arr_in=raw_dset,
-                                   bit_mask=0x03FC,
-                                   bit_shift=2)
-
-    # 0x0003 -> 0000000000000011
-    gain_bits = decode_dataset_8bit(arr_in=raw_dset,
-                                    bit_mask=0x0003,
-                                    bit_shift=0)
-
-    return coarse_adc, fine_adc, gain_bits
-
-
-def split(raw_dset):
-    """Extracts the coarse, fine and gain bits.
-
-    Readout bit number
-    0   1   2   3   4   5   6   7   8   9   10  11  12  13  14  15
-    -   B0  B1  F0  F1  F2  F3  F4  F5  F6  F7  C0  C1  C2  C3  C4
-    ADC bit numbers
-
-    C: ADC coarse (5 bit)
-    F: ADC fine (8 bit)
-    B: Gain bit (2 bit)
-
-    Args:
-        raw_dset: Array containing 16 bit entries.
-
-    Return:
-        Each a coarse, fine and gain bit array.
-
-    """
-
-    # 0x1F   -> 0000000000011111
-    coarse_adc = decode_dataset_8bit(arr_in=raw_dset,
-                                     bit_mask=0x1F,
-                                     bit_shift=0)
-
-    # 0x1FE0 -> 0001111111100000
-    fine_adc = decode_dataset_8bit(arr_in=raw_dset,
-                                   bit_mask=0x1FE0,
-                                   bit_shift=5)
-
-    # 0x6000 -> 0110000000000000
-    gain_bits = decode_dataset_8bit(arr_in=raw_dset,
-                                    bit_mask=0x6000,
-                                    bit_shift=5+8)
-
-    return coarse_adc, fine_adc, gain_bits
+        try:
+            return json.JSONEncoder.default(self, obj)
+        except TypeError:
+            print("could not serialize object: {}".format(type(obj)))
+            raise
 
 
 class IndexTracker(object):
+    """Interactively generate plots.
+    """
+
     def __init__(self, data, method_properties):
 
         self._data = data
@@ -227,6 +128,9 @@ class IndexTracker(object):
         self._slice = None
         self._window_title = None
         self._fig = None
+
+        self._frame = None
+        self._slices = None
 
         self.initiate()
 

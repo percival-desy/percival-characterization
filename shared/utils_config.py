@@ -1,3 +1,5 @@
+"""Utilities to handle config files.
+"""
 import yaml
 
 
@@ -5,8 +7,8 @@ def load_config(config_file):
     """ Loads the config from a yaml file.
 
     Args:
-        config_file (str): Name of the yaml file from which the config should be
-                           loaded.
+        config_file (str): Name of the yaml file from which the config should
+                           be loaded.
 
     Return:
         Configuration dictionary.
@@ -46,6 +48,6 @@ def update_dict(d, d_to_update):
 
     for k, v in d.items():
         if isinstance(v, dict):
-            update_dict(v)
+            update_dict(v, d_to_update[k])
         else:
             d_to_update[k] = v

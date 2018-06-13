@@ -2,6 +2,7 @@
 
 import argparse
 import datetime
+import json
 import math
 import multiprocessing
 import os
@@ -34,6 +35,7 @@ class Analyse(object):
     def __init__(self,
                  in_base_dir,
                  out_base_dir,
+                 create_outdir,
                  run_id,
                  run_type,
                  measurement,
@@ -44,6 +46,8 @@ class Analyse(object):
 
         self._in_base_dir = in_base_dir
         self._out_base_dir = out_base_dir
+
+        self._create_outdir = create_outdir
 
         self._n_rows_total = 1484
         self._n_cols_total = 1440
@@ -92,7 +96,7 @@ class Analyse(object):
 
     def generate_raw_path(self, base_dir):
         dirname = base_dir
-        filename = "{run}_" + "{}.h5".format(self._run_id)
+        filename = "{prefix}_" + "{}.h5".format(self._run_id)
 
         return dirname, filename
 
@@ -127,7 +131,6 @@ class Analyse(object):
 
         # define output files
         out_dir, out_file_name = self.generate_gather_path(self._out_base_dir)
-        out_fname = os.path.join(out_dir, out_file_name)
 
         for job_set in self._job_sets:
             jobs = []
@@ -135,20 +138,27 @@ class Analyse(object):
                 col_start = p * self._n_cols
                 col_stop = (p+1) * self._n_cols - 1
 
-                out_f = out_fname.format(col_start=col_start,
-                                         col_stop=col_stop)
+                out_fname = out_file_name.format(col_start=col_start,
+                                                 col_stop=col_stop)
+                # doing the join here and outside of loop because if out_dir
+                # contains a placeholder it will not work otherwise
+                out_fname = os.path.join(out_dir, out_fname)
 
 #                if os.path.exists(out_f):
 #                    print("output filename = {}".format(out_f))
 #                    print("WARNING: output file already exist. "
 #                          "Skipping gather.")
 #                else:
-                utils.create_dir(out_dir)
+                if self._create_outdir:
+                    utils.create_dir(out_dir)
 
                 kwargs = dict(
+                    input=self._in_base_dir,
                     in_fname=in_fname,
-                    out_fname=out_f,
+                    output=self._out_base_dir,
+                    out_fname=out_fname,
                     meta_fname=meta_fname,
+                    run=self._run_id,
                     n_rows=self._n_rows,
                     n_cols=self._n_cols,
                     part=p,
@@ -183,11 +193,9 @@ class Analyse(object):
         # define input files
         # the input files for process is the output from gather
         in_dir, in_file_name = self.generate_gather_path(self._in_base_dir)
-        in_fname = os.path.join(in_dir, in_file_name)
 
         # define output files
         out_dir, out_file_name = self.generate_process_path(self._out_base_dir)
-        out_fname = os.path.join(out_dir, out_file_name)
 
         for job_set in self._job_sets:
             jobs = []
@@ -195,21 +203,30 @@ class Analyse(object):
                 col_start = p * self._n_cols
                 col_stop = (p+1) * self._n_cols - 1
 
-                in_f = in_fname.format(col_start=col_start,
-                                       col_stop=col_stop)
-                out_f = out_fname.format(col_start=col_start,
-                                         col_stop=col_stop)
+                in_fname = in_file_name.format(col_start=col_start,
+                                           col_stop=col_stop)
+                # doing the join here and outside of loop because if in_dir
+                # contains a placeholder it will not work otherwise
+                in_fname = os.path.join(in_dir, in_fname)
+
+                out_fname = out_file_name.format(col_start=col_start,
+                                                 col_stop=col_stop)
+                # doing the join here and outside of loop because if out_dir
+                # contains a placeholder it will not work otherwise
+                out_fname = os.path.join(out_dir, out_fname)
 
 #                if os.path.exists(out_f):
 #                    print("output filename = {}".format(out_f))
 #                    print("WARNING: output file already exist. "
 #                          "Skipping process.")
 #                else:
-                utils.create_dir(out_dir)
+                if self._create_outdir:
+                    utils.create_dir(out_dir)
 
                 kwargs = dict(
-                    in_fname=in_f,
-                    out_fname=out_f,
+                    in_fname=in_fname,
+                    out_fname=out_fname,
+                    run=self._run_id,
                     method=self._method,
                     method_properties=self._method_properties
                 )
@@ -383,13 +400,13 @@ if __name__ == "__main__":
     insert_args_into_config(args, config)
 
     # fix format of command line parameter
-    if config["general"]["n_cols"] in ["None", "null"]:
+    if config["general"]["n_cols"] in ["None", "null", None]:
         config["general"]["n_cols"] = None
     else:
         config["general"]["n_cols"] = int(config["general"]["n_cols"])
 
-    for key, value in config.items():
-        print(key, value)
+    print("Configuration:")
+    print(json.dumps(config, sort_keys=True, indent=4))
 
     run_type = config["general"]["run_type"]
     run_id = config["general"]["run"]
@@ -405,13 +422,18 @@ if __name__ == "__main__":
     # generate file paths
     if run_type == "gather":
         in_base_dir = in_base_dir
+        # to allow additional directories for descramble
+        #out_base_dir = os.path.join(out_base_dir, run_id, "{run_dir}")
         out_base_dir = os.path.join(out_base_dir, run_id, "gathered")
+        create_outdir = False
     else:
         in_base_dir = os.path.join(in_base_dir, run_id, "gathered")
         out_base_dir = os.path.join(out_base_dir, run_id, "processed")
+        create_outdir = True
 
     obj = Analyse(in_base_dir=in_base_dir,
                   out_base_dir=out_base_dir,
+                  create_outdir=create_outdir,
                   run_id=run_id,
                   run_type=run_type,
                   measurement=measurement,

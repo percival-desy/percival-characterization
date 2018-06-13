@@ -1,14 +1,42 @@
+"""
+Takes one file per Vin plus an additional register file as input and gathers
+in into the default format.
+"""
 import h5py
 import numpy as np
 
-import __init__  # noqa F401
+import __init__
 from gather_adccal_base import GatherAdcBase
 import utils
 
 
 class Gather(GatherAdcBase):
+    """Converts the input file(s) into the standard gathered format.
+    """
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        # if this is not set to "gathererd" later processing will not work
+        self._output = self._get_output_dir(run_dir="gathered")
+
+        self._n_runs = None
+        self._n_frames = None
+        self._raw_shape = None
+        self._transpose_order = None
+        self._register = None
+        self._n_frames_per_run = None
 
     def initiate(self):
+        """Sets up the method attributes.
+        """
+
+        # mandatory variable to be set before any parent class function can
+        # me used are:
+        # self._n_runs
+        # self._n_frames_per_run
+        # self._n_frames
+        # self._n_runs
+
         self._read_register()
 
         self._n_runs = len(self._register)
@@ -17,9 +45,18 @@ class Gather(GatherAdcBase):
 
         self._n_frames = np.sum(self._n_frames_per_run)
 
-        self._raw_tmp_shape = (self._n_frames,
-                               self._n_rows,
-                               self._n_cols)
+        # self._data_to_write is predefined in GatherAdcBase to have one
+        # format to be used in processing
+        # it has the entries:
+        #    "s_coarse" - np.array of shape (n_frames, n_rows, n_cols)
+        #    "s_fine" - np.array of shape (n_frames, n_rows, n_cols)
+        #    "s_gain" - np.array of shape (n_frames, n_rows, n_cols)
+        #    "r_coarse" - np.array of shape (n_frames, n_rows, n_cols)
+        #    "r_fine" - np.array of shape (n_frames, n_rows, n_cols)
+        #    "r_gain" - np.array of shape (n_frames, n_rows, n_cols)
+        #    "vin" - np.array of shape (n_runs)
+        self._set_data_to_write()
+
         self._raw_shape = (-1,
                            self._n_rows_per_group,
                            self._n_adc,
@@ -30,66 +67,19 @@ class Gather(GatherAdcBase):
         # (n_rows, n_cols, n_frames, n_groups)
         self._transpose_order = (2, 3, 0, 1)
 
-        self._metadata = {
-            "n_frames_per_run": self._n_frames_per_run,
-            "n_frames": self._n_frames,
-            "n_runs": self._n_runs,
-            "n_adc": self. _n_adc,
-            "colums_used": [self._part * self._n_cols,
-                            (self._part + 1) * self._n_cols]
-        }
-
-        self._data_to_write = {
-            "s_coarse": {
-                "path": "sample/coarse",
-                "data": np.zeros(self._raw_tmp_shape, dtype=np.uint8),
-                "type": np.uint8
-            },
-            "s_fine": {
-                "path": "sample/fine",
-                "data": np.zeros(self._raw_tmp_shape, dtype=np.uint8),
-                "type": np.uint8
-            },
-            "s_gain": {
-                "path": "sample/gain",
-                "data": np.zeros(self._raw_tmp_shape, dtype=np.uint8),
-                "type": np.uint8
-            },
-            "r_coarse": {
-                "path": "reset/coarse",
-                "data": np.zeros(self._raw_tmp_shape, dtype=np.uint8),
-                "type": np.uint8
-            },
-            "r_fine": {
-                "path": "reset/fine",
-                "data": np.zeros(self._raw_tmp_shape, dtype=np.uint8),
-                "type": np.uint8
-            },
-            "r_gain": {
-                "path": "reset/gain",
-                "data": np.zeros(self._raw_tmp_shape, dtype=np.uint8),
-                "type": np.uint8
-            },
-            "vin": {
-                "path": "vin",
-                "data": np.zeros(self._n_runs, dtype=np.float16),
-                "type": np.float16
-            }
-        }
-
     def _read_register(self):
         print("meta_fname", self._meta_fname)
 
-        with open(self._meta_fname, "r") as f:
-            file_content = f.read().splitlines()
+        with open(self._meta_fname, "r") as metafile:
+            file_content = metafile.read().splitlines()
 
         # data looks like this: <V_in>  <file_prefix>
         file_content = [s.split("\t") for s in file_content]
-        for i, s in enumerate(file_content):
+        for i, string in enumerate(file_content):
             try:
-                s[0] = float(s[0])
-            except:
-                if s == ['']:
+                string[0] = float(string[0])
+            except ValueError:
+                if string == ['']:
                     # remove empty lines
                     del file_content[i]
                 else:
@@ -102,11 +92,11 @@ class Gather(GatherAdcBase):
         self._n_frames_per_run = []
 
         for i in self._register:
-            in_fname = self._in_fname.format(run=i[1])
+            in_fname = self._in_fname.format(prefix=i[1])
 
             try:
-                with h5py.File(in_fname, "r") as f:
-                    n_frames = f[self._paths["sample"]].shape[0]
+                with h5py.File(in_fname, "r") as infile:
+                    n_frames = infile[self._paths["sample"]].shape[0]
                     self._n_frames_per_run.append(n_frames)
             except OSError:
                 print("in_fname", in_fname)
@@ -130,14 +120,14 @@ class Gather(GatherAdcBase):
                               (self._part + 1) * self._n_cols)
         idx = (Ellipsis, load_idx_rows, load_idx_cols)
 
-        for i, (v, prefix) in enumerate(self._register):
-            in_fname = self._in_fname.format(run=prefix)
+        for i, (vin_value, prefix) in enumerate(self._register):
+            in_fname = self._in_fname.format(prefix=prefix)
 
             # read in data for this slice
             print("in_fname", in_fname)
-            with h5py.File(in_fname, "r") as f:
-                in_sample = f[self._paths["sample"]][idx]
-                in_reset = f[self._paths["reset"]][idx]
+            with h5py.File(in_fname, "r") as in_f:
+                in_sample = in_f[self._paths["sample"]][idx]
+                in_reset = in_f[self._paths["reset"]][idx]
 
             # determine where this data block should go in the result
             # matrix
@@ -159,7 +149,7 @@ class Gather(GatherAdcBase):
             r_fine[t_idx, Ellipsis] = fine
             r_gain[t_idx, Ellipsis] = gain
 
-            vin[i] = v
+            vin[i] = vin_value
 
         # split the rows into ADC groups
         print(s_coarse.shape)
