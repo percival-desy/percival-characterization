@@ -57,8 +57,8 @@ class Plot(PlotBase):
         cmap = matplotlib.pyplot.cm.jet
         cmap.set_under(color='white')
 
-        fine_min, fine_max = self._get_bounds(self._data["s_fine"])
-        coarse_min, coarse_max = self._get_bounds(self._data["s_coarse"])
+        fine_min, fine_max = self._get_range(self._data["s_fine"])
+        coarse_min, coarse_max = self._get_range(self._data["s_coarse"])
 
         plt.hist2d(data_coarse,
                    data_fine,
@@ -87,8 +87,3 @@ class Plot(PlotBase):
         fig.clf()
         plt.close(fig)
 
-    def _get_bounds(self, input_data):
-        ''' Return boundary limits of a vector
-        '''
-
-        return np.min(input_data), np.max(input_data)
