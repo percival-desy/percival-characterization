@@ -1,6 +1,11 @@
 ''' Plot 2D histograms of fines' distribution for different frames or Vin
+    This method works if many ADCs are studied at the same time:
+      - 2D arrays which have number of frame x number of pixels
 '''
 
+import copy
+import os
+import numpy as np
 import matplotlib
 # Generate images with having a window appear:
 # this sends remote data to locale PC for rendering
@@ -8,10 +13,6 @@ matplotlib.use('TkAgg')  # Must be before importing matplotlib.pyplot or pylab!
 import matplotlib.pyplot as plt  # noqa E402
 
 from plot_base import PlotBase  # noqa E402o
-import copy
-import os
-import numpy as np
-
 
 class Plot(PlotBase):
     def __init__(self, **kwargs):  # noqa F401
@@ -27,13 +28,13 @@ class Plot(PlotBase):
 
         title = ("allFrames, Sample: Row={}, Col={}, ADC={}"
                  .format(self._row, self._col, self._adc))
- 
+
         out = os.path.join(self._output_dir,
                            "raw_hist_2d_frame_vs_fine_row{}_col{}_adc{}"
                            .format(self._row, self._col, self._adc))
 
         self._generate_histogram_2d(self.get_nb_frames(self._data["s_fine"]),
-                                    self._data["s_fine"].flatten(),
+                                    self._data["s_fine"],
                                     plot_title=title,
                                     out_fname=out,
                                     interactive_flag=self._interactive)
@@ -56,43 +57,32 @@ class Plot(PlotBase):
         cmap = matplotlib.pyplot.cm.jet
         cmap.set_under(color='white')
 
-        print("shape", self._data["s_fine"].shape)
 
         fine_min, fine_max = self._get_range(self._data["s_fine"])
         print("fine_min", fine_min)
         print("fine_max", fine_max)
 
-        s_fine = self._data["s_fine"]
-        print(s_fine.shape)
-        s_fine = s_fine.transpose(1,0)
-        print(s_fine.shape)
-        print("Bite", data_fine.shape)
-        data_fine = data_fine.transpose(1, 0)
+        s_fine = data_fine
+        s_fine = s_fine.transpose(1, 0)
+        print("Shape of s_fine", s_fine.shape)
 
-        #n_frame = self._data["s_fine"].shape[0]
-        #print("n_frame", n_frame)
-        #n_dp_per_frame = self._data["s_fine"].shape[1]
-        #print("n_dp_per_frame", n_dp_per_frame)
-
-        #frames = np.array([np.arange(n_frame)
-        #                   for i in np.arange(n_dp_per_frame)]).flatten()
-        #frames = self.get_nb_frame(data_fine)
-        print("frames", frames)
+        n_frame = s_fine.shape[0]
 
         plt.hist2d(frames,
                    s_fine.flatten(),
                    cmap=cmap,
                    vmin=0.1,
-                   bins=[n_frame,(fine_max-fine_min+1)], 
-                   range=[[-0.5,(n_frame+0.5)],[(fine_min-0.5),(fine_max+0.5)]])
+                   bins=[n_frame, (fine_max-fine_min+1)],
+                   range=[[-0.5, (n_frame+0.5)],
+                          [(fine_min-0.5), (fine_max+0.5)]])
 
         plt.colorbar()
 
-        fig.suptitle(title)
+        fig.suptitle(plot_title)
         plt.xlabel("Frames")
         plt.ylabel("Fine [ADU]")
 
-        fig.savefig(out)
+        fig.savefig(out_fname)
 
         if interactive_flag is True:
             fig.show()
@@ -107,7 +97,6 @@ class Plot(PlotBase):
         '''
         n_frame = input_data.shape[0]
         n_dp_per_frame = input_data.shape[1]
-        
-        return np.array([np.arrange(n_frame)
-                         for i in np.arange(n_dp_per_frame)]).flatten() 
 
+        return np.array([np.arange(n_frame)
+                         for i in np.arange(n_dp_per_frame)]).flatten()
