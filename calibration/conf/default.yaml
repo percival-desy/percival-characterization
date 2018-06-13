@@ -9,8 +9,8 @@ general:
     n_processes: 1
 
 all:
-    input: &input /Users/ben/PostDoc/P2M_HDF5 
-    output: &output /Users/ben/PostDoc/P2M_HDF5
+    input: &input /Users/ben/PostDoc/P2M_HDF5/Data_lab/VRST/DLSraw 
+    output: &output /Users/ben/PostDoc/P2M_HDF5/Data_lab/VRST/DLSraw
 
 gather:
     method: file_per_vin_and_register_file
