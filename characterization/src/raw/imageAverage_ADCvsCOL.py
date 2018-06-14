@@ -1,51 +1,64 @@
-## coded by Trixi with help from Manuela & Alessandro
-## average data from a given ADC (over many rows, and also over many frames), show image of this for all ADCs
-## uses ALL row groups even if there is a restriction in the yaml or command line on rows.
+''' Show image of average data from a given ADC over many rows and many frames 
+'''
 
-
-### triple comment lines were inserted to attempt to get interactive response, need Manuela
-### to figure out how to get this to work ... .
-
-
+import os  # noqa E402
 import copy
+import numpy as np
 import matplotlib
 # Generate images without having a window appear:
 # this prevents sending remote data to locale PC for rendering
-matplotlib.use('Agg')  # Must be before importing matplotlib.pyplot or pylab!
+matplotlib.use('TkAgg')  # Must be before importing matplotlib.pyplot or pylab!
 import matplotlib.pyplot as plt  # noqa E402
-import numpy 
-###import utils # added in hopes of getting interactive functionality
 
 from plot_base import PlotBase  # noqa E402
 
-
 class Plot(PlotBase):
     def __init__(self, **kwargs):  # noqa F401
-        # overwrite the configured col and row indices
         new_kwargs = copy.deepcopy(kwargs)
         new_kwargs["col"] = None    
-        new_kwargs["row"] = None    # note if you remove this fix how ADCs are identified!
+        new_kwargs["row"] = None
         new_kwargs["dims_overwritten"] = True
 
         super().__init__(**new_kwargs)
+        
+    def plot_sample(self):
+        #_check_dimension(self._data["s_fine"])
+
+        self.create_dir()
+
+        title = ("allFrames, Sample: Row={}, Col={}, ADC={}"
+                 .format(self._row, self._col, self._adc))
+
+        out = os.path.join(self._output_dir,
+                           "raw_hist_2d_frame_vs_fine_row{}_col{}_adc{}"
+                           .format(self._row, self._col, self._adc))
+
+        self._generate_single_plot(data=self._data["s_coarse"],
+                                   plot_title=title,
+                                   out_fname=out,
+                                   interactive_flag=self._interactive)
 
     def _check_dimension(self, data):
+        ''' Check if data to study has only one dimension, otherwise raise
+            an error
+        '''
         if data.shape[0] != 1:
             raise("Plot method one image can only show one image at the time.")
 
-    def _generate_single_plot(x, data, plot_title, label, out_fname):
+    def _generate_single_plot(data,
+                              plot_title,
+                              label,
+                              out_fname,
+                              interactive_flag):
 
         fig = plt.figure(figsize=None)
-        # print(type(data))
-        # print(data.shape)
+
+        print("Shape of input data:", data.shape)
 	
-        Prep_dataPerADCs = data.reshape((212,7,1440))
-        # note cols change the most often, then ADCs, then row groups (thus they stand 1st)
-       
-        # now average over the 212 row groups for a given ADC:
-        averageDataPerADCs = numpy.average(Prep_dataPerADCs, axis=0)
+        prepare_data_per_adc = data.reshape((212, 7, 1440))
+        average_data_per_adc = np.average(prepare_data_per_addc, axis=0)
     
-        plt.imshow(averageDataPerADCs, aspect='auto', interpolation='none')
+        plt.imshow(average_data_per_adc, aspect='auto', interpolation='none')
         plt.colorbar()
         plt.xlabel("columns")
         plt.ylabel("ADCs")
@@ -57,7 +70,9 @@ class Plot(PlotBase):
         ###fig, ax = plt.subplots(2, 3, sharex=True, sharey=True)
         ###tracker = utils.IndexTracker(fig, ax, x)
         ###plt.show()
+        if interactive_flag is True:
+            fig.show()
+            input('Press enter to end')
 
-        # commented out the following 2 lines in hopes of getting interactive behaviour
         fig.clf()
         plt.close(fig)
