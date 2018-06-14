@@ -1,5 +1,5 @@
 general:
-    data_type: processed
+    data_type: raw
     run: DLSraw
 
     plot_sample: True
@@ -10,20 +10,31 @@ all:
     output: &output /Users/ben/PostDoc/P2M_HDF5/Data_lab/VRST/DLSraw
 
 raw:
-    input: /Users/ben/PostDoc/P2M_HDF5/Data_lab/VRST/VRST8kto32k_80p_AV_MultiFile060_DLSraw.h5
-    metadata_file:  /Users/ben/PostDoc/P2M_HDF5/Data_lab/VRST/2018.05.31_AV_000_meta.dat
+    #input: /Users/ben/PostDoc/P2M_HDF5/Data_lab/VRST/VRST18k1to21k2_271p_AV_02_dscrmbld_DLSraw.h5
+    #input: /Users/ben/PostDoc/P2M_HDF5/Data_lab/VRSTfromVin_8p1kto32k_AD_240frames_DLSraw.h5
+    input: /Users/ben/PostDoc/P2M_HDF5/2018.05.23_AD_00_descrambledDLSraw.h5
+    metadata_fname: null
 
     output: *output
 
     measurement: adccal
 
+    interactive: True
+    
+    viewer:
+        err_below: -0.1
+
     adc: null
-    frame: 2
+    frame: null
     col: 100
-    row: 100
+    row: [0, 1484, 7]
 
     #method: [viewer]
     method: [image, plot_coarse-fine_vs_image]
+
+
+    viewer:
+        err_below: -0.1
 
 gathered:
     input: *output
@@ -36,6 +47,8 @@ gathered:
     col: 100
     row: null
 
+    interactive: True
+    
     method: [plot, hist, hist_2d]
     #method: [plot_sample_vs_reset]
 
@@ -47,7 +60,9 @@ processed:
 
     adc: 0
     frame: null
-    col: 10
+    col: 100
     row: null
+    
+    interactive: True
 
     method: [plot]

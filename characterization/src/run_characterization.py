@@ -212,6 +212,7 @@ class Analyse(object):
         self._col = self._config[self._data_type]["col"]
         self._row = self._config[self._data_type]["row"]
         self._method_list = self._config[self._data_type]["method"]
+        self._interactive = self._config[self._data_type]["interactive"]
 
         self.set_indices()
 
@@ -270,11 +271,12 @@ class Analyse(object):
             row=self._row,
             col=self._col,
             run=self._run_id,
-            method_properties=None
+            method_properties=None,
+            interactive=self._interactive
         )
 
-        print("Configured: adc={}, frame={}, row={}, col={}"
-              .format(self._adc, self._frame, self._row, self._col))
+        print("Configured: adc={}, frame={}, row={}, col={}, interactive={}"
+              .format(self._adc, self._frame, self._row, self._col, self._interactive))
 
         loaded_data = None
         for method in self._method_list:
