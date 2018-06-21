@@ -54,7 +54,6 @@ class Process(ProcessAdccalBase):
                              adc_stage_offset=fine_offset,
                              adc_stage_slope=fine_slope)
 
-
     def _fit_adc_output(self, adc_stage, adc_stage_offset, adc_stage_slope):
         ''' Get one ADC stage and fit it.
             If data_type = coarse, the fit is done on a given range defined
@@ -81,7 +80,7 @@ class Process(ProcessAdccalBase):
                     idx = np.where(np.logical_and(adu_stage < 30,
                                                   adu_stage > 1)) 
                 if adc_stage is "s_fine":
-                    idx = np.where(np.logical_and(vin > 0, vin < 10000))
+                    idx = np.where(np.logical_and(vin > 18500, vin < 20000))
                 #if adc_stage is "s_fine":
                 #    idx = np.where(np)
                 if np.any(idx):
