@@ -80,7 +80,7 @@ class Process(ProcessAdccalBase):
                     idx = np.where(np.logical_and(adu_stage < 30,
                                                   adu_stage > 1)) 
                 if adc_stage is "s_fine":
-                    idx = np.where(np.logical_and(vin > 18500, vin < 20000))
+                    idx = np.where(np.logical_and(vin > 18500, vin < 19000))
                 #if adc_stage is "s_fine":
                 #    idx = np.where(np)
                 if np.any(idx):
