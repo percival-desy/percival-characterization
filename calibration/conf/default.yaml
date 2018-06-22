@@ -9,8 +9,8 @@ general:
     n_processes: 1
 
 all:
-    input: &input /Users/ben/PostDoc/P2M_HDF5 
-    output: &output /Users/ben/PostDoc/P2M_HDF5
+    input: &input /Users/ben/PostDoc/P2M_HDF5/Data_lab/VRST/Fine_scan 
+    output: &output /Users/ben/PostDoc/P2M_HDF5/Data_lab/VRST/Fine_scan
 
 gather:
     method: file_per_vin_and_register_file
@@ -63,4 +63,8 @@ process:
 
     input: *output
     output: *output
+
+    process_adccal_default:
+        coarse_fitting_range: [1, 30]
+        fine_fitting_range: [75, 125]
 

@@ -7,7 +7,7 @@ general:
     plot_combined: True
 
 all:
-    output: &output /Users/ben/PostDoc/P2M_HDF5/Data_lab/VRST/
+    output: &output /Users/ben/PostDoc/P2M_HDF5/Data_lab/VRST/DLSraw
 
 raw:
     #input: /Users/ben/PostDoc/P2M_HDF5/Data_lab/VRST/VRST18k1to21k2_271p_AV_02_dscrmbld_DLSraw.h5
@@ -47,6 +47,8 @@ gathered:
     col: 100
     row: null
 
+    interactive: True
+    
     method: [plot, hist, hist_2d]
     #method: [plot_sample_vs_reset]
 
@@ -58,7 +60,9 @@ processed:
 
     adc: 0
     frame: null
-    col: 10
+    col: 100
     row: null
+    
+    interactive: True
 
     method: [plot]
