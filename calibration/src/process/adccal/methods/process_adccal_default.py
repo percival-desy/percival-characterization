@@ -32,8 +32,8 @@ class Process(ProcessAdccalBase):
         }
 
     def _calculate(self):
-        ''' Perform a linear fit on sample ADC coarse and store the offset
-            and slope in a HDF5 file.
+        ''' Perform a linear fit on sample ADC coarse and fine.
+            The offsets and slopes are stored in a HDF5 file.
         '''
 
         print("Start loading data from {} ...".format(self._in_fname), end="")
@@ -63,8 +63,6 @@ class Process(ProcessAdccalBase):
                                                      adu_coarse > 1))
                 idx_fine = np.where(np.logical_and(adu_coarse < 19,
                                               adu_coarse > 17))
-                #print(idx_fine, idx_coarse)
-                #print(len(idx_fine), len(idx_coarse))
 
                 if np.any(idx_coarse):
                     fit_result = self._fit_linear(vin[idx_coarse],
