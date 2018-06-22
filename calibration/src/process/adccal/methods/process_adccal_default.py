@@ -36,60 +36,52 @@ class Process(ProcessAdccalBase):
             and slope in a HDF5 file.
         '''
 
-        sample_coarse = "s_coarse"
-        coarse_offset = "s_coarse_offset"
-        coarse_slope = "s_coarse_slope"
-
-        self._fit_adc_output(adc_stage=sample_coarse,
-                             adc_stage_offset=coarse_offset,
-                             adc_stage_slope=coarse_slope)
-        
-        print("Coarse fitting is done.")
-        
-        sample_fine = "s_fine"
-        fine_offset = "s_fine_offset"
-        fine_slope = "s_fine_slope"
-
-        self._fit_adc_output(adc_stage=sample_fine,
-                             adc_stage_offset=fine_offset,
-                             adc_stage_slope=fine_slope)
-
-    def _fit_adc_output(self, adc_stage, adc_stage_offset, adc_stage_slope):
-        ''' Get one ADC stage and fit it.
-            If data_type = coarse, the fit is done on a given range defined
-            by the user.
-            If data_type : fine, the fit is done for a given Coarse ADU.
-        ''' 
-
         print("Start loading data from {} ...".format(self._in_fname), end="")
         data = self._load_data(self._in_fname)
-        print("Data loaded, fitting them...")
+        print("Data loaded, fitting coarse data...")
+
         # convert (n_adcs, n_cols, n_groups, n_frames)
         #      -> (n_adcs, n_cols, n_groups * n_frames)
-        self._merge_groups_with_frames(data[adc_stage])
-        
+        self._merge_groups_with_frames(data["s_coarse"])
+        self._merge_groups_with_frames(data["s_fine"])
+
+        # create as many entries for each vin as there were original frames
         vin = self._fill_up_vin(data["vin"])
-        sample_adc_stage = data[adc_stage]
-        offset = self._result[adc_stage_offset]["data"]
-        slope = self._result[adc_stage_slope]["data"]
+        sample_coarse = data["s_coarse"]
+        offset_coarse = self._result["s_coarse_offset"]["data"]
+        slope_coarse = self._result["s_coarse_slope"]["data"]
+        
+        sample_fine = data["s_fine"]
+        offset_fine = self._result["s_fine_offset"]["data"]
+        slope_fine = self._result["s_fine_slope"]["data"]
 
         for adc in range(self._n_adcs):
             for col in range(self._n_cols):
-                adu_stage = sample_adc_stage[adc, col, :]
-                if adc_stage is "s_coarse":
-                    idx = np.where(np.logical_and(adu_stage < 30,
-                                                  adu_stage > 1)) 
-                if adc_stage is "s_fine":
-                    idx = np.where(np.logical_and(vin > 18500, vin < 19000))
-                #if adc_stage is "s_fine":
-                #    idx = np.where(np)
-                if np.any(idx):
-                    fit_result = self._fit_linear(vin[idx], adu_stage[idx])
-                    slope[adc, col], offset[adc, col] = fit_result.solution
+                adu_coarse = sample_coarse[adc, col, :]
+                adu_fine = sample_fine[adc, col, :]
+                idx_coarse = np.where(np.logical_and(adu_coarse < 30,
+                                                     adu_coarse > 1))
+                idx_fine = np.where(np.logical_and(adu_coarse < 19,
+                                              adu_coarse > 17))
+                #print(idx_fine, idx_coarse)
+                #print(len(idx_fine), len(idx_coarse))
+
+                if np.any(idx_coarse):
+                    fit_result = self._fit_linear(vin[idx_coarse],
+                                                  adu_coarse[idx_coarse])
+                    slope_coarse[adc, col], offset_coarse[adc, col] = fit_result.solution
                 else:
-                    slope[adc, col] = np.NaN
-                    offset[adc, col] = np.NaN
+                    slope_coarse[adc, col] = np.NaN
+                    offset_coarse[adc, col] = np.NaN
+                if np.any(idx_fine):
+                    fit_result = self._fit_linear(vin[idx_fine],
+                                                  adu_fine[idx_fine])
+                    slope_fine[adc, col], offset_fine[adc, col] = fit_result.solution
+                else:
+                    slope_fine[adc, col] = np.NaN
+                    offset_fine[adc, col] = np.NaN
 
-        self._result[adc_stage_offset]["data"] = offset
-        self._result[adc_stage_slope]["data"] = slope
-
+        self._result["s_coarse_slope"]["data"] = slope_coarse
+        self._result["s_coarse_offset"]["data"] = offset_coarse
+        self._result["s_fine_slope"]["data"] = slope_fine
+        self._result["s_fine_offset"]["data"] = offset_fine
