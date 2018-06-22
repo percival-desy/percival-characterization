@@ -61,8 +61,7 @@ class Process(ProcessAdccalBase):
                 adu_fine = sample_fine[adc, col, :]
                 idx_coarse = np.where(np.logical_and(adu_coarse < 30,
                                                      adu_coarse > 1))
-                idx_fine = np.where(np.logical_and(adu_coarse < 19,
-                                              adu_coarse > 17))
+                idx_fine = np.where(adu_coarse == 18)
 
                 if np.any(idx_coarse):
                     fit_result = self._fit_linear(vin[idx_coarse],
