@@ -33,6 +33,7 @@ class Process(ProcessAdccalBase):
                 "path": "sample/fine/slope"
             }
         }
+        
 
     def _calculate(self):
         ''' Perform a linear fit on sample ADC coarse and fine.
@@ -47,6 +48,8 @@ class Process(ProcessAdccalBase):
         #      -> (n_adcs, n_cols, n_groups * n_frames)
         self._merge_groups_with_frames(data["s_coarse"])
         self._merge_groups_with_frames(data["s_fine"])
+        
+        coarse_to_study = self._method_properties["fine_fitting_range"]
 
         # create as many entries for each vin as there were original frames
         vin = self._fill_up_vin(data["vin"])
@@ -64,7 +67,7 @@ class Process(ProcessAdccalBase):
                 adu_fine = sample_fine[adc, col, :]
                 idx_coarse = np.where(np.logical_and(adu_coarse < 30,
                                                      adu_coarse > 1))
-                idx_fine = np.where(adu_coarse == 18)
+                idx_fine = np.where(adu_coarse == coarse_to_study)
 
                 if np.any(idx_coarse):
                     fit_result = self._fit_linear(vin[idx_coarse],

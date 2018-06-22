@@ -66,5 +66,5 @@ process:
 
     process_adccal_default:
         coarse_fitting_range: [1, 30]
-        fine_fitting_range: [75, 125]
+        fine_fitting_range: 18 
 
