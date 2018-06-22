@@ -1,3 +1,6 @@
+''' Method to calculate the offsets and slopes of coarse and fine
+    part of ADCs by calling a linear fit from the base class.
+'''
 import numpy as np
 
 import __init__  # noqa F401
@@ -50,7 +53,7 @@ class Process(ProcessAdccalBase):
         sample_coarse = data["s_coarse"]
         offset_coarse = self._result["s_coarse_offset"]["data"]
         slope_coarse = self._result["s_coarse_slope"]["data"]
-        
+
         sample_fine = data["s_fine"]
         offset_fine = self._result["s_fine_offset"]["data"]
         slope_fine = self._result["s_fine_slope"]["data"]
