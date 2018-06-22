@@ -50,6 +50,7 @@ class Process(ProcessAdccalBase):
         self._merge_groups_with_frames(data["s_fine"])
         
         coarse_to_study = self._method_properties["fine_fitting_range"]
+        coarse_fit_range = self._method_properties["coarse_fitting_range"]
 
         # create as many entries for each vin as there were original frames
         vin = self._fill_up_vin(data["vin"])
@@ -65,8 +66,8 @@ class Process(ProcessAdccalBase):
             for col in range(self._n_cols):
                 adu_coarse = sample_coarse[adc, col, :]
                 adu_fine = sample_fine[adc, col, :]
-                idx_coarse = np.where(np.logical_and(adu_coarse < 30,
-                                                     adu_coarse > 1))
+                idx_coarse = np.where(np.logical_and(adu_coarse < coarse_fit_range[1],
+                                                     adu_coarse > coarse_fit_range[0]))
                 idx_fine = np.where(adu_coarse == coarse_to_study)
 
                 if np.any(idx_coarse):
