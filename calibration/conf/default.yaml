@@ -61,10 +61,11 @@ gather:
 process:
     method: process_adccal_default
 
-    input: *output
+    input: *output 
     output: *output
 
     process_adccal_default:
+        fit_adc_part: fine
         coarse_fitting_range: [1, 30]
         fine_fitting_range: 18 
 
