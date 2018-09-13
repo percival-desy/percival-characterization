@@ -88,6 +88,8 @@ class Analyse(object):
             self.run_gather()
         elif self._run_type == "process":
             self.run_process()
+        elif self._run_type == "correction":
+            self.run_process()
         else:
             print("Unsupported argument: run_type {}".format(self._run_type))
 
@@ -114,7 +116,8 @@ class Analyse(object):
 
     def generate_process_path(self, base_dir):
         dirname = os.path.join(base_dir)
-        filename = "col{col_start}-{col_stop}_processed.h5"
+        filename = "col{col_start}-{col_stop}_processed" + \
+                   "_{}.h5".format(self._method_properties["fit_adc_part"])
 
         return dirname, filename
 
@@ -192,6 +195,7 @@ class Analyse(object):
     def run_process(self):
         # define input files
         # the input files for process is the output from gather
+
         in_dir, in_file_name = self.generate_gather_path(self._in_base_dir)
 
         # define output files
@@ -204,7 +208,7 @@ class Analyse(object):
                 col_stop = (p+1) * self._n_cols - 1
 
                 in_fname = in_file_name.format(col_start=col_start,
-                                           col_stop=col_stop)
+                                               col_stop=col_stop)
                 # doing the join here and outside of loop because if in_dir
                 # contains a placeholder it will not work otherwise
                 in_fname = os.path.join(in_dir, in_fname)
@@ -423,7 +427,7 @@ if __name__ == "__main__":
     if run_type == "gather":
         in_base_dir = in_base_dir
         # to allow additional directories for descramble
-        #out_base_dir = os.path.join(out_base_dir, run_id, "{run_dir}")
+        # out_base_dir = os.path.join(out_base_dir, run_id, "{run_dir}")
         out_base_dir = os.path.join(out_base_dir, run_id, "gathered")
         create_outdir = False
     else:
