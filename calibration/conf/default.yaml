@@ -1,5 +1,5 @@
 general:
-    run_type: process
+    run_type: correction
     n_cols: 32
 
     measurement: adccal
@@ -65,7 +65,12 @@ process:
     output: *output
 
     process_adccal_default:
-        fit_adc_part: fine
+        fit_adc_part: all
         coarse_fitting_range: [1, 30]
         fine_fitting_range: 18 
 
+correction:
+    method: correction_adccal_default
+    
+    input: *output
+    output: *output
