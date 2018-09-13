@@ -48,9 +48,9 @@ class Process(ProcessAdccalBase):
         data = self._load_data(self._in_fname)
 
         if self._method_properties["fit_adc_part"] == "coarse":
-        print("Data loaded, fitting coarse data...")
-        # convert (n_adcs, n_cols, n_groups, n_frames)
-        #      -> (n_adcs, n_cols, n_groups * n_frames)
+            print("Data loaded, fitting coarse data...")
+            # convert (n_adcs, n_cols, n_groups, n_frames)
+            #      -> (n_adcs, n_cols, n_groups * n_frames)
             self._merge_groups_with_frames(data["s_coarse"])
             # create as many entries for each vin as there were original frames
             vin = self._fill_up_vin(data["vin"])
@@ -76,9 +76,9 @@ class Process(ProcessAdccalBase):
             self._result["s_coarse_offset"]["data"] = offset
 
         elif self._method_properties["fit_adc_part"] == "fine":
-        print("Data loaded, fitting fine data...")
-        # convert (n_adcs, n_cols, n_groups, n_frames)
-        #      -> (n_adcs, n_cols, n_groups * n_frames)
+            print("Data loaded, fitting fine data...")
+            # convert (n_adcs, n_cols, n_groups, n_frames)
+            #      -> (n_adcs, n_cols, n_groups * n_frames)
             self._merge_groups_with_frames(data["s_fine"])
             self._merge_groups_with_frames(data["s_coarse"])
             # create as many entries for each vin as there were original frames
