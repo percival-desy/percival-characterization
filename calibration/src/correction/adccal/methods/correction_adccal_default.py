@@ -13,7 +13,10 @@ class Correction(CorrectionAdccalBase):
     def _initiate(self):
         pass
         shapes = {
-          "value": (self._n_adcs, self._n_cols)
+          "value": (self._n_adcs,
+                    self._n_groups,
+                    self._n_cols,
+                    self._n_frames)
         }
     
         self._result = {
@@ -47,8 +50,8 @@ class Correction(CorrectionAdccalBase):
                 #if slope_coarse[adc, col] or slope_fine[adc, col] == 0:
                 #    adc_corrected = np.NaN
                 #else:
-                adc_corrected = ((sample_coarse[adc, col, :] - offset_coarse[adc, col]) * 2048) / slope_coarse[adc, col]  + 32 \
-                                    - ((sample_fine[adc, col, :] - offset_fine[adc, col]) * 2048 )/ slope_fine[adc, col]
+                adc_corrected = ((sample_coarse[adc, col, :] - offset_coarse[adc, col]) * 2047.5) / slope_coarse[adc, col]  + 31 \
+                                    - ((sample_fine[adc, col, :] - offset_fine[adc, col]) * 2047.5 )/ slope_fine[adc, col]
 
         print("Test")
 

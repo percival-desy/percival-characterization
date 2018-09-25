@@ -27,7 +27,8 @@ class CorrectionBase(object):
     def __init__(self, **kwargs):
 
         self._in_fname_gathered = None
-        self._in_fname_processed = None
+        self._in_fname_processed_coarse = None
+        self._in_fname_processed_fine = None
         self._out_fname = None
         self._method = None
 
@@ -39,7 +40,8 @@ class CorrectionBase(object):
 
         print("\n\nStart correction")
         print("in_fname_gathered:", self._in_fname_gathered)
-        print("in_fname_processed:", self._in_fname_processed)
+        print("in_fname_processed_coarse:", self._in_fname_processed_coarse)
+        print("in_fname_processed_fine:", self._in_fname_processed_fine)
         print("out_fname:", self._out_fname)
         print()
 

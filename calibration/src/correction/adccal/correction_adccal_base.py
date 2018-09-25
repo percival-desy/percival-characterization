@@ -21,13 +21,15 @@ class CorrectionAdccalBase(CorrectionBase):
             "r_fine": "reset/fine",
             "r_gain": "reset/gain",
             "vin": "vin",
-            "n_frames_per_run": "collection/n_frames_per_run"
+            "n_frames_per_run": "collection/n_frames_per_run",
         }
-        self._paths_processed = { 
-            "s_coarse_offset": "sample/coarse/offset",
-            "s_coarse_slope": "sample/coarse/slope",
-            "s_fine_offset": "sample/fine/offset",
-            "s_fine_slope": "sample/fine/slope"
+        self._paths_processed_coarse = }
+            "coarse_offset": "sample/coarse,offset",
+            "coarse_slope": "sample/coarse/slope"
+        }
+        self._paths_processed_fine = {
+            "fine_offset": "sample/fine/offset",
+            "fine_slope": "sample/fine/slope"
         }
 
         self._n_adcs = None
@@ -40,9 +42,10 @@ class CorrectionAdccalBase(CorrectionBase):
         self._set_dimensions()
 
     def _set_dimensions(self):
-        with h5py.File(self._in_fname_gathered, "r") as f:
-            s_coarse = f[self._paths_gathered["s_coarse"]][()]
-            n_frames_per_vin = f[self._paths_gathered["n_frames_per_run"]][()]
+
+        with h5py.File(self._in_fname, "r") as f:
+            s_coarse = f[self._paths["s_coarse"]][()]
+            n_frames_per_vin = f[self._paths["n_frames_per_run"]][()]
 
         self._n_adcs = s_coarse.shape[0]
         self._n_cols = s_coarse.shape[1]
@@ -53,23 +56,14 @@ class CorrectionAdccalBase(CorrectionBase):
 
         self._n_frames_per_vin = n_frames_per_vin
 
-    def _load_data_gathered(self, in_fname_gathered):
+    def _load_data(self, in_fname):
 
-        data_gathered = {}
-        with h5py.File(self._in_fname_gathered, "r") as f:
-            for key in self._paths_gathered:
-                data_gathered[key] = f[self._paths_gathered[key]][()]
+        data = {}
+        with h5py.File(self._in_fname, "r") as f:
+            for key in self._paths:
+                data[key] = f[self._paths[key]][()]
 
-        return data_gathered
-
-    def _load_data_processed(self, in_fname_processed):
-
-        data_processed = {}
-        with h5py.File(self._in_fname_processed, "r") as f:
-            for key in self._paths_processed:
-                data_processed[key] = f[self._paths_processed[key]][()]
-
-        return data_processed
+        return data
 
     def _fill_up_vin(self, vin):
         # create as many entries for each vin as there were original frames
