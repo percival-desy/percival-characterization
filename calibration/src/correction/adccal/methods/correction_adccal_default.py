@@ -13,15 +13,15 @@ class Correction(CorrectionAdccalBase):
     def _initiate(self):
         pass
         shapes = {
-          "value": (self._n_adcs,
-                    self._n_cols,
-                    self._n_frames,
-                    self._n_groups)
+          "data_structure": (self._n_adcs,
+                             self._n_cols,
+                             self._n_frames,
+                             self._n_groups)
         }
     
         self._result = {
             "adc_corrected":{
-                "data":  np.zeros(shapes["value"]), 
+                "data":  np.zeros(shapes["data_structure"]), 
                 "path": "sample/adc_corrected"
             }
         }
