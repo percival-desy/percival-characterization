@@ -62,7 +62,6 @@ class CorrectionAdccalBase(CorrectionBase):
         with h5py.File(self._in_fname_gathered, "r") as f:
             for key in self._paths_gathered:
                 data[key] = f[self._paths_gathered[key]][()]
-
         return data
 
     def _load_data_processed_coarse(self, in_fname_processed_coarse):
@@ -73,7 +72,7 @@ class CorrectionAdccalBase(CorrectionBase):
                 data[key] = f[self._paths_processed_coarse[key]][()]
 
         return data
-    
+
     def _load_data_processed_fine(self, in_fname_processed_coarse):
 
         data = {}
@@ -83,15 +82,6 @@ class CorrectionAdccalBase(CorrectionBase):
 
         return data
 
-    def _fill_up_vin(self, vin):
-        # create as many entries for each vin as there were original frames
-        x = [np.full(self._n_frames_per_vin[i] * self._n_groups, v)
-             for i, v in enumerate(vin)]
-
-        x = np.hstack(x)
-
-        return x
-
     def _merge_groups_with_frames(self, data):
         # data has the dimension (n_adcs, n_cols, n_groups, n_frames)
         # should be transformed into (n_adcs, n_cols, n_groups * n_frames)
@@ -99,4 +89,3 @@ class CorrectionAdccalBase(CorrectionBase):
         data.shape = (self._n_adcs,
                       self._n_cols,
                       self._n_total_frames)
-
