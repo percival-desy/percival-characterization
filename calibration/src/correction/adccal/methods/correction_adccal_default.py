@@ -27,6 +27,10 @@ class Correction(CorrectionAdccalBase):
         }
 
     def _calculate(self):
+        ''' Read gathered data, processed coarse and fine data to apply
+            a correction. 
+            The final output is adcs corrected
+        '''
 
         print("Start loading data from {} ".format(self._in_fname_gathered),
               ", data from {}... ".format(self._in_fname_processed_coarse), 
@@ -57,8 +61,12 @@ class Correction(CorrectionAdccalBase):
                 #if slope_coarse[adc, col] or slope_fine[adc, col] == 0:
                 #    adc_corrected = np.NaN
                 #else:
-                  adc_corrected[adc, col, frame] = ((sample_coarse[adc, col, frame] - offset_coarse[adc, col]) * 2047.5) / slope_coarse[adc, col]  + 31 \
-                                                      - ((sample_fine[adc, col, frame] - offset_fine[adc, col]) * 2047.5 )/ slope_fine[adc, col]
+                  adc_corrected[adc, col, frame] = ((sample_coarse[adc, col, frame] \
+                                                     - offset_coarse[adc, col]) * 2047.5) \
+                                                   / slope_coarse[adc, col]  + 31 \
+                                                   - ((sample_fine[adc, col, frame] \
+                                                     - offset_fine[adc, col]) * 2047.5 ) \
+                                                   / slope_fine[adc, col]
 
         print("Test")
 
