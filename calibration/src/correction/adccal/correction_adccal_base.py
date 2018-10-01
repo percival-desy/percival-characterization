@@ -21,7 +21,10 @@ class CorrectionAdccalBase(CorrectionBase):
             "r_fine": "reset/fine",
             "r_gain": "reset/gain",
             "vin": "vin",
-            "n_frames_per_run": "collection/n_frames_per_run"
+            "n_frames_per_run": "collection/n_frames_per_run",
+            "n_adc": "collection/n_adc",
+            "n_frames": "collection/n_frames",
+            "n_runs": "collection/n_runs"
         }
         self._paths_processed_coarse = {
             "s_coarse_offset": "sample/coarse/offset",

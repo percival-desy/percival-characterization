@@ -26,8 +26,22 @@ class Correction(CorrectionAdccalBase):
                 "data": np.zeros(self._n_total_frames),
                 "path": "vin"
             }
+        }           
+        self._metadata = {
+            "n_frames_per_run": {
+                "path": "collection/n_frames_per_run" 
+            },
+            "n_adc": {
+                "path": "collection/n_adc"
+            },
+            "n_frames": {
+                "path": "collection/n_frames"
+            },
+            "n_runs": {
+                "path": "collection/n_runs"
+            }
         }
-
+                    
     def _calculate(self):
         ''' Read gathered data, processed coarse and fine data to apply
             a correction.

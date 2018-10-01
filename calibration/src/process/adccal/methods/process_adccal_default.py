@@ -24,6 +24,10 @@ class Process(ProcessAdccalBase):
                 "s_coarse_slope": {
                     "data": np.zeros(shapes["offset"]),
                     "path": "sample/coarse/slope"
+                },
+                "s_coarse_residuals": {
+                    "data": np.zeros(shapes["offset"]),
+                    "path": "sample/coarse/residuals"
                 }
            }
 
@@ -77,6 +81,7 @@ class Process(ProcessAdccalBase):
             fitting_range = self._method_properties["coarse_fitting_range"]
             offset = self._result["s_coarse_offset"]["data"]
             slope = self._result["s_coarse_slope"]["data"]
+            residuals = self._result["s_coarse_residuals"]["data"]
 
             for adc in range(self._n_adcs):
                 for col in range(self._n_cols):
@@ -86,13 +91,17 @@ class Process(ProcessAdccalBase):
                     if np.any(idx_fit):
                         fit_result = self._fit_linear(vin[idx_fit], adu[idx_fit])
                         slope[adc, col], offset[adc, col] = fit_result.solution
-                        offset[adc, col] = slope[adc, col] * vin[0] + offset[adc, col]
+                        #offset[adc, col] = slope[adc, col] * vin[0] + offset[adc, col]
+                        print(fit_result.residuals)
+                        residuals[adc, col] = fit_result.residuals
                     else:
                         slope[adc, col] = np.NaN
                         offset[adc, col] = np.NaN
+                        residuals[adc, col] = np.NaN
             
             self._result["s_coarse_slope"]["data"] = slope
             self._result["s_coarse_offset"]["data"] = offset
+            self._result["s_coarse_residuals"]["data"] = residuals
 
         elif self._method_properties["fit_adc_part"] == "fine":
             print("Data loaded, fitting fine data...")

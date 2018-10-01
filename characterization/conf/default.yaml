@@ -7,7 +7,7 @@ general:
     plot_combined: True
 
 all:
-    output: &output /Users/ben/PostDoc/P2M_HDF5/Data_lab/VRST/DLSraw
+    output: &output /Users/ben/PostDoc/P2M_HDF5/Data_0918/Coarse_scan
 
 raw:
     #input: /Users/ben/PostDoc/P2M_HDF5/Data_lab/VRST/VRST18k1to21k2_271p_AV_02_dscrmbld_DLSraw.h5
@@ -58,11 +58,11 @@ processed:
 
     measurement: adccal
 
-    adc: 0
+    adc: 6
     frame: null
     col: 100
     row: null
     
     interactive: True
 
-    method: [plot]
+    method: [plot_residuals]
