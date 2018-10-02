@@ -43,6 +43,19 @@ class CorrectionAdccalBase(CorrectionBase):
         self._n_total_frames = None
 
         self._set_dimensions()
+    
+  #  def _set_data_to_write(self):
+  #      """Define which data should be written into file.
+  #      """
+
+  #      self._metadata = {
+  #          "n_frames_per_run": self._n_frames_per_run,
+  #          "n_frames": self._n_frames,
+  #          "n_runs": self._n_runs,
+  #          "n_adc": self. _n_adc,
+  #          "colums_used": [self._part * self._n_cols,
+  #                          (self._part + 1) * self._n_cols]
+  #      }
 
     def _set_dimensions(self):
 
@@ -58,6 +71,8 @@ class CorrectionAdccalBase(CorrectionBase):
         self._n_total_frames = self._n_groups * self._n_frames
 
         self._n_frames_per_vin = n_frames_per_vin
+        
+        self._n_total_frames = self._n_groups * self._n_frames
 
     def _load_data_gathered(self, in_fname_gathered):
 

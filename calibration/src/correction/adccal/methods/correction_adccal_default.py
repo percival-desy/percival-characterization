@@ -25,22 +25,13 @@ class Correction(CorrectionAdccalBase):
             "vin": {
                 "data": np.zeros(self._n_total_frames),
                 "path": "vin"
-            }
-        }           
-        self._metadata = {
+            },
             "n_frames_per_run": {
-                "path": "collection/n_frames_per_run" 
-            },
-            "n_adc": {
-                "path": "collection/n_adc"
-            },
-            "n_frames": {
-                "path": "collection/n_frames"
-            },
-            "n_runs": {
-                "path": "collection/n_runs"
+                "data": np.zeros(self._n_total_frames),
+                "path": "collection/n_frames_per_run"
             }
-        }
+            
+        }           
                     
     def _calculate(self):
         ''' Read gathered data, processed coarse and fine data to apply
@@ -63,7 +54,9 @@ class Correction(CorrectionAdccalBase):
         offset_fine = fine_processed["s_fine_offset"]
         slope_fine = fine_processed["s_fine_slope"]
         adc_corrected = self._result["adc_corrected"]["data"]
+        self._result["n_frames_per_run"]["data"] = data_gathered["n_frames_per_run"]
 
+        #self._set_data_to_write()
         for frame in range(self._n_frames):
             for adc in range(self._n_adcs):
                 for col in range(self._n_cols):
@@ -72,9 +65,9 @@ class Correction(CorrectionAdccalBase):
                                                                      frame]
                                                        - offset_coarse[adc,
                                                                        col])
-                                                      * 2047.5) \
+                                                      * (-2047.5)) \
                                                    / slope_coarse[adc,
-                                                                  col] + 31 \
+                                                                  col] - 31 \
                                                    - ((sample_fine[adc,
                                                                    col,
                                                                    frame]

@@ -39,7 +39,8 @@ def get_arguments():
                         type=str,
                         choices=["raw",
                                  "gathered",
-                                 "processed"],
+                                 "processed",
+                                 "correction"],
                         help="The data type to analyse")
 
     parser.add_argument("--adc",

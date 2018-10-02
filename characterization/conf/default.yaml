@@ -58,7 +58,7 @@ processed:
 
     measurement: adccal
 
-    adc: 6
+    adc: 0
     frame: null
     col: 100
     row: null
@@ -66,3 +66,18 @@ processed:
     interactive: True
 
     method: [plot_residuals]
+
+correction:
+    input: /Users/ben/PostDoc/P2M_HDF5/Data_0918
+    output: /Users/ben/PostDoc/P2M_HDF5/Data_0918
+
+    measurement: adccal
+
+    adc: 6
+    frame: null
+    col: 200
+    row: 100
+
+    interactive: False
+
+    method: [plot]

@@ -93,7 +93,6 @@ class PlotBase():
         print("_generate_single_plot method is not implemented.")
 
     def _generate_residuals_plot(self,
-                                 x,
                                  residuals,
                                  plot_title,
                                  label,
@@ -113,8 +112,7 @@ class PlotBase():
 #                                   plot_title="Sample Coarse, "+pos,
 #                                   label="Coarse",
 #                                   out_fname=out+"sample_coarse"+suffix)
-        self._generate_residuals_plot(x=self._vin,
-                                      residuals=self._constants["s_coarse"],
+        self._generate_residuals_plot(residuals=self._constants["s_coarse"],
                                       plot_title="Residuals of coarse sample, "+pos,
                                       label="Coarse",
                                       out_fname=out+"residuals_coarse"+suffix)
