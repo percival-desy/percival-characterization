@@ -92,6 +92,13 @@ class PlotBase():
                               out_fname):
         print("_generate_single_plot method is not implemented.")
 
+    def _generate_residuals_plot(self,
+                                 residuals,
+                                 plot_title,
+                                 label,
+                                 out_fname):
+        print("_generate_residuals_plot method is not implemented yet.")
+
     def plot_sample(self):
         self.create_dir()
 
@@ -99,12 +106,22 @@ class PlotBase():
         suffix = "_adc{}_col{}".format(self._adc_title, self._col_title)
         out = self._output_dir + "/"
 
-        self._generate_single_plot(x=self._vin,
-                                   data=self._data["s_coarse"],
-                                   constants=self._constants["s_coarse"],
-                                   plot_title="Sample Coarse, "+pos,
-                                   label="Coarse",
-                                   out_fname=out+"sample_coarse"+suffix)
+#        self._generate_single_plot(x=self._vin,
+#                                   data=self._data["s_coarse"],
+#                                   constants=self._constants["s_coarse"],
+#                                   plot_title="Sample Coarse, "+pos,
+#                                   label="Coarse",
+#                                   out_fname=out+"sample_coarse"+suffix)
+        self._generate_residuals_plot(residuals=self._constants["s_coarse"],
+                                      plot_title="Residuals of coarse sample, "+pos,
+                                      label="Coarse",
+                                      out_fname=out+"residuals_coarse"+suffix)
+#        self._generate_single_plot(x=self._vin,
+#                                   data=self._data["s_fine"],
+#                                   constants=self._constants["s_fine"],
+#                                   plot_title="Sample Fine, "+pos,
+#                                   label="Fine",
+#                                   out_fname=out+"sample_fine"+suffix)
 #        self._generate_single_plot(x=self._vin,
 #                                   data=self._data["s_fine"],
 #                                   constants=self._constants["s_fine"],

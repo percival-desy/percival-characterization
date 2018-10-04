@@ -14,11 +14,11 @@ CALIBRATION_DIR = os.path.dirname(
                     )
                   )
 SRC_DIR = os.path.join(CALIBRATION_DIR, "src")
-PROCESS_DIR = os.path.join(SRC_DIR, "process")
-ADCCAL_DIR = os.path.join(PROCESS_DIR, "adccal")
+CORRECTION_DIR = os.path.join(SRC_DIR, "correction")
+ADCCAL_DIR = os.path.join(CORRECTION_DIR, "adccal")
 
-if PROCESS_DIR not in sys.path:
-    sys.path.insert(0, PROCESS_DIR)
+if CORRECTION_DIR not in sys.path:
+    sys.path.insert(0, CORRECTION_DIR)
 
 if ADCCAL_DIR not in sys.path:
     sys.path.insert(0, ADCCAL_DIR)

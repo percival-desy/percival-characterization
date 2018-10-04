@@ -4,33 +4,30 @@
 import numpy as np
 
 import __init__  # noqa F401
-from process_adccal_base import ProcessAdccalBase
+from process_adccal_base import ProcessAdccalBase # noqa F401
 
 
 class Process(ProcessAdccalBase):
+    ''' Processed method for fitting
+    '''
 
     def _initiate(self):
+        ''' Prepare path and shapes of results
+        '''
+
         shapes = {
-            "offset": (self._n_adcs, self._n_cols)
+            "offset": (self._n_adcs, self._n_cols),
+            "vin_size": (self._n_frames * self._n_groups)
         }
 
         self._result = {
-            # must have entries for correction
-            "s_coarse_offset": {
+            self._adc_offset: {
                 "data": np.zeros(shapes["offset"]),
-                "path": "sample/coarse/offset",
+                "path": self._offset_path
             },
-            "s_coarse_slope": {
+            self._adc_slope:{
                 "data": np.zeros(shapes["offset"]),
-                "path": "sample/coarse/slope"
-            },
-            "s_fine_offset": {
-                "data": np.zeros(shapes["offset"]),
-                "path": "sample/fine/offset"
-            },
-            "s_fine_slope": {
-                "data": np.zeros(shapes["offset"]),
-                "path": "sample/fine/slope"
+                "path": self._slope_path
             }
         }
 
@@ -41,47 +38,45 @@ class Process(ProcessAdccalBase):
 
         print("Start loading data from {} ...".format(self._in_fname), end="")
         data = self._load_data(self._in_fname)
-        print("Data loaded, fitting coarse data...")
 
-        # convert (n_adcs, n_cols, n_groups, n_frames)
+        print("Data loaded, fitting {} data ...".format(self._adc_part), end="")
+        # Convert (n_adcs, n_cols, n_groups, n_frames)
         #      -> (n_adcs, n_cols, n_groups * n_frames)
-        self._merge_groups_with_frames(data["s_coarse"])
-        self._merge_groups_with_frames(data["s_fine"])
-
-        # create as many entries for each vin as there were original frames
+        self._merge_groups_with_frames(data["s_" + self._adc_part])
+        # Create for each Vin as many entries as they are original frames
         vin = self._fill_up_vin(data["vin"])
+        sample = data["s_" + self._adc_part]
         sample_coarse = data["s_coarse"]
-        offset_coarse = self._result["s_coarse_offset"]["data"]
-        slope_coarse = self._result["s_coarse_slope"]["data"]
+        fitting_range = self._method_properties[self._adc_part + "_fitting_range"]
+        offset = self._result[self._adc_offset]["data"]
+        slope = self._result[self._adc_slope]["data"]
 
-        sample_fine = data["s_fine"]
-        offset_fine = self._result["s_fine_offset"]["data"]
-        slope_fine = self._result["s_fine_slope"]["data"]
+        if self._adc_part == "coarse":
+            for adc in range(self._n_adcs):
+                for col in range(self._n_cols):
+                    adu = sample[adc, col, :]
+                    idx_fit = np.where(np.logical_and(adu < fitting_range[1],
+                                                      adu > fitting_range[0]))
+                    if np.any(idx_fit):
+                        fit_result = self._fit_linear(vin[idx_fit], adu[idx_fit])
+                        slope[adc, col], offset[adc, col] = fit_result.solution
+                        #offset[adc, col] = slope[adc, col] * vin[0] + offset[adc, col]
+                    else:
+                        slope[adc, col] = np.NaN
+                        offset[adc, col] = np.NaN
 
-        for adc in range(self._n_adcs):
-            for col in range(self._n_cols):
-                adu_coarse = sample_coarse[adc, col, :]
-                adu_fine = sample_fine[adc, col, :]
-                idx_coarse = np.where(np.logical_and(adu_coarse < 30,
-                                                     adu_coarse > 1))
-                idx_fine = np.where(adu_coarse == 18)
+        elif self._adc_part == "fine":
+            for adc in range(self._n_adcs):
+                for col in range(self._n_cols):
+                    adu = sample[adc, col, :]
+                    idx_fit = np.where(sample_coarse[adc, col, :] == fitting_range)
+                    if np.any(idx_fit):
+                        fit_result = self._fit_linear(vin[idx_fit], adu[idx_fit])
+                        slope[adc, col], offset[adc, col] = fit_result.solution
+                        #offset[adc, col] = slope[adc, col] * vin[idx_fit][0] + offset[adc, col]
+                    else:
+                        slope[adc, col] = np.NaN
+                        offset[adc, col] = np.NaN
 
-                if np.any(idx_coarse):
-                    fit_result = self._fit_linear(vin[idx_coarse],
-                                                  adu_coarse[idx_coarse])
-                    slope_coarse[adc, col], offset_coarse[adc, col] = fit_result.solution
-                else:
-                    slope_coarse[adc, col] = np.NaN
-                    offset_coarse[adc, col] = np.NaN
-                if np.any(idx_fine):
-                    fit_result = self._fit_linear(vin[idx_fine],
-                                                  adu_fine[idx_fine])
-                    slope_fine[adc, col], offset_fine[adc, col] = fit_result.solution
-                else:
-                    slope_fine[adc, col] = np.NaN
-                    offset_fine[adc, col] = np.NaN
-
-        self._result["s_coarse_slope"]["data"] = slope_coarse
-        self._result["s_coarse_offset"]["data"] = offset_coarse
-        self._result["s_fine_slope"]["data"] = slope_fine
-        self._result["s_fine_offset"]["data"] = offset_fine
+        self._result[self._adc_offset]["data"] = slope
+        self._result[self._adc_slope]["data"] = offset
