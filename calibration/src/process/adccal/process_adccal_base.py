@@ -24,6 +24,12 @@ class ProcessAdccalBase(ProcessBase):
             "n_frames_per_run": "collection/n_frames_per_run"
         }
 
+        self._adc_part = self._method_properties["fit_adc_part"]
+        self._adc_offset = "s_" + self._adc_part + "_offset"
+        self._offset_path = "sample/" + self._adc_part + "/offset"
+        self._adc_slope = "s_" + self._adc_part + "_slope"
+        self._slope_path = "sample/" + self._adc_part + "/slope"
+
         self._n_adcs = None
         self._n_cols = None
         self._n_groups = None
