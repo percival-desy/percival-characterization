@@ -12,7 +12,7 @@ class Process(ProcessAdccalBase):
     def _initiate(self):
         shapes = {
             "offset": (self._n_adcs, self._n_cols),
-            "vin_size": (self._n_frames * self._n_groups) 
+            "vin_size": (self._n_frames * self._n_groups)
         }
 
         if self._method_properties["fit_adc_part"] == "coarse":
@@ -29,7 +29,7 @@ class Process(ProcessAdccalBase):
                     "data": np.zeros(shapes["offset"]),
                     "path": "sample/coarse/residuals"
                 }
-           }
+            }
 
         if self._method_properties["fit_adc_part"] == "fine":
             self._result = {
@@ -40,6 +40,10 @@ class Process(ProcessAdccalBase):
                 "s_fine_slope": {
                     "data": np.zeros(shapes["offset"]),
                     "path": "sample/fine/slope"
+                },
+                "s_fine_residuals": {
+                    "data": np.zeros(shapes["offset"]),
+                    "path": "sample/fine/residuals"
                 }
             }
 
@@ -61,25 +65,25 @@ class Process(ProcessAdccalBase):
             sample = data["s_coarse"]
             fitting_range = self._method_properties["coarse_fitting_range"]
             offset = self._result["s_coarse_offset"]["data"]
+            offset[:] = np.NaN
             slope = self._result["s_coarse_slope"]["data"]
+            slope[:] = np.NaN
             residuals = self._result["s_coarse_residuals"]["data"]
+            residuals[:] = np.NaN
 
             for adc in range(self._n_adcs):
                 for col in range(self._n_cols):
                     adu = sample[adc, col, :]
-                    idx_fit = np.where(np.logical_and(adu < fitting_range[1], 
+                    idx_fit = np.where(np.logical_and(adu < fitting_range[1],
                                                       adu > fitting_range[0]))
                     if np.any(idx_fit):
-                        fit_result = self._fit_linear(vin[idx_fit], adu[idx_fit])
+                        fit_result = self._fit_linear(vin[idx_fit],
+                                                      adu[idx_fit])
                         slope[adc, col], offset[adc, col] = fit_result.solution
-                        #offset[adc, col] = slope[adc, col] * vin[0] + offset[adc, col]
-                        print(fit_result.residuals)
-                        residuals[adc, col] = fit_result.residuals
                     else:
                         slope[adc, col] = np.NaN
                         offset[adc, col] = np.NaN
-                        residuals[adc, col] = np.NaN
-            
+
             self._result["s_coarse_slope"]["data"] = slope
             self._result["s_coarse_offset"]["data"] = offset
             self._result["s_coarse_residuals"]["data"] = residuals
@@ -97,18 +101,24 @@ class Process(ProcessAdccalBase):
             fitting_range = self._method_properties["fine_fitting_range"]
             offset = self._result["s_fine_offset"]["data"]
             slope = self._result["s_fine_slope"]["data"]
+            residuals = self._result["s_fine_residuals"]["data"]
+            residuals[:] = np.NaN
 
             for adc in range(self._n_adcs):
                 for col in range(self._n_cols):
                     adu = sample[adc, col, :]
-                    idx_fit = np.where(sample_coarse[adc, col, :] == fitting_range)
+                    idx_fit = np.where(sample_coarse[adc,
+                                                     col,
+                                                     :] == fitting_range)
                     if np.any(idx_fit):
-                        fit_result = self._fit_linear(vin[idx_fit], adu[idx_fit])
+                        fit_result = self._fit_linear(vin[idx_fit],
+                                                      adu[idx_fit])
                         slope[adc, col], offset[adc, col] = fit_result.solution
-                        offset[adc, col] = slope[adc, col] * vin[idx_fit][0] + offset[adc, col]
+#                        offset[adc, col] = slope[adc, col] * vin[idx_fit][0] + offset[adc, col]
                     else:
                         slope[adc, col] = np.NaN
                         offset[adc, col] = np.NaN
-            
+
             self._result["s_fine_slope"]["data"] = slope
             self._result["s_fine_offset"]["data"] = offset
+            self._result["s_fine_residuals"]["data"] = residuals

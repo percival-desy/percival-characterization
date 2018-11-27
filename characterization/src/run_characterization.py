@@ -153,7 +153,7 @@ def insert_args_into_config(args, config):
 
         try:
             c_data_type["metadata_fname"] = (args.metadata_fname
-                                            or c_data_type["metadata_fname"])
+                                             or c_data_type["metadata_fname"])
         except:
             raise Exception("No input specified. Abort.")
             sys.exit(1)
@@ -283,7 +283,7 @@ class Analyse(object):
 
             # loading method properties
             if method in self._config[self._data_type]:
-                prop =  self._config[self._data_type][method]
+                prop = self._config[self._data_type][method]
                 kwargs["method_properties"] = prop
 
             kwargs["output_dir"] = os.path.join(self._output,

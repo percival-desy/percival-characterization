@@ -20,9 +20,16 @@ class LoadProcessed():
         )
 
         self._paths = {
-            "s_coarse": {
-                "slope": "sample/coarse/slope",
-                "offset": "sample/coarse/offset"
+#            "s_coarse": {
+#                "slope": "sample/coarse/slope",
+#                "offset": "sample/coarse/offset",
+#                "residuals": "sample/coarse/residuals"
+#            }
+            "s_fine": {
+                "slope": "sample/fine/slope",
+                "offset": "sample/fine/offset",
+                "residuals": "sample/fine/residuals"
+#                "fit_bounds": "sample/fine/fit_bounds"
             }
         }
 

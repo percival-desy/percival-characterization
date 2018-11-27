@@ -99,18 +99,30 @@ class PlotBase():
         suffix = "_adc{}_col{}".format(self._adc_title, self._col_title)
         out = self._output_dir + "/"
 
-        self._generate_single_plot(x=self._vin,
-                                   data=self._data["s_coarse"],
-                                   constants=self._constants["s_coarse"],
-                                   plot_title="Sample Coarse, "+pos,
-                                   label="Coarse",
-                                   out_fname=out+"sample_coarse"+suffix)
 #        self._generate_single_plot(x=self._vin,
-#                                   data=self._data["s_fine"],
-#                                   constants=self._constants["s_fine"],
-#                                   plot_title="Sample Fine, "+pos,
-#                                   label="Fine",
-#                                   out_fname=out+"sample_fine"+suffix)
+#                                   data=self._data["s_coarse"],
+#                                   constants=self._constants["s_coarse"],
+#                                   plot_title="Sample Coarse, "+pos,
+#                                   label="Coarse",
+#                                   out_fname=out+"sample_coarse"+suffix)
+
+#        self._generate_residuals_plot(residuals=self._constants["s_coarse"],
+#                                      plot_title="Sample Coarse res, "+pos,
+#                                      label="Coarse",
+#                                      out_fname=out+"sample_res"+suffix)
+
+        self._generate_single_plot(x=self._vin,
+                                   data=self._data["s_fine"],
+                                   constants=self._constants["s_fine"],
+                                   plot_title="Sample Fine, "+pos,
+                                   label="Fine",
+                                   out_fname=out+"sample_fine"+suffix)
+        self._generate_histogram(x=self._vin,
+                                 data=self._data["s_fine"],
+                                 constants=self._constants["s_fine"],
+                                 plot_title="Residuals Fine, "+pos,
+                                 label="Fine",
+                                 out_fname=out+"sample_residuals_fine"+suffix)
 #        self._generate_single_plot(x=self._vin,
 #                                   data=self._data["s_gain"],
 #                                   constants=self._constants["s_gain"],

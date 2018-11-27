@@ -1,3 +1,4 @@
+import numpy as np
 import matplotlib
 # Generate images without having a window appear:
 # this prevents sending remote data to locale PC for rendering
@@ -20,23 +21,56 @@ class Plot(PlotBase):
                               label,
                               out_fname):
 
-        fig = plt.figure(figsize=None)
-
-        plt.plot(x, data, ".", markersize=0.5, label=label)
-
+        # Get offset and slope values
         m = constants["slope"]
         b = constants["offset"]
-        plt.plot(x, m * x + b, "r", label="Fitting")
 
-        plt.legend()
+        # Determine residuals between data and fit
+        data_reshaped = data.reshape(212, int(len(data)/212))
+        mean_data = np.mean(data_reshaped, axis=1)
+        mean_x = np.mean(x.reshape(212, int(len(x)/212)), axis=1)
+        residuals = mean_data.flatten() - m * mean_x - b
 
-        fig.suptitle(plot_title)
-        plt.xlabel("V")
-        plt.ylabel("ADU")
+        # Plot data and fit
+        fig, axs = plt.subplots(nrows=2, sharex=True)
+        axs[0].plot(x, data, ".", markersize=0.5, label=label)
+        axs[0].plot(x, m * x + b, "r", label="Fitting")
+        axs[0].set(ylabel='ADC output [ADU]')
+        axs[0].legend(['data', 'fit'], loc='best')
+        axs[0].set_title(plot_title)
         fig.text(0.5, 0.78,
                  "slope: {0:.2f} \noffset: {1:.2f}".format(m, b),
                  fontsize=12)
 
+        # Plot residuals below data and fit plot
+        axs[1].plot(mean_x, residuals, 'r.')
+        axs[1].set(xlabel="Vin [V]", ylabel="Residuals [ADU]")
+
+    def _generate_histogram(self,
+                            x,
+                            data,
+                            constants,
+                            plot_title,
+                            label,
+                            out_fname):
+
+        # Get offset and slope values
+        m = constants["slope"]
+        b = constants["offset"]
+
+        # Determine residuals between data and fit
+        data_reshaped = data.reshape(212, int(len(data)/212))
+        mean_data = np.mean(data_reshaped, axis=1)
+        mean_x = np.mean(x.reshape(212, int(len(x)/212)), axis=1)
+        residuals = mean_data.flatten() - m * mean_x - b
+
+        fig = plt.figure(figsize=None)
+        plt.hist(residuals, bins='auto')
+        plt.xlabel("Residuals [ADU]")
+        plt.ylabel("Number of Entries")
+        fig.text(0.5, 0.78,
+                 "Number of entries: {0:.2f}".format(len(residuals)),
+                 fontsize=12)
         fig.savefig(out_fname)
 
         fig.clf()
