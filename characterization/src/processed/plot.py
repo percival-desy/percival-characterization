@@ -4,6 +4,8 @@ import matplotlib
 # this prevents sending remote data to locale PC for rendering
 matplotlib.use('Agg')  # Must be before importing matplotlib.pyplot or pylab!
 import matplotlib.pyplot as plt  # noqa E402
+from scipy.stats import norm
+import matplotlib.mlab as mlab
 
 import __init__  # noqa E402
 from plot_base import PlotBase  # noqa E402
@@ -63,15 +65,24 @@ class Plot(PlotBase):
         mean_data = np.mean(data_reshaped, axis=1)
         mean_x = np.mean(x.reshape(212, int(len(x)/212)), axis=1)
         residuals = mean_data.flatten() - m * mean_x - b
+        (mu, sigma) = norm.fit(residuals)
 
         fig = plt.figure(figsize=None)
-        plt.hist(residuals, bins='auto')
+        n, bins, patches = plt.hist(residuals,
+                                    bins='auto',
+                                    density=True,
+                                    facecolor='g',
+                                    alpha=0.75)
+#        bins = plt.hist(residuals, bins='auto')
         plt.xlabel("Residuals [ADU]")
         plt.ylabel("Number of Entries")
+        y = mlab.normpdf(bins, mu, sigma)
+        plt.plot(bins, y, 'r--', linewidth=2)
         fig.text(0.5, 0.78,
                  "Number of entries: {0:.2f}".format(len(residuals)),
                  fontsize=12)
+        plt.title('Residuals:' r'$ \mu=%.3f,\ \sigma=%.3f$' % (mu, sigma))
         fig.savefig(out_fname)
 
-        fig.clf()
-        plt.close(fig)
+#        fig.clf()
+#        plt.close(fig)

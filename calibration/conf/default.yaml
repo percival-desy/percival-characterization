@@ -72,7 +72,7 @@ process:
     output: *output
 
     process_adccal_default:
-        fit_adc_part: fine
+        fit_adc_part: coarse
         coarse_fitting_range: [2, 29]
         fine_fitting_range: 20
 
