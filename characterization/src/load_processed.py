@@ -4,7 +4,7 @@ import os
 
 
 class LoadProcessed():
-    def __init__(self, input_fname_templ, output_dir, adc, row, col):
+    def __init__(self, input_fname_templ, output_dir, adc, row, col, adc_part):
 
         self._input_fname_templ = input_fname_templ
         self._output_dir = os.path.normpath(output_dir)
@@ -13,25 +13,30 @@ class LoadProcessed():
         self._col = col
 
         self._data_type = "processed"
+        self._adc_part = adc_part
 
         self._input_fname, self._col_offset = self._get_input_fname(
             self._input_fname_templ,
             self._col
         )
 
-        self._paths = {
-#            "s_coarse": {
-#                "slope": "sample/coarse/slope",
-#                "offset": "sample/coarse/offset",
-#                "residuals": "sample/coarse/residuals"
-#            }
-            "s_fine": {
-                "slope": "sample/fine/slope",
-                "offset": "sample/fine/offset",
-                "residuals": "sample/fine/residuals"
-#                "fit_bounds": "sample/fine/fit_bounds"
+        if self._adc_part == "coarse":
+            self._paths = {
+                "s_coarse": {
+                    "slope": "sample/coarse/slope",
+                    "offset": "sample/coarse/offset",
+                    "residuals": "sample/coarse/residuals"
+                }
             }
-        }
+        if self._adc_part == "fine":
+            self._paths={
+                "s_fine": {
+                    "slope": "sample/fine/slope",
+                    "offset": "sample/fine/offset",
+                    "residuals": "sample/fine/residuals"
+    #                "fit_bounds": "sample/fine/fit_bounds"
+                }
+            }
 
         self._n_frames_per_vin = None
 

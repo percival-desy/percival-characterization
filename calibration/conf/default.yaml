@@ -9,9 +9,9 @@ general:
     n_processes: 1
 
 all:
-    input: &input /Users/ben/PostDoc/P2M_HDF5/Data_0918/Fine_scan
-    output: &output /Users/ben/PostDoc/P2M_HDF5/Data_0918/Fine_scan
-    input_coarse:  &input_coarse /Users/ben/PostDoc/P2M_HDF5/Data_0918/Fine_scan
+    input: &input /Users/ben/PostDoc/P2M_HDF5/Data_0918/Coarse_scan
+    output: &output /Users/ben/PostDoc/P2M_HDF5/Data_0918/Coarse_scan
+    input_coarse:  &input_coarse /Users/ben/PostDoc/P2M_HDF5/Data_0918/Coarse_scan
     input_fine: &input_fine /Users/ben/PostDoc/P2M_HDF5/Data_0918/Fine_scan
 
 

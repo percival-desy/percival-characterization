@@ -33,7 +33,8 @@ class PlotBase():
             output_dir=self._output_dir,
             adc=self._adc,
             row=self._row,
-            col=self._col
+            col=self._col,
+            adc_part=self._adc_part
         )
 
         if loaded_data is None or self._dims_overwritten:
@@ -99,6 +100,19 @@ class PlotBase():
         suffix = "_adc{}_col{}".format(self._adc_title, self._col_title)
         out = self._output_dir + "/"
 
+        if self._adc_part == "coarse":
+            self._generate_single_plot(x=self._vin,
+                                       data=self._data["s_coarse"],
+                                       constants=self._constants["s_coarse"],
+                                       plot_title="Sample Coarse, "+pos,
+                                       label="Coarse",
+                                       out_fname=out+"sample_coarse"+suffix)
+            self._generate_histogram(x=self._vin,
+                                     data=self._data["s_coarse"],
+                                     constants=self._constants["s_coarse"],
+                                     plot_title="Residuals Coarse, "+pos,
+                                     label="Coarse",
+                                     out_fname=out+"s_residuals_coarse"+suffix)
 #        self._generate_single_plot(x=self._vin,
 #                                   data=self._data["s_coarse"],
 #                                   constants=self._constants["s_coarse"],
@@ -110,19 +124,19 @@ class PlotBase():
 #                                      plot_title="Sample Coarse res, "+pos,
 #                                      label="Coarse",
 #                                      out_fname=out+"sample_res"+suffix)
-
-        self._generate_single_plot(x=self._vin,
-                                   data=self._data["s_fine"],
-                                   constants=self._constants["s_fine"],
-                                   plot_title="Sample Fine, "+pos,
-                                   label="Fine",
-                                   out_fname=out+"sample_fine"+suffix)
-        self._generate_histogram(x=self._vin,
-                                 data=self._data["s_fine"],
-                                 constants=self._constants["s_fine"],
-                                 plot_title="Residuals Fine, "+pos,
-                                 label="Fine",
-                                 out_fname=out+"sample_residuals_fine"+suffix)
+        if self._adc_part == "fine":
+            self._generate_single_plot(x=self._vin,
+                                       data=self._data["s_fine"],
+                                       constants=self._constants["s_fine"],
+                                       plot_title="Sample Fine, "+pos,
+                                       label="Fine",
+                                       out_fname=out+"sample_fine"+suffix)
+            self._generate_histogram(x=self._vin,
+                                     data=self._data["s_fine"],
+                                     constants=self._constants["s_fine"],
+                                     plot_title="Residuals Fine, "+pos,
+                                     label="Fine",
+                                     out_fname=out+"s_residuals_fine"+suffix)
 #        self._generate_single_plot(x=self._vin,
 #                                   data=self._data["s_gain"],
 #                                   constants=self._constants["s_gain"],

@@ -7,7 +7,7 @@ general:
     plot_combined: True
 
 all:
-    output: &output /Users/ben/PostDoc/P2M_HDF5/Data_0918/Fine_scan
+    output: &output /Users/ben/PostDoc/P2M_HDF5/Data_0918/Coarse_scan
 
 raw:
     input: /Users/ben/PostDoc/P2M_HDF5/Data_0918/DLSraw/correction/col0-1439_correction.h5
@@ -21,6 +21,7 @@ raw:
     frame: 2
     col: 100
     row: 100
+    adc_part: fine
 
     method: [viewer]
 
@@ -38,6 +39,7 @@ gathered:
     frame: null
     col: 700
     row: null
+    adc_part: fine
 
     method: [plot, hist, hist_2d]
     #method: [plot_sample_vs_reset]
@@ -52,5 +54,7 @@ processed:
     frame: null
     col: 500
     row: null
+
+    adc_part: coarse
 
     method: [plot]

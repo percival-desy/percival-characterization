@@ -212,6 +212,7 @@ class Analyse(object):
         self._col = self._config[self._data_type]["col"]
         self._row = self._config[self._data_type]["row"]
         self._method_list = self._config[self._data_type]["method"]
+        self._adc_part = self._config[self._data_type]["adc_part"]
 
         self.set_indices()
 
@@ -270,6 +271,7 @@ class Analyse(object):
             row=self._row,
             col=self._col,
             run=self._run_id,
+            adc_part=self._adc_part,
             method_properties=None
         )
 
