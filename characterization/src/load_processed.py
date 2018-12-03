@@ -25,11 +25,11 @@ class LoadProcessed():
                 "s_coarse": {
                     "slope": "sample/coarse/slope",
                     "offset": "sample/coarse/offset",
-                    "residuals": "sample/coarse/residuals"
+                    "residuals": "sample/coarse/r_squared"
                 }
             }
         if self._adc_part == "fine":
-            self._paths={
+            self._paths = {
                 "s_fine": {
                     "slope": "sample/fine/slope",
                     "offset": "sample/fine/offset",

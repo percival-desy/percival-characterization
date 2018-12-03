@@ -50,10 +50,10 @@ processed:
 
     measurement: adccal
 
-    adc: 2
+    adc: 0
     frame: null
-    col: 500
-    row: null
+    col: 710
+    row: 211
 
     adc_part: coarse
 

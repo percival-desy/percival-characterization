@@ -64,7 +64,8 @@ gather:
             n_col_in_blk: 32
 
 process:
-    method: process_adccal_default
+#    method: process_adccal_default
+    method: process_pixel_calibration
 
     input: *output
     input_coarse: *input_coarse
@@ -72,6 +73,11 @@ process:
     output: *output
 
     process_adccal_default:
+        fit_adc_part: coarse
+        coarse_fitting_range: [2, 29]
+        fine_fitting_range: 20
+
+    process_pixel_calibration:
         fit_adc_part: coarse
         coarse_fitting_range: [2, 29]
         fine_fitting_range: 20

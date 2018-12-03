@@ -26,12 +26,14 @@ class Plot(PlotBase):
         # Get offset and slope values
         m = constants["slope"]
         b = constants["offset"]
+        print("Offset {}".format(b))
+        print("Slope {}".format(m))
 
         # Determine residuals between data and fit
-        data_reshaped = data.reshape(212, int(len(data)/212))
-        mean_data = np.mean(data_reshaped, axis=1)
-        mean_x = np.mean(x.reshape(212, int(len(x)/212)), axis=1)
-        residuals = mean_data.flatten() - m * mean_x - b
+#        data_reshaped = data.reshape(212, int(len(data)/212))
+#        mean_data = np.mean(data_reshaped, axis=1)
+#        mean_x = np.mean(x.reshape(212, int(len(x)/212)), axis=1)
+#        residuals = mean_data.flatten() - m * mean_x - b
 
         # Plot data and fit
         fig, axs = plt.subplots(nrows=2, sharex=True)
@@ -45,8 +47,9 @@ class Plot(PlotBase):
                  fontsize=12)
 
         # Plot residuals below data and fit plot
-        axs[1].plot(mean_x, residuals, 'r.')
-        axs[1].set(xlabel="Vin [V]", ylabel="Residuals [ADU]")
+#        axs[1].plot(mean_x, residuals, 'r.')
+#        axs[1].set(xlabel="Vin [V]", ylabel="Residuals [ADU]")
+        fig.savefig(out_fname)
 
     def _generate_histogram(self,
                             x,
