@@ -96,8 +96,12 @@ class PlotBase():
     def plot_sample(self):
         self.create_dir()
 
-        pos = "ADC={}, Col={}".format(self._adc_title, self._col_title)
-        suffix = "_adc{}_col{}".format(self._adc_title, self._col_title)
+        pos = "ADC={}, Row={}, Col={}".format(self._adc_title,
+                                              self._row_title,
+                                              self._col_title)
+        suffix = "_adc{}_row{}_col{}".format(self._adc_title,
+                                             self._row_title,
+                                             self._col_title)
         out = self._output_dir + "/"
 
         if self._adc_part == "coarse":
@@ -106,7 +110,8 @@ class PlotBase():
                                        constants=self._constants["s_coarse"],
                                        plot_title="Sample Coarse, "+pos,
                                        label="Coarse",
-                                       out_fname=out+"sample_coarse"+suffix)
+                                       out_fname=out+"_test_sample_coarse"+suffix)
+
 #            self._generate_histogram(x=self._vin,
 #                                     data=self._data["s_coarse"],
 #                                     constants=self._constants["s_coarse"],

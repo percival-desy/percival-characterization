@@ -89,8 +89,20 @@ class LoadProcessed():
         data = {}
         with h5py.File(self._input_fname, "r") as f:
             for key in self._paths:
+                idx = (self._adc, col, slice(None), self._row)
                 data[key] = {}
                 for subkey, path in self._paths[key].items():
-                    data[key][subkey] = f[path][self._adc, col]
+#                    data[key][subkey] = f[path][self._adc, col]
+                    print(f[path][self._adc, col, self._row])
+                    data[key][subkey] = f[path][self._adc, col, self._row]
 
         return data
+
+#    def load_data_pixels(self):
+#        col = self._col - self._col_offset
+#
+#        data = {}
+#        with h5py.File(self._input_fname, "r") as f:
+#            for key, path in self._paths.items():
+#                idx = (self._adc, col, slice(None), self._row)
+#                d = f[path][idx].astype(np.float)

@@ -53,8 +53,8 @@ processed:
     adc: 0
     frame: null
     col: 710
-    row: 211
+    row: 1
 
     adc_part: coarse
 
-    method: [plot]
+    method: [image]
