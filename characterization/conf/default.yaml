@@ -52,9 +52,9 @@ processed:
 
     adc: 0
     frame: null
-    col: 710
+    col: 700
     row: 1
 
     adc_part: coarse
 
-    method: [image]
+    method: [viewer]

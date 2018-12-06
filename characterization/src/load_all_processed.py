@@ -3,7 +3,7 @@ import h5py
 import os
 
 
-class LoadProcessed():
+class LoadAllProcessed():
     def __init__(self, input_fname_templ, output_dir, adc, row, col, adc_part):
 
         self._input_fname_templ = input_fname_templ
@@ -59,9 +59,6 @@ class LoadProcessed():
         prefix = prefix.format(data_type=self._data_type)
         middle = middle.format(data_type=self._data_type)
         suffix = suffix.format(data_type=self._data_type)
-#        print("prefix", prefix)
-#        print("middle", middle)
-#        print("suffix", suffix)
 
         searched_file = None
         for f in files:
@@ -82,14 +79,14 @@ class LoadProcessed():
 
         return searched_file, col_offset
 
-    def load_data(self):
-        col = self._col - self._col_offset
+    def load_all_data(self):
+#        col = self._col - self._col_offset
 
         data = {}
         with h5py.File(self._input_fname, "r") as f:
             for key in self._paths:
                 data[key] = {}
                 for subkey, path in self._paths[key].items():
-                    data[key][subkey] = f[path][self._adc, col, self._row]
+                    data[key][subkey] = f[path][:, :, :]
 
         return data
