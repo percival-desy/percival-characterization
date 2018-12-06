@@ -100,7 +100,6 @@ class ViewerBase(PlotBase):
         '''
         pass
 
-
     def _generate_single_plot(self,
                               x,
                               plot_title,
@@ -135,13 +134,13 @@ class ViewerBase(PlotBase):
             self._generate_single_plot(x=self._vin,
                                        data=self._data["s_fine"],
                                        constants=self._constants["s_fine"],
-                                       plot_title="Sample Fine, "+pos,
+                                       plot_title="Sample Fine"+pos,
                                        label="Fine",
                                        out_fname=out+"sample_fine"+suffix)
             self._generate_histogram(x=self._vin,
                                      data=self._data["s_fine"],
                                      constants=self._constants["s_fine"],
-                                     plot_title="Residuals Fine, "+pos,
+                                     plot_title="Residuals Fine"+pos,
                                      label="Fine",
                                      out_fname=out+"s_residuals_fine"+suffix)
 
