@@ -18,8 +18,9 @@ class PlotBase():
             setattr(self, "_" + key, value)
 
         self._dims_overwritten = dims_overwritten
+        self._loaded_data = loaded_data
 
-        gathered_loader = LoadGathered(
+        self._gathered_loader = LoadGathered(
             input_fname_templ=self._input_fname,
             output_dir=self._output_dir,
             adc=self._adc,
@@ -37,13 +38,13 @@ class PlotBase():
             adc_part=self._adc_part
         )
 
-        if loaded_data is None or self._dims_overwritten:
-            self._vin, self._data = gathered_loader.load_data()
+        if self._loaded_data is None or self._dims_overwritten:
+            self._vin, self._data = self._gathered_loader.load_data()
             self._constants = processed_loader.load_data()
         else:
-            self._vin = loaded_data.vin
-            self._data = loaded_data.gathered_data
-            self._constants = loaded_data.constants
+            self._vin = self._loaded_data.vin
+            self._data = self._loaded_data.gathered_data
+            self._constants = self._loaded_data.constants
 
         if self._dims_overwritten:
             print("Overwritten configuration " +
@@ -61,6 +62,12 @@ class PlotBase():
             print("Output directory {} does not exist. Create it."
                   .format(self._output_dir))
             os.makedirs(self._output_dir)
+
+    def get_gathered_loader(self):
+        return self._gathered_loader
+
+    def get_input_fname(self):
+        return self._input_fname
 
     def get_dims_overwritten(self):
         """If the dimension originally configures overwritten.

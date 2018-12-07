@@ -28,6 +28,10 @@ class Plot(PlotBase):
         b = constants["offset"]
         print("Offset {}".format(b))
         print("Slope {}".format(m))
+        print(x.shape)
+        print(data.shape)
+        print(b.shape)
+        print(m.shape)
 
         # Determine residuals between data and fit
 #        data_reshaped = data.reshape(212, int(len(data)/212))
@@ -65,10 +69,12 @@ class Plot(PlotBase):
         b = constants["offset"]
 
         # Determine residuals between data and fit
-        data_reshaped = data.reshape(212, int(len(data)/212))
-        mean_data = np.mean(data_reshaped, axis=1)
-        mean_x = np.mean(x.reshape(212, int(len(x)/212)), axis=1)
-        residuals = mean_data.flatten() - m * mean_x - b
+#        data_reshaped = data.reshape(212, int(len(data)/212))
+#        mean_data = np.mean(data_reshaped, axis=1)
+#        mean_x = np.mean(x.reshape(212, int(len(x)/212)), axis=1)
+#        residuals = mean_data.flatten() - m * mean_x - b
+        residuals = data - m * x - b
+
         (mu, sigma) = norm.fit(residuals)
 
         fig = plt.figure(figsize=None)

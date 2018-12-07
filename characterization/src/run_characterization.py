@@ -281,7 +281,7 @@ class Analyse(object):
         loaded_data = None
         for method in self._method_list:
             print("loading method: {}".format(method))
-            method_m = __import__(method).Viewer
+            method_m = __import__(method).Plot
 
             # loading method properties
             if method in self._config[self._data_type]:

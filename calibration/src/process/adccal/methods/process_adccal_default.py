@@ -98,6 +98,8 @@ class Process(ProcessAdccalBase):
             vin = self._fill_up_vin(data["vin"])
             sample = data["s_fine"]
             sample_coarse = data["s_coarse"]
+            print(sample.shape)
+            print(sample_coarse.shape)
             fitting_range = self._method_properties["fine_fitting_range"]
             offset = self._result["s_fine_offset"]["data"]
             slope = self._result["s_fine_slope"]["data"]
@@ -107,6 +109,7 @@ class Process(ProcessAdccalBase):
             for adc in range(self._n_adcs):
                 for col in range(self._n_cols):
                     adu = sample[adc, col, :]
+                    print(adu.shape)
                     idx_fit = np.where(sample_coarse[adc,
                                                      col,
                                                      :] == fitting_range)

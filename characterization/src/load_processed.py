@@ -32,8 +32,7 @@ class LoadProcessed():
             self._paths = {
                 "s_fine": {
                     "slope": "sample/fine/slope",
-                    "offset": "sample/fine/offset",
-                    "residuals": "sample/fine/residuals"
+                    "offset": "sample/fine/offset"
                 }
             }
 
@@ -91,5 +90,16 @@ class LoadProcessed():
                 data[key] = {}
                 for subkey, path in self._paths[key].items():
                     data[key][subkey] = f[path][self._adc, col, self._row]
+
+        return data
+
+    def load_all_data(self):
+
+        data = {}
+        with h5py.File(self._input_fname, "r") as f:
+            for key in self._paths:
+                data[key] = {}
+                for subkey, path in self._paths[key].items():
+                    data[key][subkey] = f[path][:, :, :]
 
         return data
