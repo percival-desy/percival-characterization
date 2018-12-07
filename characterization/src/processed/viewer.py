@@ -1,5 +1,6 @@
 from load_processed import LoadProcessed
 from plot_base import PlotBase
+import numpy as np
 import matplotlib
 # Generate images without having a window appear:
 # this prevents sending remote data to locale PC for rendering
@@ -36,6 +37,13 @@ class Plot(PlotBase):
         '''
         pass
 
+    def get_matrix_dimensions(self, x):
+        '''Return the shape of a matrix.
+           The input parameter as the following shape:
+               n_adc * n_columns * n_groups
+        '''
+        return (np.size(x, 0), np.size(x, 1), np.size(x, 2))
+
     def _generate_plot_2d(self,
                           x,
                           plot_title,
@@ -43,10 +51,10 @@ class Plot(PlotBase):
                           out_fname):
 
         fig, axs = plt.subplots(nrows=1, sharex=True)
-
 #        Reorder the input data to plot it in a 2D histogram
+        adcs, cols, row_groups = self.get_matrix_dimensions(x)
         x = x.transpose(0, 2, 1)
-        x = x.reshape(7*212, 1440)
+        x = x.reshape(adcs*row_groups, cols)
         plt.imshow(x)
         plt.colorbar()
 
