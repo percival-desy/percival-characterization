@@ -20,13 +20,13 @@ class Plot(PlotBase):
             col=self._col,
             adc_part=self._adc_part
         )
-        gathered_loader = self.get_gathered_loader()
+#        gathered_loader = self.get_gathered_loader()
         if self._loaded_data is None or self._dims_overwritten:
-            self._vin, self._data = gathered_loader.load_data()
+#            self._vin, self._data = gathered_loader.load_data()
             self._constants = processed_loader.load_all_data()
         else:
-            self._vin = self._loaded_data.vin
-            self._data = self._loaded_data.gathered_data
+#            self._vin = self._loaded_data.vin
+#            self._data = self._loaded_data.gathered_data
             self._constants = self._loaded_data.constants
 
     def _get_residuals(self,
@@ -42,6 +42,7 @@ class Plot(PlotBase):
            The input parameter as the following shape:
                n_adc * n_columns * n_groups
         '''
+        print(np.size(x, 0), np.size(x, 1), np.size(x, 2))
         return (np.size(x, 0), np.size(x, 1), np.size(x, 2))
 
     def _generate_plot_2d(self,
@@ -50,9 +51,11 @@ class Plot(PlotBase):
                           label,
                           out_fname):
 
+        print(x.shape)
         fig, axs = plt.subplots(nrows=1, sharex=True)
 #        Reorder the input data to plot it in a 2D histogram
         adcs, cols, row_groups = self.get_matrix_dimensions(x)
+
         x = x.transpose(0, 2, 1)
         x = x.reshape(adcs*row_groups, cols)
         plt.imshow(x)

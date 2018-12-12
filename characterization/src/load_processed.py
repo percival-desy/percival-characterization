@@ -94,12 +94,13 @@ class LoadProcessed():
         return data
 
     def load_all_data(self):
+        col = self._col - self._col_offset
 
         data = {}
         with h5py.File(self._input_fname, "r") as f:
             for key in self._paths:
                 data[key] = {}
                 for subkey, path in self._paths[key].items():
-                    data[key][subkey] = f[path][:, :, :]
+                    data[key][subkey] = f[path][:, col, :]
 
         return data

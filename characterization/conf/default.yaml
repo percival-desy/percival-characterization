@@ -7,7 +7,7 @@ general:
     plot_combined: True
 
 all:
-    output: &output /Users/ben/PostDoc/P2M_HDF5/Data_0918/Coarse_scan
+    output: &output /Volumes/LACIE_SHARE/Percival/Data_lab_october18/Fine_scan
 
 raw:
     input: /Users/ben/PostDoc/P2M_HDF5/Data_0918/DLSraw/correction/col0-1439_correction.h5
@@ -19,7 +19,7 @@ raw:
 
     adc: null
     frame: 2
-    col: 100
+    col: 500
     row: 100
     adc_part: fine
 
@@ -35,10 +35,10 @@ gathered:
 
     measurement: adccal
 
-    adc: 2
+    adc: 0
     frame: null
-    col: 700
-    row: null
+    col: 60
+    row: 10
     adc_part: fine
 
     method: [plot, hist, hist_2d]
@@ -50,11 +50,11 @@ processed:
 
     measurement: adccal
 
-    adc: [6]
+    adc: [0]
     frame: null
-    col: 700
+    col: 40
     row: 100
 
-    adc_part: coarse
+    adc_part: fine
 
-    method: [viewer]
+    method: [plot]

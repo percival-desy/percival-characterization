@@ -46,7 +46,7 @@ class LoadGathered():
         input_fname = input_fname_templ.format(data_type=self._data_type,
                                                col_start="*",
                                                col_stop="*")
-
+        print(input_fname_templ)
         files = glob.glob(input_fname)
 
         # TODO do not use file name but "collections/columns_used" entry in

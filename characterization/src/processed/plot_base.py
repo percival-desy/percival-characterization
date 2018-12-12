@@ -100,6 +100,26 @@ class PlotBase():
                               out_fname):
         print("_generate_single_plot method is not implemented.")
 
+    def _generate_histogram(self,
+                            x,
+                            plot_title,
+                            label,
+                            out_fname):
+        print("_generate_hisogram method is not implemented yet.")
+
+    def _calculate_residuals(self,
+                             x,
+                             data,
+                             constants):
+        ''' Return residuals between fitted data and raw data
+        '''
+
+        m = constants["slope"]
+        b = constants["offset"]
+        residuals = data - m * x - b
+
+        return residuals
+
     def plot_sample(self):
         self.create_dir()
 
@@ -117,44 +137,25 @@ class PlotBase():
                                        constants=self._constants["s_coarse"],
                                        plot_title="Sample Coarse, "+pos,
                                        label="Coarse",
-                                       out_fname=out+"_test_sample_coarse"+suffix)
+                                       out_fname=out+"sample_coarse"+suffix)
 
-#            self._generate_histogram(x=self._vin,
-#                                     data=self._data["s_coarse"],
-#                                     constants=self._constants["s_coarse"],
-#                                     plot_title="Residuals Coarse, "+pos,
-#                                     label="Coarse",
-#                                     out_fname=out+"s_residuals_coarse"+suffix)
-#        self._generate_single_plot(x=self._vin,
-#                                   data=self._data["s_coarse"],
-#                                   constants=self._constants["s_coarse"],
-#                                   plot_title="Sample Coarse, "+pos,
-#                                   label="Coarse",
-#                                   out_fname=out+"sample_coarse"+suffix)
-
-#        self._generate_residuals_plot(residuals=self._constants["s_coarse"],
-#                                      plot_title="Sample Coarse res, "+pos,
-#                                      label="Coarse",
-#                                      out_fname=out+"sample_res"+suffix)
         if self._adc_part == "fine":
+            self._s_coarse = self._data["s_coarse"]
+            res = self._calculate_residuals(self._vin,
+                                            self._data["s_fine"],
+                                            self._constants["s_fine"])
+
             self._generate_single_plot(x=self._vin,
                                        data=self._data["s_fine"],
                                        constants=self._constants["s_fine"],
                                        plot_title="Sample Fine, "+pos,
                                        label="Fine",
                                        out_fname=out+"sample_fine"+suffix)
-            self._generate_histogram(x=self._vin,
-                                     data=self._data["s_fine"],
-                                     constants=self._constants["s_fine"],
+
+            self._generate_histogram(x=res,
                                      plot_title="Residuals Fine, "+pos,
                                      label="Fine",
                                      out_fname=out+"s_residuals_fine"+suffix)
-#        self._generate_single_plot(x=self._vin,
-#                                   data=self._data["s_gain"],
-#                                   constants=self._constants["s_gain"],
-#                                   plot_title="Sample Gain, "+pos,
-#                                   label="Gain",
-#                                   out_fname=out+"sample_gain"+suffix)
 
     def plot_reset(self):
         pass
