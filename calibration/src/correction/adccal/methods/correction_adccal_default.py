@@ -57,27 +57,42 @@ class Correction(CorrectionAdccalBase):
         self._result["n_frames_per_run"]["data"] = data_gathered["n_frames_per_run"]
         print(self._n_cols)
 #        self._set_data_to_write()
-        for adc in range(self._n_adcs):
-            for col in range(self._n_cols):
-                for row in range(self._n_groups):
-                    adu_coarse = sample_coarse[adc, col, :, row]
-                    coarse_cor = (adu_coarse - offset_coarse[adc, col, row]) / slope_coarse[adc, col, row]
-#                    print(coarse_cor)
-                    adu_fine = sample_fine[adc, col, :, row]
-                    adc_corrected[adc, col, :, row] = ((adu_coarse
-                                                       - offset_coarse[adc,
-                                                                       col,
-                                                                       row])
-                                                      * (-2047.5)) \
-                                                   / slope_coarse[adc,
-                                                                  col,
-                                                                  row] - 31 \
-                                                   - ((adu_fine
-                                                       - offset_fine[adc,
-                                                                     col,
-                                                                     row])
-                                                       * 2047.5) \
-                                                   / slope_fine[adc, col, row]
 
-        self._result["adc_corrected"]["data"] = adc_corrected
+        for frame in range(self._n_frames):
+            adu_coarse = sample_coarse[:, :, frame, :]
+            print("Shape of ADU {}".format(adu_coarse.shape))
+            off_c = offset_coarse[:, :, :]
+            print("Shape off_c {}".format(off_c.shape))
+            slp_c = slope_coarse[:, :, :]
+            print("Shape of slp_c {}".format(slp_c.shape))
+            coarse_cor = (adu_coarse - off_c) / slp_c * (2047.5) - 31
+            adu_fine = sample_fine[:, :, frame, :]
+            off_f = offset_fine[:, :, :]
+            slp_f = slope_fine[:, :, :]
+            fine_cor = (adu_fine - off_f) / slp_f * 2047.5
+            correction = coarse_cor - fine_cor
+            print(coarse_cor)
+#        for adc in range(self._n_adcs):
+#            for col in range(self._n_cols):
+#                for row in range(self._n_groups):
+#                    adu_coarse = sample_coarse[adc, col, :, row]
+#                    coarse_cor = (adu_coarse - offset_coarse[adc, col, row]) / slope_coarse[adc, col, row]
+##                    print(coarse_cor)
+#                    adu_fine = sample_fine[adc, col, :, row]
+#                    adc_corrected[adc, col, :, row] = ((adu_coarse
+#                                                       - offset_coarse[adc,
+#                                                                       col,
+#                                                                       row])
+#                                                      * (-2047.5)) \
+#                                                   / slope_coarse[adc,
+#                                                                  col,
+#                                                                  row] - 31 \
+#                                                   - ((adu_fine
+#                                                       - offset_fine[adc,
+#                                                                     col,
+#                                                                     row])
+#                                                       * 2047.5) \
+#                                                   / slope_fine[adc, col, row]
+#
+        self._result["adc_corrected"]["data"] = correction
         self._result["vin"]["data"] = data_gathered["vin"]

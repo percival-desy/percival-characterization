@@ -1,6 +1,6 @@
 general:
     run_type: gather
-    n_cols: 32
+    n_cols: null
 
     measurement: adccal
 
@@ -9,32 +9,29 @@ general:
     n_processes: 1
 
 all:
-    input: &input /Volumes/LACIE_SHARE/Percival/2018.12.08_3G/DLSraw/gathered
-    output: &output /Volumes/LACIE_SHARE/Percival/Data_lab_october18/Coarse_scan
+    input: &input /Volumes/LACIE_SHARE/Percival/2018.12.08_3G 
+    output: &output /Volumes/LACIE_SHARE/Percival/2018.12.08_3G
     input_coarse:  &input_coarse /Volumes/LACIE_SHARE/Percival/Data_lab_october18/Coarse_scan
     input_fine: &input_fine /Volumes/LACIE_SHARE/Percival/Data_lab_october18/Fine_scan
 
 gather:
-    method: file_per_vin_and_register_file
-#    method: descramble_tcpdump
+    method: descramble_tcpdump
 
     input: *input
     output: *output
-    input_coarse: *input_coarse
-    input_fine: *input_fine
 
     descramble_tcpdump:
-        # to use it
+        # to use it 
         # (base) [prcvlusr@cfeld-percival01]~/PercAuxiliaryTools/Framework/percival-characterization% python3 ./calibration/src/analyse.py --config_file descramble_OdinDAQ_2018_06_18AY_2L2N_v01.yaml
         descramble_method: descramble_OdinDAQraw_2018_06_18AY_2L2N_v3Seq
 
-        input: [2018.12.08_SeqMod_tint12ms_Tplus20_0802g_3Thrs_1_fl0.h5, 2018.12.08_SeqMod_tint12ms_Tplus20_0802g_3Thrs_1_fl1.h5]
+        input: [2018.10.17h1527_seqMode_10hrs_fl0.h5, 2018.10.17h1527_seqMode_10hrs_fl1.h5]
         output_prefix: "2018.10.17h1527_seqMode_10hrs"
 
         # descramble OdinDAQ saving raw (scrambled, disordered data in 2xh5files)
         descramble_OdinDAQraw_2018_06_18AY_2L2N_v3Seq:
             # OdinDAQ as 06/2018 swaps Rst and Smpl images
-            swap_sample_reset: True
+            swap_sample_reset: True 
             # saves descrambed to file
 
             # seqentialMode images taken with a standardMode-MezzFirmware? in that case, set to True
@@ -50,39 +47,7 @@ gather:
             clean_memory: True
             verbose: True
             # show descrambled images
-            debug: False
-
-        # older Firmware, using (pack_number) to id a packet
-        descramble_tcpdump_2018_03_15ad:
-            save_file: True
-            clean_memory: True
-            verbose: True
-            multiple_save_files: True
-            # multiple_metadata_file: /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testFramework/2018.05.25/try1/VRST=10k_AD_10frames_meta.dat
-            multiple_metadata_file: /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testFramework/2018.05.25/try1/p2018.03.15crdAD_h20_meta.dat
-            multiple_imgperfile: 1
-
-            n_adc: 7
-            n_grp: 212
-            n_pad: 45
-
-            n_col_in_blk: 32
-
-        # more up-to-date Firmware, using (datatype,subframe,pack) triplet to id a packet
-        descramble_tcpdump_2018_04_13aq:
-            save_file: True
-            clean_memory: True
-            verbose: True
-
-            multiple_save_files: True
-            multiple_metadata_file: /home/marras/PERCIVAL/PercFramework/data/h5_scrmbl_view/h5in/compare_p2018.04.13crdAQ_h14.dat
-            multiple_imgperfile: 1
-
-            n_adc: 7
-            n_grp: 212
-            n_pad: 45
-
-            n_col_in_blk: 32
+            debug: True
 
 process:
 #    method: process_adccal_default
@@ -110,5 +75,6 @@ correction:
     #input_coarse: /Users/ben/PostDoc/P2M_HDF5/Data_lab/VRST/DLSraw/DLSraw/processed/col0-1439_processed.h5
     input_coarse: *input_coarse
     input_fine: *input_fine
-    input_gathered: /Volumes/LACIE_SHARE/Percival/2018.12.08_3G/DLSraw/gathered
-    output: /Volumes/LACIE_SHARE/Percival/2018.12.08_3G/DLSraw/gathered/DLSraw/gathered
+    input_gathered: /Volumes/LACIE_SHARE/Percival/Data_lab_october18/Fine_scan/DLSraw/
+    output: /Volumes/LACIE_SHARE/Percival/Data_lab_october18/
+

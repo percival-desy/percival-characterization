@@ -34,7 +34,6 @@ class LoadCorrection():
         self._n_frames = None
         self._n_groups = None
         self._n_total_frames = None
-        self._n_groups = None 
 
     def _get_input_fname(self, input_fname_templ, col):
 
@@ -66,7 +65,8 @@ class LoadCorrection():
 
         if searched_file is None:
             print("input tmplates:", input_fname_templ)
-            raise Exception("No files found which contains column {}.".format(col))
+            raise Exception("No files found which contains column {}."
+                            .format(col))
 
         return searched_file, col_offset
 
@@ -84,7 +84,7 @@ class LoadCorrection():
             data = {}
             for key, path in self._paths.items():
                 idx = (self._adc, col, slice(None), 0)
-                #idx = (self._adc, col, slice(None), self._row)
+#                idx = (self._adc, col, slice(None), self._row)
                 d = f[path][idx].astype(np.float)
 
                 # determine number of frames
@@ -102,7 +102,7 @@ class LoadCorrection():
                         self._n_total_frames = self._n_frames * self._n_groups
 
                 data[key] = d
-                #data[key] = self._merge_groups_with_frames(d)
+#                data[key] = self._merge_groups_with_frames(d)
 
         vin = self._fill_up_vin(vin, self._n_groups)
 

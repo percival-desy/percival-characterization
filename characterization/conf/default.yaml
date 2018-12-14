@@ -1,5 +1,5 @@
-hasgeneral:
-    data_type: corrected
+general:
+    data_type: gathered
     run: DLSraw
 
     plot_sample: True
@@ -7,10 +7,10 @@ hasgeneral:
     plot_combined: True
 
 all:
-    output: &output /Volumes/LACIE_SHARE/Percival/Data_lab_october18/
+    output: &output /Volumes/LACIE_SHARE/Percival/2018.12.08_3G/DLSraw/gathered
 
 raw:
-    input: /Users/ben/PostDoc/P2M_HDF5/Data_0918/DLSraw/correction/col0-1439_correction.h5
+    input: /Volumes/LACIE_SHARE/Percival/2018.12.08_3G/DLSraw/gathered/2018.10.17h1527_seqMode_10hrs_dscrmbld_DLSraw.h5
     metadata_fname: null
 
     output: *output
@@ -18,11 +18,12 @@ raw:
     measurement: adccal
 
     adc: null
-    frame: 2
+    frame: 3
     col: 500
     row: 100
     adc_part: fine
 
+    interactive: False
     method: [viewer]
 
     viewer:
@@ -40,6 +41,7 @@ gathered:
     col: 60
     row: 10
     adc_part: fine
+    interactive: False
 
     method: [plot, hist, hist_2d]
     #method: [plot_sample_vs_reset]
@@ -59,15 +61,17 @@ processed:
 
     method: [plot]
 
-corrected:
+correction:
     input: *output
     output: *output
 
     measurement: adccal
 
-    adc: [0]
+    adc: [2]
     frame: null
-    col: 40
-    row: 100
+    col: 400
+    row: 400
+
+    interactive: False
 
     method: [plot]

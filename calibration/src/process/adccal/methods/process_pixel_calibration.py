@@ -78,6 +78,7 @@ class Process(ProcessAdccalBase):
                             fit = self._fit_linear(vin[roi], adu[roi])
                             slope[adc, col, row] = fit.solution[0]
                             offset[adc, col, row] = fit.solution[1]
+                            offset[adc, col, row] = slope[adc, col, row] * vin[roi][0] + offset[adc, col, row]
 
             self._result["s_coarse_slope"]["data"] = slope
             self._result["s_coarse_offset"]["data"] = offset
@@ -110,6 +111,7 @@ class Process(ProcessAdccalBase):
                             fit = self._fit_linear(vin[roi], adu[roi])
                             slope[adc, col, row] = fit.solution[0]
                             offset[adc, col, row] = fit.solution[1]
+                            offset[adc, col, row] = slope[adc, col, row] * vin[roi][0] + offset[adc, col, row]
 
             self._result["s_fine_slope"]["data"] = slope
             self._result["s_fine_offset"]["data"] = offset

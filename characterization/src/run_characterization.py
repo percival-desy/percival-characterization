@@ -40,7 +40,7 @@ def get_arguments():
                         choices=["raw",
                                  "gathered",
                                  "processed",
-                                 "corrected"],
+                                 "correction"],
                         help="The data type to analyse")
 
     parser.add_argument("--adc",
@@ -154,7 +154,7 @@ def insert_args_into_config(args, config):
 
         try:
             c_data_type["metadata_fname"] = (args.metadata_fname
-                                             or c_data_type["metadata_fname"])
+                                            or c_data_type["metadata_fname"])
         except:
             raise Exception("No input specified. Abort.")
             sys.exit(1)
@@ -213,7 +213,7 @@ class Analyse(object):
         self._col = self._config[self._data_type]["col"]
         self._row = self._config[self._data_type]["row"]
         self._method_list = self._config[self._data_type]["method"]
-        self._adc_part = self._config[self._data_type]["adc_part"]
+        self._interactive = self._config[self._data_type]["interactive"]
 
         self.set_indices()
 
@@ -272,12 +272,16 @@ class Analyse(object):
             row=self._row,
             col=self._col,
             run=self._run_id,
-            adc_part=self._adc_part,
-            method_properties=None
+            method_properties=None,
+            interactive=self._interactive
         )
 
-        print("Configured: adc={}, frame={}, row={}, col={}"
-              .format(self._adc, self._frame, self._row, self._col))
+        print("Configured: adc={}, frame={}, row={}, col={}, interactive={}"
+              .format(self._adc,
+                      self._frame,
+                      self._row,
+                      self._col,
+                      self._interactive))
 
         loaded_data = None
         for method in self._method_list:

@@ -1,8 +1,6 @@
 from collections import namedtuple
 import os
 
-from load_gathered import LoadGathered
-from load_processed import LoadProcessed
 from load_correction import LoadCorrection
 import utils
 
@@ -18,7 +16,7 @@ class PlotBase():
             setattr(self, "_" + key, value)
 
         self._dims_overwritten = dims_overwritten
-
+        print("Row {}".format(self._row))
         corrected_loader = LoadCorrection(
             input_fname_templ=self._input_fname,
             output_dir=self._output_dir,
