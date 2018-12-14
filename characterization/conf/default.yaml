@@ -1,5 +1,5 @@
-general:
-    data_type: processed
+hasgeneral:
+    data_type: corrected
     run: DLSraw
 
     plot_sample: True
@@ -7,7 +7,7 @@ general:
     plot_combined: True
 
 all:
-    output: &output /Volumes/LACIE_SHARE/Percival/Data_lab_october18/Fine_scan
+    output: &output /Volumes/LACIE_SHARE/Percival/Data_lab_october18/
 
 raw:
     input: /Users/ben/PostDoc/P2M_HDF5/Data_0918/DLSraw/correction/col0-1439_correction.h5
@@ -56,5 +56,18 @@ processed:
     row: 100
 
     adc_part: fine
+
+    method: [plot]
+
+corrected:
+    input: *output
+    output: *output
+
+    measurement: adccal
+
+    adc: [0]
+    frame: null
+    col: 40
+    row: 100
 
     method: [plot]

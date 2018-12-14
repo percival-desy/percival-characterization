@@ -1,4 +1,4 @@
-"""Base class for all processing methods
+h"""Base class for all processing methods
 """
 from collections import namedtuple
 import os

@@ -1,4 +1,4 @@
-"""Base class for ADC calibration processing
+ """Base class for ADC calibration processing
 """
 import h5py
 import numpy as np
