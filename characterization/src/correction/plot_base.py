@@ -3,11 +3,10 @@ import os
 
 from load_correction import LoadCorrection
 import utils
+import numpy as np
 
 
 class PlotBase():
-    LoadedData = namedtuple("loaded_data", ["vin",
-                                            "adc_corrected"])
 
     def __init__(self, loaded_data=None, dims_overwritten=False, **kwargs):
 
@@ -16,7 +15,8 @@ class PlotBase():
             setattr(self, "_" + key, value)
 
         self._dims_overwritten = dims_overwritten
-        print("Row {}".format(self._row))
+        self._all_cols = self._method_properties["all_cols"]
+
         corrected_loader = LoadCorrection(
             input_fname_templ=self._input_fname,
             output_dir=self._output_dir,
@@ -25,12 +25,34 @@ class PlotBase():
             col=self._col
         )
 
-        if loaded_data is None or self._dims_overwritten:
-            self._vin, self._data = corrected_loader.load_data()
+        # Prepare empty data for showing 2D plots
+        self._stack = np.zeros((1484, 0, 10))
+        # Read all files contain in a folder and stack data together
+        if self._all_cols is True:
+            nb_files = corrected_loader.get_number_files(self._input_fname)
+            for file in range(nb_files):
+                col = file * 32
+                corrected_loader.set_col(col)
+                corrected_loader.set_input_fname(col)
+                if loaded_data is None or self._dims_overwritten:
+                    self._data = corrected_loader.load_data()
+                self._stack = np.concatenate((self._stack,
+                                              self._data["sample"]
+                                                        ["s_adc_corrected"]),
+                                             axis=1)
         else:
-            self._vin = loaded_data.vin
-            self._data = loaded_data.adc_corrected
-
+            if loaded_data is None or self._dims_overwritten:
+                self._data = corrected_loader.load_data()
+                self._stack = np.concatenate((self._stack,
+                                              self._data["sample"]
+                                                        ["s_adc_corrected"]),
+                                             axis=1)
+            else:
+                self._data = loaded_data.adc_corrected
+                self._stack = np.concatenate((self._stack,
+                                              self._data["sample"]
+                                                        ["s_adc_corrected"]),
+                                             axis=1)
         if self._dims_overwritten:
             print("Overwritten configuration " +
                   "(adc={}, frame={}, row={}, col={})"
@@ -66,11 +88,9 @@ class PlotBase():
 
         """
 
-        return PlotBase.LoadedData(vin=self._vin,
-                                   adc_corrected=self._data)
+        return PlotBase.LoadedData(adc_corrected=self._data)
 
     def _generate_single_plot(self,
-                              x,
                               data,
                               plot_title,
                               label,
@@ -83,9 +103,7 @@ class PlotBase():
         pos = "ADC={}, Col={}".format(self._adc_title, self._col_title)
         suffix = "_adc{}_col{}".format(self._adc_title, self._col_title)
         out = self._output_dir + "/"
-
-        self._generate_single_plot(x=self._vin,
-                                   data=self._data["s_adc_corrected"],
+        self._generate_single_plot(data=self._stack,
                                    plot_title="Sample Coarse, "+pos,
                                    label="Coarse",
                                    out_fname=out+"sample_coarse"+suffix)
