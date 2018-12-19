@@ -1,5 +1,5 @@
 general:
-    data_type: gathered
+    data_type: correction
     run: DLSraw
 
     plot_sample: True
@@ -7,7 +7,10 @@ general:
     plot_combined: True
 
 all:
-    output: &output /Volumes/LACIE_SHARE/Percival/2018.12.08_3G/DLSraw/gathered
+#    output: &output /Volumes/LACIE_SHARE/Beamtime_17122018/DLSraw/gathered/DLSraw
+#    output: &output /Volumes/LACIE_SHARE/Beamtime_17122018/pinhole3
+#    input: &input /Volumes/LACIE_SHARE/Beamtime_17122018/ek26
+    output: &output /Volumes/LACIE_SHARE/Percival/Data_lab_october18/Fine_scan
 
 raw:
     input: /Volumes/LACIE_SHARE/Percival/2018.12.08_3G/DLSraw/gathered/2018.10.17h1527_seqMode_10hrs_dscrmbld_DLSraw.h5
@@ -18,7 +21,7 @@ raw:
     measurement: adccal
 
     adc: null
-    frame: 3
+    frame: 2
     col: 500
     row: 100
     adc_part: fine
@@ -54,24 +57,33 @@ processed:
 
     adc: [0]
     frame: null
-    col: 40
+    col: 100
     row: 100
 
     adc_part: fine
+    interactive: false
+    method: [viewer]
+    viewer:
+        all_cols: True
 
-    method: [plot]
 
 correction:
     input: *output
+#    input_dark: *input
     output: *output
 
     measurement: adccal
 
-    adc: [2]
-    frame: null
-    col: 400
-    row: 400
+    adc: 2
+    frame: 3
+    col: 530
+    row: 10
 
-    interactive: False
+    adc_part: None
+
+    interactive: True
 
     method: [plot]
+
+    plot:
+        all_cols: True

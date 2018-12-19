@@ -1,4 +1,4 @@
-tfrom collections import namedtuple
+from collections import namedtuple
 import os
 
 from load_gathered import LoadGathered

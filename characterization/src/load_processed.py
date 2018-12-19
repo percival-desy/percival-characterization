@@ -42,6 +42,26 @@ class LoadProcessed():
         self._n_groups = None
         self._n_total_frames = None
 
+    def set_col(self, col):
+        self._col = col
+
+    def get_col(self):
+        return self._col
+
+    def set_input_fname(self, col):
+        self._input_fname, self._col_offset = self._get_input_fname(
+            self._input_fname_templ,
+            self._col
+        )
+
+    def get_number_files(self, input_fname_templ):
+
+        input_fname = input_fname_templ.format(data_type=self._data_type,
+                                               col_start="*",
+                                               col_stop="*")
+
+        return len(glob.glob(input_fname))
+
     def _get_input_fname(self, input_fname_templ, col):
 
         input_fname = input_fname_templ.format(data_type=self._data_type,
@@ -94,13 +114,12 @@ class LoadProcessed():
         return data
 
     def load_all_data(self):
-        col = self._col - self._col_offset
 
         data = {}
         with h5py.File(self._input_fname, "r") as f:
             for key in self._paths:
                 data[key] = {}
                 for subkey, path in self._paths[key].items():
-                    data[key][subkey] = f[path][:, col, :]
+                    data[key][subkey] = f[path][()]
 
         return data
