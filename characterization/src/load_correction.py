@@ -6,7 +6,7 @@ import numpy as np
 
 class LoadCorrection():
     def __init__(self, input_fname_templ,
-                 output_dir, adc, row, col):
+                 output_dir, adc, row, col, frame):
 
         self._input_fname_templ = input_fname_templ
         self._output_dir = os.path.normpath(output_dir)
@@ -14,6 +14,7 @@ class LoadCorrection():
         self._row = row
         self._col = col
         self._data_type = "correction"
+        self._frame = frame
 
         self._input_fname, self._col_offset = self._get_input_fname(
             self._input_fname_templ,
@@ -24,6 +25,11 @@ class LoadCorrection():
             "sample": {
                 "s_adc_corrected": "sample/adc_corrected"
             }
+        }
+
+        self._metadata_paths = {
+            "vin": "vin",
+            "n_frames_per_run": "collection/n_frames_per_run"
         }
 
         self._n_frames_per_vin = None
@@ -90,8 +96,7 @@ class LoadCorrection():
 
         return searched_file, col_offset
 
-    def load_data(self):
-#        col = self._col - self._col_offset
+    def load_data_all(self):
 
         data = {}
         with h5py.File(self._input_fname, "r") as f:
@@ -100,3 +105,20 @@ class LoadCorrection():
                 for subkey, path in self._paths[key].items():
                     data[key][subkey] = f[path][()]
         return data
+
+    def load_data(self):
+        col = self._col - self._col_offset
+
+        data = {}
+        with h5py.File(self._input_fname, "r") as f:
+            vin = f[self._metadata_paths["vin"]][()]
+
+            n_frames_per_run = self._metadata_paths["n_frames_per_run"]
+            self._n_frames_per_vin = f[n_frames_per_run][()]
+
+            for key in self._paths:
+                data[key] = {}
+                for subkey, path in self._paths[key].items():
+                    data[key][subkey] = f[path][(self._row, col, slice(None))]
+
+        return vin, data

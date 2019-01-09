@@ -76,11 +76,11 @@ class Plot(PlotBase):
             for adc in range(adcs):
                 row = (grp * adcs) + adc
                 for col in range(cols):
-                    if x[adc, col, grp] < 0 or x[adc, col, grp] > 1e4:
-                        x_rsh[row, col] = 0
-                    else:
-                        x_rsh[row, col] = x[adc, col, grp]
-#                    x_rsh[row, col] = x[adc, col, grp]
+#                    if x[adc, col, grp] < 0 or x[adc, col, grp] > 1e4:
+#                        x_rsh[row, col] = 0
+#                    else:
+#                        x_rsh[row, col] = x[adc, col, grp]
+                    x_rsh[row, col] = x[adc, col, grp]
 
 
 #        x = x.transpose(0, 2, 1)
