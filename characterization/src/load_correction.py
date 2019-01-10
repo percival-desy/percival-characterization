@@ -1,7 +1,6 @@
 import glob
 import h5py
 import os
-import numpy as np
 
 
 class LoadCorrection():
@@ -50,6 +49,10 @@ class LoadCorrection():
             self._col
         )
 
+    def get_dimensions_data(self):
+        data = self.load_data_all()
+        return data.shape
+
     def get_number_files(self, input_fname_templ):
 
         input_fname = input_fname_templ.format(data_type=self._data_type,
@@ -74,9 +77,6 @@ class LoadCorrection():
         prefix = prefix.format(data_type=self._data_type)
         middle = middle.format(data_type=self._data_type)
         suffix = suffix.format(data_type=self._data_type)
-#        print("prefix", prefix)
-#        print("middle", middle)
-#        print("suffix", suffix)
 
         searched_file = None
         for f in files:

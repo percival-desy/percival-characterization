@@ -53,14 +53,13 @@ class PlotBase():
 #                                                        ["s_adc_corrected"]),
 #                                             axis=1)
         elif (loaded_data is None or self._dims_overwritten and
-           self._all_cols is False):
+              self._all_cols is False):
             self._vin, self._data = corrected_loader.load_data()
 #            self._vin = self._data["vin"]["vin"]
             self._corrected = self._data["sample"]["s_adc_corrected"]
         else:
             self._data = loaded_data.adc_corrected
         print(self._col)
-
 
         if self._dims_overwritten:
             print("Overwritten configuration " +

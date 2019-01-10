@@ -24,8 +24,7 @@ class LoadProcessed():
             self._paths = {
                 "s_coarse": {
                     "slope": "sample/coarse/slope",
-                    "offset": "sample/coarse/offset",
-                    "residuals": "sample/coarse/r_squared"
+                    "offset": "sample/coarse/offset"
                 }
             }
         if self._adc_part == "fine":
