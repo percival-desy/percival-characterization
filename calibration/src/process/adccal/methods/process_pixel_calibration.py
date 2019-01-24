@@ -20,7 +20,7 @@ class Process(ProcessAdccalBase):
             self._result = {
                 "s_coarse_offset": {
                     "data": np.zeros(shapes["offset"]),
-                    "path": "sample/coarse/offset",
+                    "path": "sample/coarse/offset"
                 },
                 "s_coarse_slope": {
                     "data": np.zeros(shapes["offset"]),
@@ -37,10 +37,6 @@ class Process(ProcessAdccalBase):
                 "s_fine_slope": {
                     "data": np.zeros(shapes["offset"]),
                     "path": "sample/fine/slope"
-                },
-                "roi_fine": {
-                    "data": self._method_properties["fine_fitting_range"],
-                    "path": "sample/fine/roi"
                 }
             }
 
@@ -54,9 +50,6 @@ class Process(ProcessAdccalBase):
 
         if self._method_properties["fit_adc_part"] == "coarse":
             print("Data loaded, fitting coarse data...")
-            # convert (n_adcs, n_cols, n_groups, n_frames)
-            #      -> (n_adcs, n_cols, n_groups * n_frames)
-#            sample = self._merge_adcs_with_row_group(data["s_coarse"]))
             sample = data["s_coarse"]
             print(sample.shape)
             vin = self._fill_vin_total_frames(data["vin"])
@@ -66,6 +59,8 @@ class Process(ProcessAdccalBase):
             slp = self._result["s_coarse_slope"]["data"]  # Slope
             slp[:] = np.NaN
             fitting_range = self._method_properties["coarse_fitting_range"]
+            print("Fitting in range [{}; {}]".format(fitting_range[0],
+                  fitting_range[1]))
 
             for adc in range(self._n_adcs):
                 for col in range(self._n_cols):
@@ -76,6 +71,7 @@ class Process(ProcessAdccalBase):
                         if np.any(roi):
                             fit = self._fit_linear(vin[roi], adu[roi])
                             slp[adc, col, row] = fit.solution[0]
+#                            offst[adc, col, row] = fit.solution[1]
                             offst[adc, col, row] = slp[adc, col, row] * vin[roi][0] + fit.solution[1]
 
             self._result["s_coarse_slope"]["data"] = slp
