@@ -26,6 +26,9 @@ class Plot(PlotBase):
         # Get offset and slope values
         m = constants["slope"]
         b = constants["offset"]
+
+        t = np.sqrt(m*m - x[0]*x[0])
+
 #        print("Offset {}".format(b))
 #        print("Slope {}".format(m))
 #        print(x.shape)
@@ -40,14 +43,14 @@ class Plot(PlotBase):
 #        residuals = mean_data.flatten() - m * mean_x - b
 #        roi_fine = np.where(self._s_coarse == roi)
 #        print(roi_fine)
-        roi = np.where(self._s_coarse == 20)
+        roi = None  #np.where(self._s_coarse == 20)
 
         residuals = self._calculate_residuals(x, data, constants)
 
         # Plot data and fit
         fig, axs = plt.subplots(nrows=2, sharex=True)
-        axs[0].plot(x[roi], data[roi], ".", markersize=0.5, label=label)
-        axs[0].plot(x[roi], m * x[roi] + b, "r", label="Fitting")
+        axs[0].plot(x[:], data[:], ".", markersize=0.5, label=label)
+        axs[0].plot(x[:], m * x[:] + (t+b), "r", label="Fitting")
         axs[0].set(ylabel='ADC output [ADU]')
         axs[0].legend(['data', 'fit'], loc='best')
         axs[0].set_title(plot_title)
@@ -56,7 +59,7 @@ class Plot(PlotBase):
                  fontsize=12)
 
         # Plot residuals below data and fit plot
-        axs[1].plot(x[roi], residuals[roi], 'r.')
+        axs[1].plot(x[:], residuals[:], 'r.')
         axs[1].set(xlabel="Vin [V]", ylabel="Residuals [ADU]")
         fig.savefig(out_fname)
 
