@@ -4,7 +4,7 @@ import matplotlib
 # this prevents sending remote data to locale PC for rendering
 matplotlib.use('TkAgg')  # Must be before importing matplotlib.pyplot or pylab!
 import matplotlib.pyplot as plt  # noqa E402
-
+import numpy as np
 import __init__  # noqa E402
 from plot_base import PlotBase  # noqa E402
 
@@ -25,11 +25,13 @@ class Plot(PlotBase):
                               out_fname):
 
         fig = plt.figure(figsize=None)
+        print("Vin length {}".format(len(x)))
+        print("Data length {}".format(len(data)))
+        v = [np.full(10, x)
+             for i, x in enumerate(x)]
 
-        print(len(x), len(data))
-        print(data)
-
-        plt.plot(x, data, ".", markersize=0.5, label=label)
+        v = np.hstack(v)
+        plt.plot(v, data, ".", markersize=0.5, label=label)
         plt.xlabel("Vin [V]")
         plt.ylabel("ADU")
 

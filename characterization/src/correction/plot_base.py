@@ -26,7 +26,7 @@ class PlotBase():
         )
         if self._all_cols:
             # Prepare empty data for showing 2D plots
-            self._stack = np.zeros((1484, 0, 10))  # TODO: Get dims from data
+            self._stack = np.zeros((1484, 0, 300))  # TODO: Get dims from data
             # Read all files contain in a folder and stack data together
             nb_files = corrected_loader.get_number_files(self._input_fname)
             for file in range(nb_files):
@@ -55,11 +55,12 @@ class PlotBase():
         elif (loaded_data is None or self._dims_overwritten and
               self._all_cols is False):
             self._vin, self._data = corrected_loader.load_data()
-#            self._vin = self._data["vin"]["vin"]
+#            self._vin = self._vin["vin"]["vin"]
             self._corrected = self._data["sample"]["s_adc_corrected"]
         else:
             self._data = loaded_data.adc_corrected
-        print(self._col)
+        print("Column {}".format(self._col))
+        print("Vin {}".format(self._vin.shape))
 
         if self._dims_overwritten:
             print("Overwritten configuration " +
@@ -96,7 +97,7 @@ class PlotBase():
 
         """
 
-        return PlotBase.LoadedData(adc_corrected=self._data)
+        return PlotBase.LoadCorrection(adc_corrected=self._data)
 
     def _generate_single_hist(self,
                               data,
