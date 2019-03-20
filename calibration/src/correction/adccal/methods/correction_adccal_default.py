@@ -62,12 +62,12 @@ class Correction(CorrectionAdccalBase):
 
         for frame in range(self._n_frames):
             s_crs = sample_crs[:, :, frame, :]
-            s_coarse_cor = (s_crs - offset_crs) / slope_crs * (-2047.5) - 31
+            s_coarse_cor = (s_crs - offset_crs) / slope_crs * (-2047.5) + 4095
             s_fn = sample_fn[:, :, frame, :]
             s_fine_cor = (s_fn - offset_fn) / slope_fn * 2047.5
             adc_corrected[:, :, frame] = s_coarse_cor - s_fine_cor
 
-        adc_c = np.zeros((1484, self._n_cols, self._n_frames))  # TODO: remove magic numbers
+        adc_c = np.zeros((self._n_rows, self._n_cols, self._n_frames))  # TODO: remove magic numbers
         for grp in range(self._n_groups):
             for adc in range(self._n_adcs):
 #                print("Reading adc {} from row group {}".format(adc, grp))

@@ -67,6 +67,7 @@ class CorrectionAdccalBase(CorrectionBase):
         self._n_cols = s_coarse.shape[1]
         self._n_frames = s_coarse.shape[2]
         self._n_groups = s_coarse.shape[3]
+        self._n_rows = self._n_adcs * self._n_groups
 
         self._n_total_frames = self._n_groups * self._n_frames
 
