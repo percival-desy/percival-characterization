@@ -3,6 +3,7 @@ import h5py
 import os
 import numpy as np
 import sys
+import argparse
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 CALIBRATION_DIR = os.path.dirname(CURRENT_DIR)
@@ -92,14 +93,46 @@ def write_output_file(outputdir, fname, dict_constants):
             f.flush()
 
 
+def get_arguments():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--input_dir_crs",
+                        type=str,
+                        required=True,
+                        help="Input directory to load Coare data")
+    parser.add_argument("--input_dir_fn",
+                        type=str,
+                        required=True,
+                        help="Input directory to load Fine data")
+
+    parser.add_argument("--output_dir",
+                        type=str,
+                        required=True,
+                        help="Output directory of merged data")
+    parser.add_argument("--output_file",
+                        type=str,
+                        required=True,
+                        help="Name of the merged output file")
+
+    args = parser.parse_args()
+
+    return args
+
+
 if __name__ == '__main__':
 #    import doctest
 #    doctest.testmod()
 
-    inputdir_coarse = '/Volumes/LACIE_SHARE/Percival/Data_lab_october18/Coarse_scan/DLSraw/processed'
-    inputdir_fine= '/Volumes/LACIE_SHARE/Percival/Data_lab_october18/Fine_scan/DLSraw/processed'
-#    inputdir = '/Volumes/LACIE_SHARE/Percival/Data_lab_october18/Coarse_scan/DLSraw/processed'
-    outputdir = '/Volumes/LACIE_SHARE/Percival/Data_lab_october18/DLSraw/processed'
+#    inputdir_coarse = '/Volumes/LACIE_SHARE/Percival/Data_lab_october18/Coarse_scan/DLSraw/processed'
+#    inputdir_fine= '/Volumes/LACIE_SHARE/Percival/Data_lab_october18/Fine_scan/DLSraw/processed'
+#    outputdir = '/Volumes/LACIE_SHARE/Percival/Data_lab_october18/DLSraw/processed'
+
+    args = get_arguments()
+
+    input_dir_coarse = args.input_dir_crs
+    input_dir_fine = args.input_dir_fn
+    output_dir = args.output_dir
+    out_fname = args.output_file
 
     list_constants_crs, list_keys_crs = get_list_constant(inputdir_coarse)
     list_constants_fn, list_keys_fn = get_list_constant(inputdir_fine)
@@ -116,4 +149,4 @@ if __name__ == '__main__':
     list_keys = list_keys_crs + list_keys_fn
     merged_list = merge_dictionaries(list_constants, list_keys)
 
-    write_output_file(outputdir, 'test.h5', merged_list)
+    write_output_file(output_dir, out_fname, merged_list)
