@@ -120,17 +120,13 @@ def get_arguments():
 
 
 if __name__ == '__main__':
-#    import doctest
-#    doctest.testmod()
-
-#    inputdir_coarse = '/Volumes/LACIE_SHARE/Percival/Data_lab_october18/Coarse_scan/DLSraw/processed'
-#    inputdir_fine= '/Volumes/LACIE_SHARE/Percival/Data_lab_october18/Fine_scan/DLSraw/processed'
-#    outputdir = '/Volumes/LACIE_SHARE/Percival/Data_lab_october18/DLSraw/processed'
+    #    import doctest
+    #    doctest.testmod()
 
     args = get_arguments()
 
-    input_dir_coarse = args.input_dir_crs
-    input_dir_fine = args.input_dir_fn
+    inputdir_coarse = args.input_dir_crs
+    inputdir_fine = args.input_dir_fn
     output_dir = args.output_dir
     out_fname = args.output_file
 
