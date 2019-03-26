@@ -33,6 +33,16 @@ class Correction(CorrectionAdccalBase):
 
         }
 
+    def _adc_reordering(self, adc_to_reorder):
+
+        adc_shaped = np.zeros((self._n_rows, self._n_cols, self._n_frames))
+        for grp in range(self._n_groups):
+            for adc in range(self._n_adcs):
+                row = (grp * 7) + adc
+                adc_shaped[row] = adc_to_reorder[adc, :, :, grp]
+
+        return adc_shaped
+
     def _calculate(self):
         ''' Read gathered data, processed coarse and fine data to apply
             a correction.
@@ -58,22 +68,21 @@ class Correction(CorrectionAdccalBase):
         adc_corrected = self._result["adc_corrected"]["data"]
         self._result["n_frames_per_run"]["data"] = data_gathered["n_frames_per_run"]
         print(self._n_cols)
-#        self._set_data_to_write()
+        ADU_MAX = 4095
 
         for frame in range(self._n_frames):
             s_crs = sample_crs[:, :, frame, :]
-            s_coarse_cor = (s_crs - offset_crs) / slope_crs * (-2047.5) + 4095
+            s_coarse_cor = (s_crs - offset_crs) / slope_crs * (- ADU_MAX/2) + ADU_MAX
             s_fn = sample_fn[:, :, frame, :]
-            s_fine_cor = (s_fn - offset_fn) / slope_fn * 2047.5
+            s_fine_cor = (s_fn - offset_fn) / slope_fn * ADU_MAX
             adc_corrected[:, :, frame] = s_coarse_cor - s_fine_cor
 
-        adc_c = np.zeros((self._n_rows, self._n_cols, self._n_frames))  # TODO: remove magic numbers
-        for grp in range(self._n_groups):
-            for adc in range(self._n_adcs):
-#                print("Reading adc {} from row group {}".format(adc, grp))
-#                print("Assigning to row {}".format((grp*7)+adc))
-                row = (grp * 7) + adc
-                adc_c[row] = adc_corrected[adc, :, :, grp]
+        adc_c = self._adc_reordering(adc_corrected)
+#        adc_c = np.zeros((self._n_rows, self._n_cols, self._n_frames))
+#        for grp in range(self._n_groups):
+#            for adc in range(self._n_adcs):
+#                row = (grp * 7) + adc
+#                adc_c[row] = adc_corrected[adc, :, :, grp]
 
         self._result["adc_corrected"]["data"] = adc_c
         self._result["vin"]["data"] = data_gathered["vin"]
