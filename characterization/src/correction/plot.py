@@ -45,36 +45,3 @@ class Plot(PlotBase):
 
         fig.clf()
         plt.close(fig)
-
-#        def _generate_single_plot(data,
-#                                  plot_title,
-#                                  label,
-#                                  out_fname,
-#                                  interactive_flag):
-#
-#            fig = plt.figure(figsize=None)
-#
-#            print("Shape of input data:", data.shape(0))
-#
-#             prepare_data_per_adc = data.reshape((212, 7, 1440))
-#             average_data_per_adc = np.average(prepare_data_per_addc, axis=0)
-#
-#            plt.imshow(average_data_per_adc, aspect='auto', interpolation='none')
-#            plt.imshow(data, aspect='auto', interpolation='none')
-#            plt.colorbar()
-#            plt.xlabel("columns")
-#            plt.ylabel("ADCs")
-#
-#            fig.suptitle(plot_title)
-#            fig.savefig(out_fname)
-#
-#            ### # copied the following 3 lines from raw/viewer.py in hopes of getting interactive
-#            ###fig, ax = plt.subplots(2, 3, sharex=True, sharey=True)
-#            ###tracker = utils.IndexTracker(fig, ax, x)
-#            ###plt.show()
-#            if interactive_flag is True:
-#                fig.show()
-#                input('Press enter to end')
-#
-#            fig.clf()
-#            plt.close(fig)
