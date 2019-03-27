@@ -26,8 +26,12 @@ ADCCAL_PROCESS_METHOD_DIR = os.path.join(PROCESS_DIR, "adccal", "methods")
 PTCCAL_PROCESS_METHOD_DIR = os.path.join(PROCESS_DIR, "ptccal", "methods")
 
 CORRECTION_DIR = os.path.join(SRC_DIR, "correction")
-ADCCAL_CORRECTION_METHOD_DIR = os.path.join(CORRECTION_DIR, "adccal", "methods")
-PTCCAL_CORRECTION_METHOD_DIR = os.path.join(CORRECTION_DIR, "ptccal", "methods")
+ADCCAL_CORRECTION_METHOD_DIR = os.path.join(CORRECTION_DIR,
+                                            "adccal",
+                                            "methods")
+PTCCAL_CORRECTION_METHOD_DIR = os.path.join(CORRECTION_DIR,
+                                            "ptccal",
+                                            "methods")
 
 if SHARED_DIR not in sys.path:
     sys.path.insert(0, SHARED_DIR)
@@ -38,8 +42,7 @@ import utils  # noqa E402
 class Analyse(object):
     def __init__(self,
                  in_base_dir,
-                 in_base_dir_processed_fine,
-                 in_base_dir_processed_coarse,
+                 in_base_dir_processed,
                  out_base_dir,
                  create_outdir,
                  run_id,
@@ -51,8 +54,7 @@ class Analyse(object):
                  n_processes):
 
         self._in_base_dir = in_base_dir
-        self._in_base_dir_processed_coarse = in_base_dir_processed_coarse
-        self._in_base_dir_processed_fine = in_base_dir_processed_fine
+        self._in_base_dir_processed = in_base_dir_processed
         self._out_base_dir = out_base_dir
 
         self._create_outdir = create_outdir
@@ -125,14 +127,12 @@ class Analyse(object):
     def generate_process_path(self, base_dir):
         dirname = os.path.join(base_dir)
         filename = "col{col_start}-{col_stop}_processed.h5"
-       # filename = "col{col_start}-{col_stop}_processed" + \
-       #            "_{}.h5".format(self._method_properties["fit_adc_part"])
 
         return dirname, filename
 
     def generate_correction_path(self, base_dir):
         dirname = os.path.join(base_dir)
-        filename = "col{col_start}-{col_stop}_correction.h5"
+        filename = "col{col_start}-{col_stop}_corrected.h5"
 
         return dirname, filename
 
@@ -263,18 +263,13 @@ class Analyse(object):
 
         # Input files for correction are the output from gather and process
         in_base_dir_gathered = os.path.join(self._in_base_dir, "gathered")
-#        in_base_dir_processed = os.path.join(self._in_base_dir, "processed")
-        in_base_dir_processed_coarse = os.path.join(self._in_base_dir_processed_coarse, "processed")
-        in_base_dir_processed_fine = os.path.join(self._in_base_dir_processed_fine, "processed")
+        in_base_dir_processed = os.path.join(self._in_base_dir_processed, "processed")
 
         in_dir_gathered, in_file_name_gathered = self.generate_gather_path(in_base_dir_gathered)
-#        in_dir_processed, in_file_name_processed = self.generate_gather_path(in_base_dir_processed)
-        in_dir_processed_coarse, in_file_name_processed_coarse = self.generate_process_path(in_base_dir_processed_coarse)
-        in_dir_processed_fine, in_file_name_processed_fine = self.generate_process_path(in_base_dir_processed_fine)
+        in_dir_processed, in_file_name_processed = self.generate_process_path(in_base_dir_processed)
 
         # Define output files
         out_dir, out_file_name = self.generate_correction_path(self._out_base_dir)
-
 
         for job_set in self._job_sets:
             jobs = []
@@ -284,19 +279,14 @@ class Analyse(object):
 
                 in_fname_gathered = in_file_name_gathered.format(col_start=col_start,
                                                                  col_stop=col_stop)
-#               in_fname_processed = in_file_name_processed.format(col_start=col_start,
-#                                                                 col_stop=col_stop)
-                in_fname_processed_coarse = in_file_name_processed_coarse.format(col_start=col_start,
+                in_fname_processed = in_file_name_processed.format(col_start=col_start,
                                                                  col_stop=col_stop)
-                in_fname_processed_fine = in_file_name_processed_fine.format(col_start=col_start,
-                                                                 col_stop=col_stop)
+
 
                 # doing the join here and outside of loop because if in_dir
                 # contains a placeholder it will not work otherwise
                 in_fname_gathered = os.path.join(in_dir_gathered, in_fname_gathered)
-#               in_fname_processed = os.path.join(in_dir_processed, in_fname_processed)
-                in_fname_processed_coarse = os.path.join(in_dir_processed_coarse, in_fname_processed_coarse)
-                in_fname_processed_fine = os.path.join(in_dir_processed_fine, in_fname_processed_fine)
+                in_fname_processed = os.path.join(in_dir_processed, in_fname_processed)
 
                 out_fname = out_file_name.format(col_start=col_start,
                                                  col_stop=col_stop)
@@ -314,9 +304,7 @@ class Analyse(object):
 
                 kwargs = dict(
                     in_fname_gathered=in_fname_gathered,
-#                    in_fname_processed=in_fname_processed,
-                    in_fname_processed_coarse=in_fname_processed_coarse,
-                    in_fname_processed_fine=in_fname_processed_fine,
+                    in_fname_processed=in_fname_processed,
                     out_fname=out_fname,
                     run=self._run_id,
                     method=self._method,
@@ -332,8 +320,7 @@ class Analyse(object):
                 job.join()
 
         print(in_fname_gathered)
-        print(in_fname_processed_coarse)
-        print(in_fname_processed_fine)
+        print(in_fname_processed)
 
     def _call_correction(self, **kwargs):
         if self._measurement == "adccal":
@@ -347,7 +334,6 @@ class Analyse(object):
 
         obj = correction_m(**kwargs)
         obj.run()
-
 
     def _call_process(self, **kwargs):
         if self._measurement == "adccal":
@@ -526,8 +512,7 @@ if __name__ == "__main__":
 
     out_base_dir = config[run_type]["output"]
     in_base_dir = config[run_type]["input"]
-    in_base_dir_processed_coarse = config[run_type]["input_coarse"]
-    in_base_dir_processed_fine = config[run_type]["input_fine"]
+    in_base_dir_processed = config[run_type]["input_constants"]
     method = config[run_type]["method"]
     method_properties = config[run_type][method]
 
@@ -544,18 +529,13 @@ if __name__ == "__main__":
         create_outdir = True
     elif run_type == "correction":
         in_base_dir_gathered = os.path.join(in_base_dir, run_id, "gathered")
-        in_base_dir_processed_coarse = os.path.join(in_base_dir_processed_coarse,
-                                                    run_id)
-        in_base_dir_processed_fine = os.path.join(in_base_dir_processed_fine,
-                                                  run_id)
-#        in_base_dir_processed = os.path.join(in_base_dir, run_id, "processed")
+        in_base_dir_processed = os.path.join(in_base_dir_processed, run_id, "processed")
         in_base_dir = os.path.join(in_base_dir, run_id)
-        out_base_dir = os.path.join(out_base_dir, run_id, "correction")
+        out_base_dir = os.path.join(out_base_dir, run_id, "corrected")
         create_outdir = True
 
     obj = Analyse(in_base_dir=in_base_dir,
-                  in_base_dir_processed_coarse=in_base_dir_processed_coarse,
-                  in_base_dir_processed_fine=in_base_dir_processed_fine,
+                  in_base_dir_processed=in_base_dir_processed,
                   out_base_dir=out_base_dir,
                   create_outdir=create_outdir,
                   run_id=run_id,

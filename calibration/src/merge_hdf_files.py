@@ -4,6 +4,9 @@ import os
 import numpy as np
 import sys
 import argparse
+import time
+from itertools import chain
+from collections import defaultdict
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 CALIBRATION_DIR = os.path.dirname(CURRENT_DIR)
@@ -63,6 +66,43 @@ def get_list_constant(inputdir):
     return list_data, list_keys[:2]
 
 
+def get_list_constant2(fname):
+
+    list_data = []
+    file_content = utils.load_file_content(fname)
+    data_to_concatenate = {}
+    list_keys = []
+    for key, value in file_content.items():
+        if key.startswith('collection'):
+            if key not in data_to_concatenate:
+                data_to_concatenate[key] = value
+        else:
+            if key not in data_to_concatenate:
+                data_to_concatenate[key] = {}
+                list_keys.append(key)
+            data_to_concatenate[key] = value
+    list_data.append(data_to_concatenate)
+
+    return data_to_concatenate, list_keys[:2]
+
+
+def get_constants(fname):
+
+    file_content = utils.load_file_content(fname)
+    data_to_concatenate = {}
+
+    for key, value in file_content.items():
+        if key.startswith('collection'):
+            if key not in data_to_concatenate:
+                data_to_concatenate[key] = value
+        else:
+            if key not in data_to_concatenate:
+                data_to_concatenate[key] = {}
+            data_to_concatenate[key] = value
+
+    return data_to_concatenate
+
+
 def merge_dictionaries(list_data, list_keys):
 
     stack = np.zeros((7, 0, 212))
@@ -70,14 +110,17 @@ def merge_dictionaries(list_data, list_keys):
     for key in list_keys:
         print(key)
         dict_t[key] = {}
-        adc_shaped = np.zeros((1484, 1440))
+#        adc_shaped = np.zeros((1484, 1440))
+#        adc_shaped = np.zeros((7, 32, 212))
         for i in range(len(list_data)):
             stack = np.concatenate((stack, list_data[i][key]), axis=1)
-        for grp in range(stack.shape[2]):
-            for adc in range(stack.shape[0]):
-                row = (grp * 7) + adc
-                adc_shaped[row] = stack[adc, :, grp]
-        dict_t[key] = adc_shaped
+#        for grp in range(stack.shape[2]):
+#            for adc in range(stack.shape[0]):
+#                row = (grp * 7) + adc
+#                adc_shaped[row] = stack[adc, :, grp]
+#        dict_t[key] = adc_shaped
+        dict_t[key] = stack
+
         stack = np.zeros((7, 0, 212))
 
     return dict_t
@@ -113,6 +156,15 @@ def get_arguments():
                         type=str,
                         required=True,
                         help="Name of the merged output file")
+#    parse.add_argument("--option",
+#                       type=str
+#                       required=True,
+#                       help="merge_constants: Merge coarse constants and fine\
+#                       constants in one file, which has same data strcuture\
+#                       as the input. (7, n_cols, 212)\
+#                       \n merge_all: merge all constants from all files into\
+#                       a unique file having following strucure:\
+#                       \n (1484, 1440)"
 
     args = parser.parse_args()
 
@@ -122,6 +174,7 @@ def get_arguments():
 if __name__ == '__main__':
     #    import doctest
     #    doctest.testmod()
+    total_time = time.time()
 
     args = get_arguments()
 
@@ -130,19 +183,126 @@ if __name__ == '__main__':
     output_dir = args.output_dir
     out_fname = args.output_file
 
-    list_constants_crs, list_keys_crs = get_list_constant(inputdir_coarse)
-    list_constants_fn, list_keys_fn = get_list_constant(inputdir_fine)
+    os.chdir(inputdir_coarse)
+    file_list_crs = get_file_list(inputdir_coarse)
+    file_list_fn = get_file_list(inputdir_fine)
 
-    list_constants = []
-    dict_output = {}
+    files_crs = {}
+    for fname in file_list_crs:
+        columns = fname.split("_processed.h5")[0]
+        if columns in files_crs:
+            files_crs[columns].append(fname)
+        else:
+            files_crs[columns] = [fname]
 
-    list_t = {}
-    list_constants = []
-    for i in range(len(list_constants_crs)):
-        list_t.update(list_constants_crs[i])
-        list_t.update(list_constants_fn[i])
-        list_constants.append(list_t)
-    list_keys = list_keys_crs + list_keys_fn
-    merged_list = merge_dictionaries(list_constants, list_keys)
+    data_crs = {}
+    for columns, file_list in files_crs.items():
+        data_crs[columns] = {}
+        data_to_be_concatenated = {}
+        for fname in file_list:
+            file_content = utils.load_file_content(fname)
+            for key, value in file_content.items():
+                if key.startswith('collection'):
+                    if key not in data_to_be_concatenated:
+                        data_to_be_concatenated[key] = value
+                else:
+                    if key not in data_to_be_concatenated:
+                        data_to_be_concatenated[key] = {}
+                    data_to_be_concatenated[key] = value
+        for key, value in data_to_be_concatenated.items():
+            data_crs[columns][key] = value
 
-    write_output_file(output_dir, out_fname, merged_list)
+    os.chdir(inputdir_fine)
+    files_fn = {}
+    for fname in file_list_crs:
+        columns = fname.split("_processed.h5")[0]
+        if columns in files_fn:
+            files_fn[columns].append(fname)
+        else:
+            files_fn[columns] = [fname]
+
+    data_fn = {}
+    for columns, file_list in files_fn.items():
+        data_fn[columns] = {}
+        data_to_be_concatenated = {}
+        for fname in file_list:
+            file_content = utils.load_file_content(fname)
+            for key, value in file_content.items():
+                if key.startswith('collection'):
+                    if key not in data_to_be_concatenated:
+                        data_to_be_concatenated[key] = value
+                else:
+                    if key not in data_to_be_concatenated:
+                        data_to_be_concatenated[key] = {}
+                    data_to_be_concatenated[key] = value
+        for key, value in data_to_be_concatenated.items():
+            data_fn[columns][key] = value
+
+    data = {}
+    for columns, file_list in files_crs.items():
+        data[columns] = {}
+        for key, value in data_crs[columns].items():
+            data[columns][key] = value
+        for key, value in data_fn[columns].items():
+            data[columns][key] = value
+
+    os.chdir(output_dir)
+    for file in files_crs:
+        print(files_crs[file])
+        outfname = files_crs[file][0]
+        with h5py.File(outfname, "w") as f:
+            for key, value in data[file].items():
+                f.create_dataset(key, data=value)
+                f.flush()
+#        with h5.py
+
+#    data = defaultdict(list)
+#    for key, value in chain(data_crs.items(), data_fn.items()):
+#        data[key].append(value)
+#    list_constants_crs = [get_constants(file)
+#                          for file in file_list_crs]
+#    list_key_crs = [get_list_constant2(file)[1] for file in file_list_crs]
+#
+#    os.chdir(inputdir_fine)
+#    list_constants_fn = [get_constants(file) for file in file_list_fn]
+#    list_key_fn = [get_list_constant2(file)[1] for file in file_list_fn]
+#
+#    dict_constants = {}
+#    list_constants = []
+#    for i in range(len(list_constants_crs)):
+#        dict_constants.update(list_constants_crs[i])
+#        dict_constants.update(list_constants_fn[i])
+#        list_constants.append(dict_constants)
+#
+#    list_keys = list_key_crs[0] + list_key_fn[0]
+
+#    merged_list = [merge_dictionaries(list_constants, list_keys)
+#                   for i in range(len(list_constants))]
+#
+#    for file in range(len(file_list_crs)):
+#        write_output_file(output_dir, file_list_crs[file], list_constants[i])
+
+#    file_list_fn = get_file_list(inputdir_fine)
+#
+#    list_constants_fn, list_keys_fn = get_list_constant2(file_list_fn[1])
+#
+#    out_fname = file_list_crs[1]
+#
+#
+##    list_constants_crs, list_keys_crs = get_list_constant(inputdir_coarse)
+##    list_constants_fn, list_keys_fn = get_list_constant(inputdir_fine)
+#
+#    list_constants = []
+#    dict_output = {}
+#
+#    list_t = {}
+#    list_constants = []
+#    for i in range(len(list_constants_crs)):
+#        list_t.update(list_constants_crs[i])
+#        list_t.update(list_constants_fn[i])
+#        list_constants.append(list_t)
+#    list_keys = list_keys_crs + list_keys_fn
+#    merged_list = merge_dictionaries(list_constants, list_keys)
+#
+#    write_output_file(output_dir, out_fname, merged_list)
+    print('Mergin took: {:.3f} s \n'.format(time.time() - total_time))

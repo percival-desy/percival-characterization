@@ -26,11 +26,9 @@ class CorrectionAdccalBase(CorrectionBase):
             "n_frames": "collection/n_frames",
             "n_runs": "collection/n_runs"
         }
-        self._paths_processed_coarse = {
+        self._paths_processed = {
             "s_coarse_offset": "sample/coarse/offset",
-            "s_coarse_slope": "sample/coarse/slope"
-        }
-        self._paths_processed_fine = {
+            "s_coarse_slope": "sample/coarse/slope",
             "s_fine_offset": "sample/fine/offset",
             "s_fine_slope": "sample/fine/slope"
         }
@@ -83,21 +81,12 @@ class CorrectionAdccalBase(CorrectionBase):
                 data[key] = f[self._paths_gathered[key]][()]
         return data
 
-    def _load_data_processed_coarse(self, in_fname_processed_coarse):
+    def _load_data_processed(self, in_fname_processed):
 
         data = {}
-        with h5py.File(self._in_fname_processed_coarse, "r") as f:
-            for key in self._paths_processed_coarse:
-                data[key] = f[self._paths_processed_coarse[key]][()]
-
-        return data
-
-    def _load_data_processed_fine(self, in_fname_processed_coarse):
-
-        data = {}
-        with h5py.File(self._in_fname_processed_fine, "r") as f:
-            for key in self._paths_processed_fine:
-                data[key] = f[self._paths_processed_fine[key]][()]
+        with h5py.File(self._in_fname_processed, "r") as f:
+            for key in self._paths_processed:
+                data[key] = f[self._paths_processed[key]][()]
 
         return data
 
