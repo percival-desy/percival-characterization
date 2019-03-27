@@ -50,21 +50,18 @@ class Correction(CorrectionAdccalBase):
         '''
 
         print("Start loading data from {} ".format(self._in_fname_gathered),
-              ", data from {}... ".format(self._in_fname_processed_coarse),
-              " and data frome{}...".format(self._in_fname_processed_fine),
+              "and  data from {}... ".format(self._in_fname_processed),
               end="")
         data_gathered = self._load_data_gathered(self._in_fname_gathered)
-        coarse_processed = self._load_data_processed_coarse(
-                self._in_fname_processed_coarse)
-        fn_processed = self._load_data_processed_fine(
-                self._in_fname_processed_fine)
+        data_processed = self._load_data_processed(
+                self._in_fname_processed)
 
         sample_crs = data_gathered["s_coarse"]
-        offset_crs = coarse_processed["s_coarse_offset"]
-        slope_crs = coarse_processed["s_coarse_slope"]
+        offset_crs = data_processed["s_coarse_offset"]
+        slope_crs = data_processed["s_coarse_slope"]
         sample_fn = data_gathered["s_fine"]
-        offset_fn = fn_processed["s_fine_offset"]
-        slope_fn = fn_processed["s_fine_slope"]
+        offset_fn = data_processed["s_fine_offset"]
+        slope_fn = data_processed["s_fine_slope"]
         adc_corrected = self._result["adc_corrected"]["data"]
         self._result["n_frames_per_run"]["data"] = data_gathered["n_frames_per_run"]
         print(self._n_cols)
