@@ -41,46 +41,73 @@ def get_list_constant(inputdir):
     '''Return a list of dictionaries and a list of keys for all the files
        contained in the input directory
     '''
-    d_names = get_file_list(inputdir)
+    file_list = get_file_list(inputdir)
     os.chdir(inputdir)
 
-    list_data = []
-    for fname in d_names:
-        file_content = utils.load_file_content(fname)
-        data_to_concatenate = {}
-        list_keys = []
-        for key, value in file_content.items():
-            if key.startswith('collection'):
-                if key not in data_to_concatenate:
-                    data_to_concatenate[key] = value
-            else:
-                if key not in data_to_concatenate:
-                    data_to_concatenate[key] = {}
-                    list_keys.append(key)
-                data_to_concatenate[key] = value
-                data_shape = data_to_concatenate[key].shape
-        list_data.append(data_to_concatenate)
+    files = {}
+    for fname in file_list:
+        columns = fname.split("_correction.h5")[0]
+        if columns in files:
+            files[columns].append(fname)
+        else:
+            files[columns] = [fname]
 
-    return list_data, list_keys[0], data_shape
+    data = {}
+    for columns, file_list in files.items():
+        data[columns] = {}
+        data_to_be_concatenated = {}
+        for fname in file_list:
+            file_content = utils.load_file_content(fname)
+            for key, value in file_content.items():
+                if key.startswith('collection'):
+                    if key not in data_to_be_concatenated:
+                        data_to_be_concatenated[key] = value
+                else:
+                    if key not in data_to_be_concatenated:
+                        data_to_be_concatenated[key] = {}
+                    data_to_be_concatenated[key] = value
+        for key, value in data_to_be_concatenated.items():
+            data[columns][key] = value
+            if not key.startswith('collection') and not key.startswith('vin'):
+                data_shape = value.shape
+
+    return data, data_shape
 
 
-def merge_dictionaries(list_data, list_keys, n_frames):
+def merge_dictionaries(list_data, n_rows, n_frames):
 
-    stack = np.zeros((1484, 0, n_frame))
+    stack = np.zeros((n_rows, 0, n_frames))
     dict_t = {}
-    for key in list_keys:
-        print(key)
-        dict_t[key] = {}
-        adc_shaped = np.zeros((1484, 1440, n_frame))
-        for i in range(len(list_data)):
-            stack = np.concatenate((stack, list_data[i][key]), axis=1)
-#        for grp in range(stack.shape[2]):
-#            for adc in range(stack.shape[0]):
-#                row = (grp * 7) + adc
-#                adc_shaped[row] = stack[adc, :, grp]
-        dict_t[key] = adc_shaped
-        stack = np.zeros((1484, 0, n_frame))
 
+    for key, value in list_data.items():
+        list_keys = []
+        for subkey, suvalue in list_data[key].items():
+            list_keys.append(subkey)
+
+    for subkey in list_keys:
+        if not subkey.startswith("collection") and not subkey.startswith("vin"):
+            dict_t[subkey] = {}
+            stack = np.zeros((n_rows, 0, n_frames))
+            for key, value, in list_data.items():
+                stack = np.concatenate((stack, list_data[key][subkey]), axis=1)
+            dict_t[subkey] = stack
+#    for key, value in list_data.items():
+##        print(key)
+##        dict_t[key] = {}
+#        data = []
+#        for subkey, subvalue in list_data[key].items():
+#            if not subkey.startswith('collection') and not subkey.startswith('vin'):
+##                print(subkey, subvalue)
+##                print(subvalue.shape)
+#                data.append(subvalue)
+##                stack = np.concatenate((stack, list_data[key][subkey]), axis=1)
+##                print(stack)
+#            dict_t[subkey] = data
+#        stack = np.concatenate((stack, dict_t[subkey]), axis=1)
+#        dict_t2[subkey] = stack
+#        stack = np.zeros((n_rows, 0, n_frames))
+
+#    pass
     return dict_t
 
 
@@ -90,6 +117,8 @@ def write_output_file(outputdir, fname, dict_constants):
     out_fname = os.path.join(outputdir, fname)
     with h5py.File(out_fname, "w") as f:
         for key, value in dict_constants.items():
+#            for subkey, subvalue in dict_constants[key].items():
+#            print(key, value)
             f.create_dataset(key, data=value)
             f.flush()
 
@@ -126,12 +155,15 @@ if __name__ == '__main__':
     output_dir = args.output_dir
     out_fname = args.output_file
 
-    list_constants, list_keys, data_shape = get_list_constant(inputdir)
+    list_constants, data_shape = get_list_constant(inputdir)
 
-    n_frame = data_shape[2]
+    n_rows = data_shape[0]
+    n_frames = data_shape[2]
 #    list_constants = []
 #    dict_output = {}
-    merge_list = merge_dictionaries(list_constants, list_keys, n_frame)
+    merge_list = merge_dictionaries(list_constants, n_rows, n_frames)
+    merge_shape = merge_list['sample/adc_corrected'].shape
+    write_output_file(output_dir, out_fname, merge_list)
 
 #    list_t = {}
 #    list_constants = []
