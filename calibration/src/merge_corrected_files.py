@@ -19,7 +19,6 @@ if SHARED_DIR not in sys.path:
 import utils
 
 
-
 def get_file_list(inputdir):
     ''' Return a list of files contained in a directory
     '''
@@ -59,13 +58,15 @@ def get_list_constant(inputdir):
                     data_to_concatenate[key] = {}
                     list_keys.append(key)
                 data_to_concatenate[key] = value
+                data_shape = data_to_concatenate[key].shape
         list_data.append(data_to_concatenate)
 
-    return list_data, list_keys[0]
+    return list_data, list_keys[0], data_shape
 
 
 def merge_dictionaries(list_data, list_keys):
 
+    n_frames = get_number_frames()
     stack = np.zeros((1484, 0, 3000))
     dict_t = {}
     for key in list_keys:
@@ -126,8 +127,9 @@ if __name__ == '__main__':
     output_dir = args.output_dir
     out_fname = args.output_file
 
-    list_constants, list_keys = get_list_constant(inputdir)
+    list_constants, list_keys, data_shape = get_list_constant(inputdir)
 
+    print(data_shape)
     list_constants = []
     dict_output = {}
 
