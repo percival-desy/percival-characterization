@@ -64,15 +64,14 @@ def get_list_constant(inputdir):
     return list_data, list_keys[0], data_shape
 
 
-def merge_dictionaries(list_data, list_keys):
+def merge_dictionaries(list_data, list_keys, n_frames):
 
-    n_frames = get_number_frames()
-    stack = np.zeros((1484, 0, 3000))
+    stack = np.zeros((1484, 0, n_frame))
     dict_t = {}
     for key in list_keys:
         print(key)
         dict_t[key] = {}
-        adc_shaped = np.zeros((1484, 1440, 3000))
+        adc_shaped = np.zeros((1484, 1440, n_frame))
         for i in range(len(list_data)):
             stack = np.concatenate((stack, list_data[i][key]), axis=1)
 #        for grp in range(stack.shape[2]):
@@ -80,7 +79,7 @@ def merge_dictionaries(list_data, list_keys):
 #                row = (grp * 7) + adc
 #                adc_shaped[row] = stack[adc, :, grp]
         dict_t[key] = adc_shaped
-        stack = np.zeros((1484, 0, 3000))
+        stack = np.zeros((1484, 0, n_frame))
 
     return dict_t
 
@@ -129,9 +128,10 @@ if __name__ == '__main__':
 
     list_constants, list_keys, data_shape = get_list_constant(inputdir)
 
-    print(data_shape)
-    list_constants = []
-    dict_output = {}
+    n_frame = data_shape[2]
+#    list_constants = []
+#    dict_output = {}
+    merge_list = merge_dictionaries(list_constants, list_keys, n_frame)
 
 #    list_t = {}
 #    list_constants = []
