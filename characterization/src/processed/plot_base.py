@@ -4,7 +4,7 @@ import os
 from load_gathered import LoadGathered
 from load_processed import LoadProcessed
 import utils
-
+import numpy as np
 
 class PlotBase():
     LoadedData = namedtuple("loaded_data", ["vin",
@@ -91,6 +91,17 @@ class PlotBase():
                                    gathered_data=self._data,
                                    constants=self._constants)
 
+    def _recalculate_offset(self, vin, constants):
+        """ Adjust the offset for plotting.
+
+        Return:
+            A float
+        """
+
+        m = constants['slope']
+        b = constants['offset']
+        return - m * vin[0] + b
+
     def _generate_single_plot(self,
                               x,
                               data,
@@ -114,11 +125,14 @@ class PlotBase():
         ''' Return residuals between fitted data and raw data
         '''
 
-        m = constants["slope"]
-        b = constants["offset"]
-        residuals = data - m * x - b
+        roi = np.where(np.logical_and(data < 30,
+                                      data > 1))
 
-        return residuals
+        offset = self._recalculate_offset(x, constants)
+
+        residuals = data - constants['slope'] * x - offset
+
+        return residuals[roi]
 
     def plot_sample(self):
         self.create_dir()
@@ -132,12 +146,21 @@ class PlotBase():
         out = self._output_dir + "/"
 
         if self._adc_part == "coarse":
+            self._s_coarse = self._data["s_coarse"]
+            res = self._calculate_residuals(self._vin,
+                                            self._data["s_coarse"],
+                                            self._constants["s_coarse"])
             self._generate_single_plot(x=self._vin,
                                        data=self._data["s_coarse"],
                                        constants=self._constants["s_coarse"],
                                        plot_title="Sample Coarse, "+pos,
                                        label="Coarse",
                                        out_fname=out+"sample_coarse"+suffix)
+
+            self._generate_histogram(x=res,
+                                     plot_title="Residuals Coarse, "+pos,
+                                     label="Coarse",
+                                     out_fname=out+"s_residuals_coarse"+suffix)
 
         if self._adc_part == "fine":
             self._s_coarse = self._data["s_coarse"]
@@ -158,7 +181,50 @@ class PlotBase():
                                      out_fname=out+"s_residuals_fine"+suffix)
 
     def plot_reset(self):
-        pass
+        self.create_dir()
+
+        pos = "ADC={}, Row={}, Col={}".format(self._adc_title,
+                                              self._row_title,
+                                              self._col_title)
+        suffix = "_adc{}_row{}_col{}".format(self._adc_title,
+                                             self._row_title,
+                                             self._col_title)
+        out = self._output_dir + "/"
+
+        if self._adc_part == "coarse":
+            self._s_coarse = self._data["r_coarse"]
+            res = self._calculate_residuals(self._vin,
+                                            self._data["r_coarse"],
+                                            self._constants["r_coarse"])
+            self._generate_single_plot(x=self._vin,
+                                       data=self._data["r_coarse"],
+                                       constants=self._constants["r_coarse"],
+                                       plot_title="Reset Coarse, "+pos,
+                                       label="Coarse",
+                                       out_fname=out+"reset_coarse"+suffix)
+
+            self._generate_histogram(x=res,
+                                     plot_title="Residuals Sample/Coarse, "+pos,
+                                     label="Coarse",
+                                     out_fname=out+"r_residuals_coarse"+suffix)
+
+        if self._adc_part == "fine":
+            self._s_coarse = self._data["r_coarse"]
+            res = self._calculate_residuals(self._vin,
+                                            self._data["r_fine"],
+                                            self._constants["r_fine"])
+
+            self._generate_single_plot(x=self._vin,
+                                       data=self._data["r_fine"],
+                                       constants=self._constants["r_fine"],
+                                       plot_title="Reset Fine, "+pos,
+                                       label="Fine",
+                                       out_fname=out+"reset_fine"+suffix)
+
+            self._generate_histogram(x=res,
+                                     plot_title="Residuals Reset/Fine, "+pos,
+                                     label="Fine",
+                                     out_fname=out+"r_residuals_fine"+suffix)
 
     def plot_combined(self):
         pass
