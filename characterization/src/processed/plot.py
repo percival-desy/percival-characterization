@@ -27,14 +27,8 @@ class Plot(PlotBase):
         m = constants["slope"]
         b = constants["offset"]
 
-        t = np.sqrt(m*m - x[0]*x[0])
-
-#        print("Offset {}".format(b))
-#        print("Slope {}".format(m))
-#        print(x.shape)
-#        print(data.shape)
-#        print(b.shape)
-#        print(m.shape)
+#        offset = np.sqrt(m*m - x[0]*x[0])
+        offset = self._recalculate_offset(x, constants)
 
         # Determine residuals between data and fit
 #        data_reshaped = data.reshape(212, int(len(data)/212))
@@ -43,14 +37,17 @@ class Plot(PlotBase):
 #        residuals = mean_data.flatten() - m * mean_x - b
 #        roi_fine = np.where(self._s_coarse == roi)
 #        print(roi_fine)
-        roi = None  #np.where(self._s_coarse == 20)
-
+#        roi = None  #np.where(self._s_coarse == 20)
+        roi = np.where(np.logical_and(data < 30,
+                                      data > 1))
         residuals = self._calculate_residuals(x, data, constants)
+        data_roi = data[roi]
+        x_roi = x[roi]
 
         # Plot data and fit
         fig, axs = plt.subplots(nrows=2, sharex=True)
-        axs[0].plot(x[:], data[:], ".", markersize=0.5, label=label)
-        axs[0].plot(x[:], m * x[:] + (t+b), "r", label="Fitting")
+        axs[0].plot(x[roi], data[roi], ".", markersize=0.5, label=label)
+        axs[0].plot(x[roi], m * x[roi] + offset, "r", label="Fitting")
         axs[0].set(ylabel='ADC output [ADU]')
         axs[0].legend(['data', 'fit'], loc='best')
         axs[0].set_title(plot_title)
@@ -59,7 +56,7 @@ class Plot(PlotBase):
                  fontsize=12)
 
         # Plot residuals below data and fit plot
-        axs[1].plot(x[:], residuals[:], 'r.')
+        axs[1].plot(x[roi], residuals, 'r.')
         axs[1].set(xlabel="Vin [V]", ylabel="Residuals [ADU]")
         fig.savefig(out_fname)
 
@@ -71,7 +68,11 @@ class Plot(PlotBase):
         ''' Create a 1D-histogram
         '''
 
-        roi = np.where(self._s_coarse == 20)
+#        roi = np.where(self._s_coarse == 20)
+        roi = Ellipsis
+#        roi = np.where(np.logical_and(x < 30,
+#                                      x > 1))
+
         (mu, sigma) = norm.fit(x[roi])
 
         fig = plt.figure(figsize=None)
@@ -82,7 +83,7 @@ class Plot(PlotBase):
                                     alpha=0.75)
         plt.xlabel("Residuals [ADU]")
         plt.ylabel("Number of Entries")
-        y = mlab.normpdf(bins, mu, sigma)
+        y = norm.pdf(bins, mu, sigma)
         plt.plot(bins, y, 'r--', linewidth=2)
         fig.text(0.5, 0.78,
                  "Number of entries: {0:.2f}".format(len(x[roi])),
