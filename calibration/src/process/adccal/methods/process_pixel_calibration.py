@@ -92,7 +92,7 @@ class Process(ProcessAdccalBase):
                 fit = self._fit_linear(vin[roi], adu[roi])
                 slope[adc, col, row] = fit.solution[0]
                 offset[adc, col, row] = fit.solution[1]
-                offset[adc, col, row] = slope[adc, col, row] * vin[roi][0]
+                offset[adc, col, row] += slope[adc, col, row] * vin[roi][0]
             if offset[adc, col, row] < 0:
                 offset[adc, col, row] = np.NaN
             if (slope[adc, col, row] > 3e3 or
@@ -147,16 +147,16 @@ class Process(ProcessAdccalBase):
             s_slope = self._result["s_fine_slope"]["data"]
             r_slope = self._result["r_fine_slope"]["data"]
 
-            s_slope, s_offset = self.get_coarse_parameters(sample,
-                                                           sample_coarse,
-                                                           vin,
-                                                           s_slope,
-                                                           s_offset)
-            r_slope, r_offset = self.get_coarse_parameters(reset,
-                                                           reset_coarse,
-                                                           vin,
-                                                           r_slope,
-                                                           r_offset)
+            s_slope, s_offset = self.get_fine_parameters(sample,
+                                                         sample_coarse,
+                                                         vin,
+                                                         s_slope,
+                                                         s_offset)
+            r_slope, r_offset = self.get_fine_parameters(reset,
+                                                         reset_coarse,
+                                                         vin,
+                                                         r_slope,
+                                                         r_offset)
 
             self._result["s_fine_slope"]["data"] = s_slope
             self._result["s_fine_offset"]["data"] = s_offset
