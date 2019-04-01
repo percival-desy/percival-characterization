@@ -131,7 +131,7 @@ class PlotBase():
 
     def _set_roi(self, data, roi):
         if self._adc_part == "fine":
-            print("Determine roi for fine plotting")
+            print("Determine roi for s_coarse {}".format(self._roi_fit))
             self._roi = np.where(data == self._roi_fit)
         if self._adc_part == "coarse":
             print("Determine roi for coarse plotting")
