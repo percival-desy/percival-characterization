@@ -30,7 +30,11 @@ class CorrectionAdccalBase(CorrectionBase):
             "s_coarse_offset": "sample/coarse/offset",
             "s_coarse_slope": "sample/coarse/slope",
             "s_fine_offset": "sample/fine/offset",
-            "s_fine_slope": "sample/fine/slope"
+            "s_fine_slope": "sample/fine/slope",
+            "r_coarse_offset": "reset/coarse/offset",
+            "r_coarse_slope": "reset/coarse/slope",
+            "r_fine_offset": "reset/fine/offset",
+            "r_fine_slope": "reset/fine/slope"
         }
 
         self._n_adcs = None
