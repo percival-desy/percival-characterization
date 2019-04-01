@@ -141,6 +141,7 @@ class Process(ProcessAdccalBase):
             sample_coarse = data["s_coarse"]
             reset_coarse = data["r_coarse"]
             sample = data["s_fine"]
+            reset = data["r_fine"]
             vin = self._fill_vin_total_frames(data["vin"])
             s_offset = self._result["s_fine_offset"]["data"]
             r_offset = self._result["r_fine_offset"]["data"]
