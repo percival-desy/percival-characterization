@@ -263,7 +263,7 @@ class Analyse(object):
 
         # Input files for correction are the output from gather and process
         in_base_dir_gathered = os.path.join(self._in_base_dir, "gathered")
-        in_base_dir_processed = os.path.join(self._in_base_dir_processed, "processed")
+        in_base_dir_processed = os.path.join(self._in_base_dir, "processed")
 
         in_dir_gathered, in_file_name_gathered = self.generate_gather_path(in_base_dir_gathered)
         in_dir_processed, in_file_name_processed = self.generate_process_path(in_base_dir_processed)
