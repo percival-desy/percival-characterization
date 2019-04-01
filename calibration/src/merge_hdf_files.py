@@ -5,8 +5,6 @@ import numpy as np
 import sys
 import argparse
 import time
-from itertools import chain
-from collections import defaultdict
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 CALIBRATION_DIR = os.path.dirname(CURRENT_DIR)
@@ -110,15 +108,8 @@ def merge_dictionaries(list_data, list_keys):
     for key in list_keys:
         print(key)
         dict_t[key] = {}
-#        adc_shaped = np.zeros((1484, 1440))
-#        adc_shaped = np.zeros((7, 32, 212))
         for i in range(len(list_data)):
             stack = np.concatenate((stack, list_data[i][key]), axis=1)
-#        for grp in range(stack.shape[2]):
-#            for adc in range(stack.shape[0]):
-#                row = (grp * 7) + adc
-#                adc_shaped[row] = stack[adc, :, grp]
-#        dict_t[key] = adc_shaped
         dict_t[key] = stack
 
         stack = np.zeros((7, 0, 212))
@@ -254,55 +245,4 @@ if __name__ == '__main__':
             for key, value in data[file].items():
                 f.create_dataset(key, data=value)
                 f.flush()
-#        with h5.py
-
-#    data = defaultdict(list)
-#    for key, value in chain(data_crs.items(), data_fn.items()):
-#        data[key].append(value)
-#    list_constants_crs = [get_constants(file)
-#                          for file in file_list_crs]
-#    list_key_crs = [get_list_constant2(file)[1] for file in file_list_crs]
-#
-#    os.chdir(inputdir_fine)
-#    list_constants_fn = [get_constants(file) for file in file_list_fn]
-#    list_key_fn = [get_list_constant2(file)[1] for file in file_list_fn]
-#
-#    dict_constants = {}
-#    list_constants = []
-#    for i in range(len(list_constants_crs)):
-#        dict_constants.update(list_constants_crs[i])
-#        dict_constants.update(list_constants_fn[i])
-#        list_constants.append(dict_constants)
-#
-#    list_keys = list_key_crs[0] + list_key_fn[0]
-
-#    merged_list = [merge_dictionaries(list_constants, list_keys)
-#                   for i in range(len(list_constants))]
-#
-#    for file in range(len(file_list_crs)):
-#        write_output_file(output_dir, file_list_crs[file], list_constants[i])
-
-#    file_list_fn = get_file_list(inputdir_fine)
-#
-#    list_constants_fn, list_keys_fn = get_list_constant2(file_list_fn[1])
-#
-#    out_fname = file_list_crs[1]
-#
-#
-##    list_constants_crs, list_keys_crs = get_list_constant(inputdir_coarse)
-##    list_constants_fn, list_keys_fn = get_list_constant(inputdir_fine)
-#
-#    list_constants = []
-#    dict_output = {}
-#
-#    list_t = {}
-#    list_constants = []
-#    for i in range(len(list_constants_crs)):
-#        list_t.update(list_constants_crs[i])
-#        list_t.update(list_constants_fn[i])
-#        list_constants.append(list_t)
-#    list_keys = list_keys_crs + list_keys_fn
-#    merged_list = merge_dictionaries(list_constants, list_keys)
-#
-#    write_output_file(output_dir, out_fname, merged_list)
     print('Mergin took: {:.3f} s \n'.format(time.time() - total_time))

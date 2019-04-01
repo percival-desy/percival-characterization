@@ -4,6 +4,7 @@ import os
 import numpy as np
 import sys
 import argparse
+import time
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 CALIBRATION_DIR = os.path.dirname(CURRENT_DIR)
@@ -85,29 +86,14 @@ def merge_dictionaries(list_data, n_rows, n_frames):
             list_keys.append(subkey)
 
     for subkey in list_keys:
-        if not subkey.startswith("collection") and not subkey.startswith("vin"):
+        if (not subkey.startswith("collection") and not
+                subkey.startswith("vin")):
             dict_t[subkey] = {}
             stack = np.zeros((n_rows, 0, n_frames))
             for key, value, in list_data.items():
                 stack = np.concatenate((stack, list_data[key][subkey]), axis=1)
             dict_t[subkey] = stack
-#    for key, value in list_data.items():
-##        print(key)
-##        dict_t[key] = {}
-#        data = []
-#        for subkey, subvalue in list_data[key].items():
-#            if not subkey.startswith('collection') and not subkey.startswith('vin'):
-##                print(subkey, subvalue)
-##                print(subvalue.shape)
-#                data.append(subvalue)
-##                stack = np.concatenate((stack, list_data[key][subkey]), axis=1)
-##                print(stack)
-#            dict_t[subkey] = data
-#        stack = np.concatenate((stack, dict_t[subkey]), axis=1)
-#        dict_t2[subkey] = stack
-#        stack = np.zeros((n_rows, 0, n_frames))
 
-#    pass
     return dict_t
 
 
@@ -117,8 +103,6 @@ def write_output_file(outputdir, fname, dict_constants):
     out_fname = os.path.join(outputdir, fname)
     with h5py.File(out_fname, "w") as f:
         for key, value in dict_constants.items():
-#            for subkey, subvalue in dict_constants[key].items():
-#            print(key, value)
             f.create_dataset(key, data=value)
             f.flush()
 
@@ -148,6 +132,7 @@ def get_arguments():
 if __name__ == '__main__':
     #    import doctest
     #    doctest.testmod()
+    total_time = time.time()
 
     args = get_arguments()
 
@@ -159,17 +144,8 @@ if __name__ == '__main__':
 
     n_rows = data_shape[0]
     n_frames = data_shape[2]
-#    list_constants = []
-#    dict_output = {}
+
     merge_list = merge_dictionaries(list_constants, n_rows, n_frames)
     merge_shape = merge_list['sample/adc_corrected'].shape
     write_output_file(output_dir, out_fname, merge_list)
-
-#    list_t = {}
-#    list_constants = []
-#    for i in range(len(list_constants)):
-#        list_t.update(list_constants[i])
-#        list_constants.append(list_t)
-#    merged_list = merge_dictionaries(list_constants, list_keys)
-#
-#    write_output_file(output_dir, out_fname, merged_list)
+    print('Mergin took: {:.3f} s \n'.format(time.time() - total_time))
