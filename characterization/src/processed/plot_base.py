@@ -19,6 +19,7 @@ class PlotBase():
 
         self._dims_overwritten = dims_overwritten
         self._loaded_data = loaded_data
+        self._roi = None
 
         self._gathered_loader = LoadGathered(
             input_fname_templ=self._input_fname,
@@ -40,7 +41,7 @@ class PlotBase():
 
         if self._loaded_data is None or self._dims_overwritten:
             self._vin, self._data = self._gathered_loader.load_data()
-            self._constants = processed_loader.load_data()
+            self._constants, self._roi_fit = processed_loader.load_data()
         else:
             self._vin = self._loaded_data.vin
             self._data = self._loaded_data.gathered_data
@@ -125,14 +126,18 @@ class PlotBase():
         ''' Return residuals between fitted data and raw data
         '''
 
-        roi = np.where(np.logical_and(data < 30,
-                                      data > 1))
-
         offset = self._recalculate_offset(x, constants)
+        return data - constants['slope'] * x - offset
 
-        residuals = data - constants['slope'] * x - offset
-
-        return residuals[roi]
+    def _set_roi(self, data, roi):
+        if self._adc_part == "fine":
+            print("Determine roi for fine plotting")
+            self._roi = np.where(data == self._roi_fit)
+        if self._adc_part == "coarse":
+            print("Determine roi for coarse plotting")
+            print(self._roi_fit[1], self._roi_fit[0])
+            self._roi = np.where(np.logical_and(data < self._roi_fit[1],
+                                                data > self._roi_fit[0]))
 
     def plot_sample(self):
         self.create_dir()

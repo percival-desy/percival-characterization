@@ -42,6 +42,7 @@ class LoadProcessed():
                     "offset": "reset/fine/offset"
                 }
             }
+        self._metadata_paths = {"fit_roi": "collection/fit_roi"}
 
         self._n_frames_per_vin = None
 
@@ -113,20 +114,22 @@ class LoadProcessed():
 
         data = {}
         with h5py.File(self._input_fname, "r") as f:
+            fit_roi = f[self._metadata_paths["fit_roi"]][()]
             for key in self._paths:
                 data[key] = {}
                 for subkey, path in self._paths[key].items():
                     data[key][subkey] = f[path][self._adc, col, self._row]
 
-        return data
+        return data, fit_roi
 
     def load_all_data(self):
 
         data = {}
         with h5py.File(self._input_fname, "r") as f:
+            fit_roi = f[self._metadata_paths["fit_roi"]][()]
             for key in self._paths:
                 data[key] = {}
                 for subkey, path in self._paths[key].items():
                     data[key][subkey] = f[path][()]
 
-        return data
+        return data, fit_roi
