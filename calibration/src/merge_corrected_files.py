@@ -24,7 +24,9 @@ def get_file_list(inputdir):
     ''' Return a list of files contained in a directory
     '''
 
-    return os.listdir(inputdir)
+    file_list = os.listdir(inputdir)
+    file_list.sort()
+    return file_list
 
 
 def get_number_files(inputdir):
