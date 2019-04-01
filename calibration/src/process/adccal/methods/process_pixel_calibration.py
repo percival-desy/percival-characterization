@@ -35,6 +35,9 @@ class Process(ProcessAdccalBase):
                     "path": "reset/coarse/slope"
                 }
             }
+            self._metadata = {
+                    "fit_roi": self._method_properties["coarse_fitting_range"]
+            }
 
         if self._method_properties["fit_adc_part"] == "fine":
             self._result = {
@@ -54,6 +57,9 @@ class Process(ProcessAdccalBase):
                     "data": np.NaN * np.zeros(shapes["offset"]),
                     "path": "reset/fine/slope"
                 }
+            }
+            self._metadata = {
+                    "fit_roi": self._method_properties["coarse_fitting_range"]
             }
 
     def get_coarse_parameters(self, channel, vin, slope, offset):
