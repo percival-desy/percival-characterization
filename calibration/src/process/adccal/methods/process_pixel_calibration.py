@@ -59,7 +59,7 @@ class Process(ProcessAdccalBase):
                 }
             }
             self._metadata = {
-                    "fit_roi": self._method_properties["coarse_fitting_range"]
+                    "fit_roi": self._method_properties["fine_fitting_range"]
             }
 
     def get_coarse_parameters(self, channel, vin, slope, offset):
