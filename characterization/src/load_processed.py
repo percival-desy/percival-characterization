@@ -25,6 +25,10 @@ class LoadProcessed():
                 "s_coarse": {
                     "slope": "sample/coarse/slope",
                     "offset": "sample/coarse/offset"
+                },
+                "r_coarse": {
+                    "slope": "reset/coarse/slope",
+                    "offset": "reset/coarse/offset"
                 }
             }
         if self._adc_part == "fine":
@@ -32,6 +36,10 @@ class LoadProcessed():
                 "s_fine": {
                     "slope": "sample/fine/slope",
                     "offset": "sample/fine/offset"
+                },
+                "r_fine": {
+                    "slope": "reset/fine/slope",
+                    "offset": "reset/fine/offset"
                 }
             }
 
