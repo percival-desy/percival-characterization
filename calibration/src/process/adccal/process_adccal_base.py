@@ -28,6 +28,7 @@ class ProcessAdccalBase(ProcessBase):
         self._n_cols = None
         self._n_groups = None
         self._n_frames = None
+        self._n_rows = None
 
         self._n_total_frames = None
 
@@ -43,6 +44,7 @@ class ProcessAdccalBase(ProcessBase):
         self._n_cols = s_coarse.shape[1]
         self._n_frames = s_coarse.shape[2]
         self._n_groups = s_coarse.shape[3]
+        self._n_rows = self._n_adcs * self._n_groups
 
         self._n_total_frames = self._n_groups * self._n_frames
 
@@ -66,6 +68,15 @@ class ProcessAdccalBase(ProcessBase):
 
         return x
 
+    def _fill_vin_total_frames(self, vin):
+        # create as many entries for each vin as there were original frames
+        x = [np.full(self._n_frames_per_vin[i], v)
+             for i, v in enumerate(vin)]
+
+        x = np.hstack(x)
+
+        return x
+
     def _merge_groups_with_frames(self, data):
         # data has the dimension (n_adcs, n_cols, n_groups, n_frames)
         # should be transformed into (n_adcs, n_cols, n_groups * n_frames)
@@ -73,3 +84,19 @@ class ProcessAdccalBase(ProcessBase):
         data.shape = (self._n_adcs,
                       self._n_cols,
                       self._n_total_frames)
+
+    def _merge_adcs_with_row_group(self, data):
+        ''' Data has dimension (n_adcs, n_cols, n_frames, n_groups)
+            It should be transformed into (n_rows, n_cols, n_frames)
+        '''
+
+        print(data.shape)
+#        print(data[0, 100, 0, 3])
+#        data = np.rollaxis(data, 3)
+#        print(data[0, 0, 100, 3])
+        data = data.transpose(0, 3, 1, 2)
+        data = data.reshape(self._n_rows, self._n_cols, self._n_frames)
+#        print(data.shape)
+#        data = data.reshape(self._n_rows, self._n_cols, self._n_frames)
+        print(data.shape)
+        return data

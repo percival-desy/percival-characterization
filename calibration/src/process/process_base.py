@@ -40,6 +40,7 @@ class ProcessBase(object):
             setattr(self, "_" + key, value)
 
         self._result = {}
+        self._metadata = {}
 
         print("\n\nStart process")
         print("in_fname:", self._in_fname)
@@ -196,5 +197,14 @@ class ProcessBase(object):
 
             name = "{}/{}".format(metadata_base_path, "method")
             out_f.create_dataset(name, data=self._method)
+
+            gname = "collection"
+            for key, value in iter(self._metadata.items()):
+                name = "{}/{}".format(gname, key)
+                try:
+                    out_f.create_dataset(name, data=value)
+                except:
+                    print("Error in", name, value.dtype)
+                    raise
 
             out_f.flush()

@@ -1,5 +1,7 @@
 general:
-    data_type: raw
+
+    data_type: correction
+
     run: DLSraw
 
     plot_sample: True
@@ -7,12 +9,15 @@ general:
     plot_combined: True
 
 all:
-    output: &output /Users/ben/PostDoc/P2M_HDF5/Data_lab/VRST/DLSraw
+
+#    output: &output /Volumes/LACIE_SHARE/Beamtime_17122018/DLSraw/gathered/DLSraw
+#    output: &output /Volumes/LACIE_SHARE/Beamtime_17122018/pinhole3
+#    input: &input /Volumes/LACIE_SHARE/Beamtime_17122018/ek26
+    output: &output /Volumes/LACIE_SHARE/Percival/Data_lab_october18/Fine_scan
 
 raw:
-    #input: /Users/ben/PostDoc/P2M_HDF5/Data_lab/VRST/VRST18k1to21k2_271p_AV_02_dscrmbld_DLSraw.h5
-    #input: /Users/ben/PostDoc/P2M_HDF5/Data_lab/VRSTfromVin_8p1kto32k_AD_240frames_DLSraw.h5
-    input: /Users/ben/PostDoc/P2M_HDF5/2018.05.23_AD_00_descrambledDLSraw.h5
+    input: /Volumes/LACIE_SHARE/Percival/2018.12.08_3G/DLSraw/gathered/2018.10.17h1527_seqMode_10hrs_dscrmbld_DLSraw.h5
+
     metadata_fname: null
 
     output: *output
@@ -25,16 +30,20 @@ raw:
         err_below: -0.1
 
     adc: null
-    frame: null
-    col: 100
-    row: [0, 1484, 7]
 
-    #method: [viewer]
-    method: [image, plot_coarse-fine_vs_image]
+    frame: 2
+    col: 500
+    row: 100
+    adc_part: fine
+
+
+    interactive: False
+    method: [viewer]
 
 
     viewer:
-        err_below: -0.1
+      err_below: -0.1
+    #method: [image, plot_coarse-fine_vs_image]
 
 gathered:
     input: *output
@@ -44,8 +53,10 @@ gathered:
 
     adc: 0
     frame: null
-    col: 100
-    row: null
+    col: 60
+    row: 10
+    adc_part: fine
+    interactive: False
 
     interactive: True
     
@@ -58,11 +69,35 @@ processed:
 
     measurement: adccal
 
-    adc: 0
+    adc: [0]
     frame: null
     col: 100
-    row: null
-    
+    row: 100
+
+    adc_part: fine
+    interactive: false
+    method: [viewer]
+    viewer:
+        all_cols: True
+
+
+correction:
+    input: *output
+#    input_dark: *input
+    output: *output
+
+    measurement: adccal
+
+    adc: 2
+    frame: 3
+    col: 530
+    row: 10
+
+    adc_part: None
+
     interactive: True
 
     method: [plot]
+
+    plot:
+        all_cols: True

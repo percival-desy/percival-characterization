@@ -4,7 +4,7 @@ import os
 
 
 class LoadProcessed():
-    def __init__(self, input_fname_templ, output_dir, adc, row, col):
+    def __init__(self, input_fname_templ, output_dir, adc, row, col, adc_part):
 
         self._input_fname_templ = input_fname_templ
         self._output_dir = os.path.normpath(output_dir)
@@ -13,24 +13,62 @@ class LoadProcessed():
         self._col = col
 
         self._data_type = "processed"
+        self._adc_part = adc_part
 
         self._input_fname, self._col_offset = self._get_input_fname(
             self._input_fname_templ,
             self._col
         )
 
-        self._paths = {
-            "s_coarse": {
-                "slope": "sample/coarse/slope",
-                "offset": "sample/coarse/offset"
+        if self._adc_part == "coarse":
+            self._paths = {
+                "s_coarse": {
+                    "slope": "sample/coarse/slope",
+                    "offset": "sample/coarse/offset"
+                },
+                "r_coarse": {
+                    "slope": "reset/coarse/slope",
+                    "offset": "reset/coarse/offset"
+                }
             }
-        }
+        if self._adc_part == "fine":
+            self._paths = {
+                "s_fine": {
+                    "slope": "sample/fine/slope",
+                    "offset": "sample/fine/offset"
+                },
+                "r_fine": {
+                    "slope": "reset/fine/slope",
+                    "offset": "reset/fine/offset"
+                }
+            }
+        self._metadata_paths = {"fit_roi": "collection/fit_roi"}
 
         self._n_frames_per_vin = None
 
         self._n_frames = None
         self._n_groups = None
         self._n_total_frames = None
+
+    def set_col(self, col):
+        self._col = col
+
+    def get_col(self):
+        return self._col
+
+    def set_input_fname(self, col):
+        self._input_fname, self._col_offset = self._get_input_fname(
+            self._input_fname_templ,
+            self._col
+        )
+
+    def get_number_files(self, input_fname_templ):
+
+        input_fname = input_fname_templ.format(data_type=self._data_type,
+                                               col_start="*",
+                                               col_stop="*")
+
+        return len(glob.glob(input_fname))
 
     def _get_input_fname(self, input_fname_templ, col):
 
@@ -76,9 +114,22 @@ class LoadProcessed():
 
         data = {}
         with h5py.File(self._input_fname, "r") as f:
+            fit_roi = f[self._metadata_paths["fit_roi"]][()]
             for key in self._paths:
                 data[key] = {}
                 for subkey, path in self._paths[key].items():
-                    data[key][subkey] = f[path][self._adc, col]
+                    data[key][subkey] = f[path][self._adc, col, self._row]
 
-        return data
+        return data, fit_roi
+
+    def load_all_data(self):
+
+        data = {}
+        with h5py.File(self._input_fname, "r") as f:
+            fit_roi = f[self._metadata_paths["fit_roi"]][()]
+            for key in self._paths:
+                data[key] = {}
+                for subkey, path in self._paths[key].items():
+                    data[key][subkey] = f[path][()]
+
+        return data, fit_roi

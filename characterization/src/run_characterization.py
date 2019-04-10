@@ -39,7 +39,8 @@ def get_arguments():
                         type=str,
                         choices=["raw",
                                  "gathered",
-                                 "processed"],
+                                 "processed",
+                                 "correction"],
                         help="The data type to analyse")
 
     parser.add_argument("--adc",
@@ -214,6 +215,9 @@ class Analyse(object):
         self._method_list = self._config[self._data_type]["method"]
         self._interactive = self._config[self._data_type]["interactive"]
 
+        self._adc_part = self._config[self._data_type]["adc_part"]
+
+
         self.set_indices()
 
         self.load_methods()
@@ -271,12 +275,17 @@ class Analyse(object):
             row=self._row,
             col=self._col,
             run=self._run_id,
+            adc_part=self._adc_part,
             method_properties=None,
             interactive=self._interactive
         )
 
         print("Configured: adc={}, frame={}, row={}, col={}, interactive={}"
-              .format(self._adc, self._frame, self._row, self._col, self._interactive))
+              .format(self._adc,
+                      self._frame,
+                      self._row,
+                      self._col,
+                      self._interactive))
 
         loaded_data = None
         for method in self._method_list:
@@ -285,7 +294,7 @@ class Analyse(object):
 
             # loading method properties
             if method in self._config[self._data_type]:
-                prop =  self._config[self._data_type][method]
+                prop = self._config[self._data_type][method]
                 kwargs["method_properties"] = prop
 
             kwargs["output_dir"] = os.path.join(self._output,
