@@ -521,6 +521,7 @@ if __name__ == "__main__":
     if run_type == "gather":
         in_base_dir = in_base_dir
         # to allow additional directories for descramble
+
         # out_base_dir = os.path.join(out_base_dir, run_id, "{run_dir}")
         out_base_dir = os.path.join(out_base_dir, run_id, "gathered")
         create_outdir = False

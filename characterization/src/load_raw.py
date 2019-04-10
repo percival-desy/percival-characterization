@@ -11,7 +11,8 @@ class LoadRaw():
                  output_dir,
                  frame=None,
                  row=None,
-                 col=None):
+                 col=None,
+                 interactive=None):
 
         self._input_fname = input_fname
         self._metadata_fname = metadata_fname
@@ -32,6 +33,11 @@ class LoadRaw():
             self._col = slice(None)
         else:
             self._col = col
+        
+        if interactive is None:
+            self._interactive = slice(None)
+        else:
+            self._interactive = interactive
 
         self._data_type = "raw"
 

@@ -1,5 +1,7 @@
 general:
+
     data_type: correction
+
     run: DLSraw
 
     plot_sample: True
@@ -7,6 +9,7 @@ general:
     plot_combined: True
 
 all:
+
 #    output: &output /Volumes/LACIE_SHARE/Beamtime_17122018/DLSraw/gathered/DLSraw
 #    output: &output /Volumes/LACIE_SHARE/Beamtime_17122018/pinhole3
 #    input: &input /Volumes/LACIE_SHARE/Beamtime_17122018/ek26
@@ -14,20 +17,29 @@ all:
 
 raw:
     input: /Volumes/LACIE_SHARE/Percival/2018.12.08_3G/DLSraw/gathered/2018.10.17h1527_seqMode_10hrs_dscrmbld_DLSraw.h5
+
     metadata_fname: null
 
     output: *output
 
     measurement: adccal
 
+    interactive: True
+    
+    viewer:
+        err_below: -0.1
+
     adc: null
+
     frame: 2
     col: 500
     row: 100
     adc_part: fine
 
+
     interactive: False
     method: [viewer]
+
 
     viewer:
       err_below: -0.1
@@ -46,6 +58,8 @@ gathered:
     adc_part: fine
     interactive: False
 
+    interactive: True
+    
     method: [plot, hist, hist_2d]
     #method: [plot_sample_vs_reset]
 

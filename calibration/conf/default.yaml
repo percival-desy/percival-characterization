@@ -9,6 +9,7 @@ general:
     n_processes: 1
 
 all:
+
     input: &input /Volumes/LACIE_SHARE/Percival/2018.12.08_3G/DLSraw/gathered
     output: &output /Volumes/LACIE_SHARE/Percival/Data_lab_october18/Coarse_scan
     input_coarse:  &input_coarse /Volumes/LACIE_SHARE/Percival/Data_lab_october18/Coarse_scan
@@ -112,3 +113,4 @@ correction:
     input_fine: *input_fine
     input_gathered: /Volumes/LACIE_SHARE/Percival/2018.12.08_3G/DLSraw/gathered
     output: /Volumes/LACIE_SHARE/Percival/2018.12.08_3G/DLSraw/gathered/DLSraw/gathered
+

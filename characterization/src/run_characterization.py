@@ -214,7 +214,9 @@ class Analyse(object):
         self._row = self._config[self._data_type]["row"]
         self._method_list = self._config[self._data_type]["method"]
         self._interactive = self._config[self._data_type]["interactive"]
+
         self._adc_part = self._config[self._data_type]["adc_part"]
+
 
         self.set_indices()
 
