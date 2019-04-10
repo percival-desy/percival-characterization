@@ -20,7 +20,7 @@ if SHARED_DIR not in sys.path:
 import utils
 
 
-class JoinConstants(object):
+class MergeConstants(object):
 
     def __init__(self, input_dir_crs, input_dir_fn, outpur_dir, out_fname):
         self._input_dir = None
@@ -34,9 +34,6 @@ class JoinConstants(object):
 
     def set_n_rows(self, n_rows):
         self._n_rows = n_rows
-
-    def set_n_frames(self, n_frames):
-        self._n_frames = n_frames
 
     def get_list_of_files(self):
         ''' Return a list of files contained inside the input directory
@@ -107,8 +104,6 @@ class JoinConstants(object):
         for subkey in list_keys:
             if (not subkey.startswith("collection") and not
                     subkey.startswith("vin")):
-                print(subkey)
-
                 dict_t[subkey] = {}
                 stack = np.zeros((n_rows, 0))
                 for key, value, in list_data.items():
@@ -139,23 +134,11 @@ class JoinConstants(object):
 
     def write_hdf5_file(self, files_to_merge):
 
-#        for file in files_to_merge:
         out_fname = os.path.join(self._output_dir, self._out_fname)
         with h5py.File(out_fname, "w") as f:
             for key, value in files_to_merge.items():
                 f.create_dataset(key, data=value)
                 f.flush()
-
-
-def get_number_files(inputdir):
-    ''' Return the number of files contain in the input folder
-
-        Example:
-            >>> get_number_files([1, 2, 3])
-            3
-    '''
-
-    return len(inputdir)
 
 
 def get_arguments():
@@ -196,85 +179,8 @@ if __name__ == '__main__':
     output_dir = args.output_dir
     out_fname = args.output_file
 
-    obj = JoinConstants(inputdir_coarse, inputdir_fine, output_dir, out_fname)
+    obj = MergeConstants(inputdir_coarse, inputdir_fine, output_dir, out_fname)
     obj.run()
 
     print("File {} written in directory {}".format(out_fname, output_dir))
-#
-## Get list of files according to input directory
-#    os.chdir(inputdir_coarse)
-#    file_list_crs = get_file_list(inputdir_coarse)
-#    file_list_fn = get_file_list(inputdir_fine)
-#
-## Create a dictionary with file name for each columns
-## Files are called: coln-m_processed.h5 and we keep only coln-m
-#    files_crs = {}
-#    for fname in file_list_crs:
-#        columns = fname.split("_processed.h5")[0]
-#        if columns in files_crs:
-#            files_crs[columns].append(fname)
-#        else:
-#            files_crs[columns] = [fname]
-#
-## We prepare a dictionary to our file structure and the values
-#    data_crs = {}
-#    for columns, file_list in files_crs.items():
-#        data_crs[columns] = {}
-#        data_to_be_concatenated = {}
-#        for fname in file_list:
-#            file_content = utils.load_file_content(fname)
-#            for key, value in file_content.items():
-#                if key.startswith('collection'):
-#                    if key not in data_to_be_concatenated:
-#                        data_to_be_concatenated[key] = value
-#                else:
-#                    if key not in data_to_be_concatenated:
-#                        data_to_be_concatenated[key] = {}
-#                    data_to_be_concatenated[key] = value
-#        for key, value in data_to_be_concatenated.items():
-#            data_crs[columns][key] = value
-#
-#    os.chdir(inputdir_fine)
-#    files_fn = {}
-#    for fname in file_list_crs:
-#        columns = fname.split("_processed.h5")[0]
-#        if columns in files_fn:
-#            files_fn[columns].append(fname)
-#        else:
-#            files_fn[columns] = [fname]
-#
-#    data_fn = {}
-#    for columns, file_list in files_fn.items():
-#        data_fn[columns] = {}
-#        data_to_be_concatenated = {}
-#        for fname in file_list:
-#            file_content = utils.load_file_content(fname)
-#            for key, value in file_content.items():
-#                if key.startswith('collection'):
-#                    if key not in data_to_be_concatenated:
-#                        data_to_be_concatenated[key] = value
-#                else:
-#                    if key not in data_to_be_concatenated:
-#                        data_to_be_concatenated[key] = {}
-#                    data_to_be_concatenated[key] = value
-#        for key, value in data_to_be_concatenated.items():
-#            data_fn[columns][key] = value
-#
-## %erge values into same dictionary
-#    data = {}
-#    for columns, file_list in files_crs.items():
-#        data[columns] = {}
-#        for key, value in data_crs[columns].items():
-#            data[columns][key] = value
-#        for key, value in data_fn[columns].items():
-#            data[columns][key] = value
-#
-#    os.chdir(output_dir)
-#    for file in files_crs:
-#        print(files_crs[file])
-#        outfname = files_crs[file][0]
-#        with h5py.File(outfname, "w") as f:
-#            for key, value in data[file].items():
-#                f.create_dataset(key, data=value)
-#                f.flush()
-#    print('Mergin took: {:.3f} s \n'.format(time.time() - total_time))
+    print('Merging files took: {:.3f} s \n'.format(time.time() - total_time))
