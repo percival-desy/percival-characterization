@@ -66,7 +66,7 @@ class MergeConstants(object):
                 for key, value in file_content.items():
                     if (key.startswith("collection") and
                        key not in data_to_concatenate):
-                            data_to_concatenate[key] = key
+                            data_to_concatenate[key] = value
                     else:
                         if key not in data_to_concatenate:
                             data_to_concatenate[key] = {}
@@ -85,10 +85,17 @@ class MergeConstants(object):
         data = {}
         for columns, file_list in data_crs.items():
             data[columns] = {}
+            fit_roi = []
             for key, value in data_crs[columns].items():
+                if key.endswith("fit_roi"):
+                    fit_roi.append(value[0])
+                    fit_roi.append(value[1])
                 data[columns][key] = value
             for key, value in data_fn[columns].items():
                 data[columns][key] = value
+                if key.endswith("fit_roi"):
+                    fit_roi.append(value)
+            data[columns]["collection/fit_roi"] = fit_roi
         return data
 
     def merge_dictionaries(self, list_data, n_rows):
@@ -110,6 +117,8 @@ class MergeConstants(object):
                     stack = np.concatenate((stack, list_data[key][subkey]),
                                            axis=1)
                 dict_t[subkey] = stack
+            else:
+                dict_t[subkey] = list_data[key][subkey]
 
         return dict_t
 
