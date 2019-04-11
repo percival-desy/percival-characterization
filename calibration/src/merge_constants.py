@@ -85,7 +85,6 @@ class MergeConstants(object):
         data = {}
         for columns, file_list in data_crs.items():
             data[columns] = {}
-            fit_roi = []
             for key, value in data_crs[columns].items():
                 data[columns][key] = value
             for key, value in data_fn[columns].items():
