@@ -87,15 +87,9 @@ class MergeConstants(object):
             data[columns] = {}
             fit_roi = []
             for key, value in data_crs[columns].items():
-                if key.endswith("fit_roi"):
-                    fit_roi.append(value[0])
-                    fit_roi.append(value[1])
                 data[columns][key] = value
             for key, value in data_fn[columns].items():
                 data[columns][key] = value
-                if key.endswith("fit_roi"):
-                    fit_roi.append(value)
-            data[columns]["collection/fit_roi"] = fit_roi
         return data
 
     def merge_dictionaries(self, list_data, n_rows):
