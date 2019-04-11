@@ -40,7 +40,7 @@ def get_arguments():
                         choices=["raw",
                                  "gathered",
                                  "processed",
-                                 "correction"],
+                                 "corrected"],
                         help="The data type to analyse")
 
     parser.add_argument("--adc",
