@@ -20,29 +20,26 @@ class LoadProcessed():
             self._col
         )
 
-        if self._adc_part == "coarse":
-            self._paths = {
-                "s_coarse": {
-                    "slope": "sample/coarse/slope",
-                    "offset": "sample/coarse/offset"
-                },
-                "r_coarse": {
-                    "slope": "reset/coarse/slope",
-                    "offset": "reset/coarse/offset"
-                }
+        self._paths = {
+            "s_coarse": {
+                "slope": "sample/coarse/slope",
+                "offset": "sample/coarse/offset"
+            },
+            "r_coarse": {
+                "slope": "reset/coarse/slope",
+                "offset": "reset/coarse/offset"
+            },
+            "s_fine": {
+                "slope": "sample/fine/slope",
+                "offset": "sample/fine/offset"
+            },
+            "r_fine": {
+                "slope": "reset/fine/slope",
+                "offset": "reset/fine/offset"
             }
-        if self._adc_part == "fine":
-            self._paths = {
-                "s_fine": {
-                    "slope": "sample/fine/slope",
-                    "offset": "sample/fine/offset"
-                },
-                "r_fine": {
-                    "slope": "reset/fine/slope",
-                    "offset": "reset/fine/offset"
-                }
-            }
-        self._metadata_paths = {"fit_roi": "collection/fit_roi"}
+        }
+        self._metadata_paths = {"roi_crs": "collection/roi_crs",
+                                "roi_fn": "collection/roi_fn"}
 
         self._n_frames_per_vin = None
 
@@ -62,13 +59,13 @@ class LoadProcessed():
             self._col
         )
 
-    def get_number_files(self, input_fname_templ):
-
-        input_fname = input_fname_templ.format(data_type=self._data_type,
-                                               col_start="*",
-                                               col_stop="*")
-
-        return len(glob.glob(input_fname))
+#    def get_number_files(self, input_fname_templ):
+#
+#        input_fname = input_fname_templ.format(data_type=self._data_type,
+#                                               col_start="*",
+#                                               col_stop="*")
+#
+#        return len(glob.glob(input_fname))
 
     def _get_input_fname(self, input_fname_templ, col):
 
@@ -110,26 +107,35 @@ class LoadProcessed():
         return searched_file, col_offset
 
     def load_data(self):
-        col = self._col - self._col_offset
+#        col = self._col - self._col_offset
 
         data = {}
         with h5py.File(self._input_fname, "r") as f:
-            fit_roi = f[self._metadata_paths["fit_roi"]][()]
-            for key in self._paths:
-                data[key] = {}
-                for subkey, path in self._paths[key].items():
-                    data[key][subkey] = f[path][self._adc, col, self._row]
 
-        return data, fit_roi
-
-    def load_all_data(self):
-
-        data = {}
-        with h5py.File(self._input_fname, "r") as f:
-            fit_roi = f[self._metadata_paths["fit_roi"]][()]
             for key in self._paths:
                 data[key] = {}
                 for subkey, path in self._paths[key].items():
                     data[key][subkey] = f[path][()]
 
-        return data, fit_roi
+        return data
+
+    def load_all_data(self):
+
+        data = {}
+        with h5py.File(self._input_fname, "r") as f:
+            roi_crs = f[self._metadata_paths["roi_crs"]][()]
+            roi_fn = f[self._metadata_paths["roi_fn"]][()]
+            for key in self._paths:
+                data[key] = {}
+                for subkey, path in self._paths[key].items():
+                    data[key][subkey] = f[path][()]
+
+        return data, roi_crs, roi_fn
+
+    def load_metadata(self):
+
+        with h5py.File(self._input_fname, "r") as f:
+            roi_crs = f[self._metadata_paths["roi_crs"]][()]
+            roi_fn = f[self._metadata_paths["roi_fn"]][()]
+
+        return roi_crs, roi_fn
