@@ -110,9 +110,9 @@ class Process(ProcessAdccalBase):
     def _adc_reordering(self, adc_to_reorder):
         ''' Reshuffle adc arrays
                 Input data (4D arrays):
-                    (n_adcs, n_cols, n_frames, n_groups)
+                    (n_adcs, n_cols, n_groups)
                 Output data (3D arrays):
-                    (n_rows, n_cols, n_frames)
+                    (n_rows, n_cols)
         '''
         adc_shaped = np.zeros((self._n_rows, self._n_cols))
         for grp in range(self._n_groups):
