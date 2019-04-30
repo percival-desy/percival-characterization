@@ -16,9 +16,8 @@ class Plot(PlotBase):
             input_fname_templ=self._input_fname,
             output_dir=self._output_dir,
             adc=self._adc,
-            row=self._row,
-            col=self._col,
-            adc_part=self._adc_part
+            row=slice(None, None, None),
+            col=slice(None, None, None)
         )
 
         if self._loaded_data is None or self._dims_overwritten:
