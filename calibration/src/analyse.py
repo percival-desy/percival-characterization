@@ -323,12 +323,12 @@ class Analyse(object):
         print(in_fname_processed)
 
     def _call_correction(self, **kwargs):
-        if self._measurement == "adccal":
-            if ADCCAL_CORRECTION_METHOD_DIR not in sys.path:
-                sys.path.insert(0, ADCCAL_CORRECTION_METHOD_DIR)
-        elif self.measurement == "ptccal":
-            if PTCCAL_CORRECTION_METHOD_DIR not in sys.path:
-                sys.path.inster(0, PTCCAL_CORRECTION_METHOD_DIR)
+        if (self._measurement == "adccal" and
+                ADCCAL_CORRECTION_METHOD_DIR not in sys.path):
+            sys.path.insert(0, ADCCAL_CORRECTION_METHOD_DIR)
+        elif (self.measurement == "ptccal" and
+                PTCCAL_CORRECTION_METHOD_DIR not in sys.path):
+            sys.path.inster(0, PTCCAL_CORRECTION_METHOD_DIR)
 
         correction_m = __import__(self._method).Correction
 

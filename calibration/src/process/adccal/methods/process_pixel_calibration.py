@@ -3,7 +3,7 @@
     part of ADCs by calling a linear fit from the base class.
 '''
 import numpy as np
-
+from itertools import product
 import __init__  # noqa F401
 from process_adccal_base import ProcessAdccalBase
 
@@ -19,26 +19,108 @@ class Process(ProcessAdccalBase):
         if self._method_properties["fit_adc_part"] == "coarse":
             self._result = {
                 "s_coarse_offset": {
-                    "data": np.zeros(shapes["offset"]),
+                    "data": np.NaN * np.zeros(shapes["offset"]),
                     "path": "sample/coarse/offset"
                 },
                 "s_coarse_slope": {
-                    "data": np.zeros(shapes["offset"]),
+                    "data": np.NaN * np.zeros(shapes["offset"]),
                     "path": "sample/coarse/slope"
+                },
+                "r_coarse_offset": {
+                    "data": np.NaN * np.zeros(shapes["offset"]),
+                    "path": "reset/coarse/offset"
+                },
+                "r_coarse_slope": {
+                    "data": np.NaN * np.zeros(shapes["offset"]),
+                    "path": "reset/coarse/slope"
                 }
+            }
+            self._metadata = {
+                    "roi_crs": self._method_properties["coarse_fitting_range"]
             }
 
         if self._method_properties["fit_adc_part"] == "fine":
             self._result = {
                 "s_fine_offset": {
-                    "data": np.zeros(shapes["offset"]),
+                    "data": np.NaN * np.zeros(shapes["offset"]),
                     "path": "sample/fine/offset"
                 },
                 "s_fine_slope": {
-                    "data": np.zeros(shapes["offset"]),
+                    "data": np.NaN * np.zeros(shapes["offset"]),
                     "path": "sample/fine/slope"
+                },
+                "r_fine_offset": {
+                    "data": np.NaN * np.zeros(shapes["offset"]),
+                    "path": "reset/fine/offset"
+                },
+                "r_fine_slope": {
+                    "data": np.NaN * np.zeros(shapes["offset"]),
+                    "path": "reset/fine/slope"
                 }
             }
+            self._metadata = {
+                    "roi_fn": self._method_properties["fine_fitting_range"]
+            }
+
+    def get_coarse_parameters(self, channel, vin, slope, offset):
+        ''' Return the offset and slope from fit of coarse data
+            according to the channel (sample or reset)
+        '''
+
+        fit_roi = self._method_properties["coarse_fitting_range"]
+        for adc, col, row in product(range(self._n_adcs),
+                                     range(self._n_cols),
+                                     range(self._n_groups)):
+            adu = channel[adc, col, :, row]
+            roi = np.where(np.logical_and(adu < fit_roi[1],
+                                          adu > fit_roi[0]))
+            if np.any(roi):
+                fit = self._fit_linear(vin[roi], adu[roi])
+                slope[adc, col, row] = fit.solution[0]
+                offset[adc, col, row] = slope[adc, col, row] * vin[roi][0]
+                offset[adc, col, row] += fit.solution[1]
+
+        return slope, offset
+
+    def get_fine_parameters(self, channel, coarse, vin, slope, offset):
+        ''' Return the offset and slope from fit of fine data
+            according to the channel (sample or reset)
+        '''
+
+        fit_roi = self._method_properties["fine_fitting_range"]
+        for adc, col, row in product(range(self._n_adcs),
+                                     range(self._n_cols),
+                                     range(self._n_groups)):
+            adu = channel[adc, col, :, row]
+            crs = coarse[adc, col, :, row]
+            roi = np.where(crs == fit_roi)
+            if np.any(roi):
+                fit = self._fit_linear(vin[roi], adu[roi])
+                slope[adc, col, row] = fit.solution[0]
+                offset[adc, col, row] = fit.solution[1]
+                offset[adc, col, row] += slope[adc, col, row] * vin[roi][0]
+            if offset[adc, col, row] < 0:
+                offset[adc, col, row] = np.NaN
+            if (slope[adc, col, row] > 3e3 or
+                    slope[adc, col, row] < 0):
+                slope[adc, col, row] = np.NaN
+
+        return slope, offset
+
+    def _adc_reordering(self, adc_to_reorder):
+        ''' Reshuffle adc arrays
+                Input data (4D arrays):
+                    (n_adcs, n_cols, n_groups)
+                Output data (3D arrays):
+                    (n_rows, n_cols)
+        '''
+        adc_shaped = np.zeros((self._n_rows, self._n_cols))
+        for grp in range(self._n_groups):
+            for adc in range(self._n_adcs):
+                row = (grp * 7) + adc
+                adc_shaped[row] = adc_to_reorder[adc, :, grp]
+
+        return adc_shaped
 
     def _calculate(self):
         ''' Perform a linear fit on sample ADC coarse and fine.
@@ -51,63 +133,54 @@ class Process(ProcessAdccalBase):
         if self._method_properties["fit_adc_part"] == "coarse":
             print("Data loaded, fitting coarse data...")
             sample = data["s_coarse"]
+            reset = data["r_coarse"]
             print(sample.shape)
             vin = self._fill_vin_total_frames(data["vin"])
-#            vin = self._fill_up_vin(data["vin"])
-            offst = self._result["s_coarse_offset"]["data"]  # Offset
-            offst[:] = np.NaN
-            slp = self._result["s_coarse_slope"]["data"]  # Slope
-            slp[:] = np.NaN
-            fitting_range = self._method_properties["coarse_fitting_range"]
-            print("Fitting in range [{}; {}]".format(fitting_range[0],
-                  fitting_range[1]))
+            s_offset = self._result["s_coarse_offset"]["data"]  # Offset sample
+            r_offset = self._result["r_coarse_offset"]["data"]  # Offset reset
+            s_slope = self._result["s_coarse_slope"]["data"]  # Slope sample
+            r_slope = self._result["s_coarse_slope"]["data"]  # Slope reset
 
-            for adc in range(self._n_adcs):
-                for col in range(self._n_cols):
-                    for row in range(self._n_groups):
-                        adu = sample[adc, col, :, row]
-                        roi = np.where(np.logical_and(adu < fitting_range[1],
-                                                      adu > fitting_range[0]))
-                        if np.any(roi):
-                            fit = self._fit_linear(vin[roi], adu[roi])
-                            slp[adc, col, row] = fit.solution[0]
-#                            offst[adc, col, row] = fit.solution[1]
-                            offst[adc, col, row] = slp[adc, col, row] * vin[roi][0] + fit.solution[1]
+            s_slope, s_offset = self.get_coarse_parameters(sample,
+                                                           vin,
+                                                           s_slope,
+                                                           s_offset)
+            r_slope, r_offset = self.get_coarse_parameters(reset,
+                                                           vin,
+                                                           r_slope,
+                                                           r_offset)
 
-            self._result["s_coarse_slope"]["data"] = slp
-            self._result["s_coarse_offset"]["data"] = offst
+            self._result["s_coarse_slope"]["data"] = self._adc_reordering(s_slope)
+            self._result["s_coarse_offset"]["data"] = self._adc_reordering(s_offset)
+            self._result["r_coarse_slope"]["data"] = self._adc_reordering(r_slope)
+            self._result["r_coarse_offset"]["data"] =  self._adc_reordering(r_offset)
 
         if self._method_properties["fit_adc_part"] == "fine":
             print("Data loaded, fitting coarse data...")
             # convert (n_adcs, n_cols, n_groups, n_frames)
             #      -> (n_adcs, n_cols, n_groups * n_frames)
             sample_coarse = data["s_coarse"]
+            reset_coarse = data["r_coarse"]
             sample = data["s_fine"]
+            reset = data["r_fine"]
             vin = self._fill_vin_total_frames(data["vin"])
-            offset = self._result["s_fine_offset"]["data"]
-            offset[:] = np.NaN
-            slope = self._result["s_fine_slope"]["data"]
-            slope[:] = np.NaN
-            fitting_range = self._method_properties["fine_fitting_range"]
+            s_offset = self._result["s_fine_offset"]["data"]
+            r_offset = self._result["r_fine_offset"]["data"]
+            s_slope = self._result["s_fine_slope"]["data"]
+            r_slope = self._result["r_fine_slope"]["data"]
 
-            for adc in range(self._n_adcs):
-                for col in range(self._n_cols):
-                    for row in range(self._n_groups):
-                        adu = sample[adc, col, :, row]
-#                        print(adu.shape)
-                        roi = np.where(sample_coarse[adc,
-                                                     col,
-                                                     :,
-                                                     row] == fitting_range)
-                        if np.any(roi):
-                            fit = self._fit_linear(vin[roi], adu[roi])
-                            slope[adc, col, row] = fit.solution[0]
-                            offset[adc, col, row] = slope[adc, col, row] * vin[roi][0] + fit.solution[1]
-                        if offset[adc, col, row] < 0:
-                            offset[adc, col, row] = np.NaN
-                        if slope[adc, col, row] > 3e3 or \
-                           slope[adc, col, row] < 0:
-                            slope[adc, col, row] = np.NaN
+            s_slope, s_offset = self.get_fine_parameters(sample,
+                                                         sample_coarse,
+                                                         vin,
+                                                         s_slope,
+                                                         s_offset)
+            r_slope, r_offset = self.get_fine_parameters(reset,
+                                                         reset_coarse,
+                                                         vin,
+                                                         r_slope,
+                                                         r_offset)
 
-            self._result["s_fine_slope"]["data"] = slope
-            self._result["s_fine_offset"]["data"] = offset
+            self._result["s_fine_slope"]["data"] = self._adc_reordering(s_slope)
+            self._result["s_fine_offset"]["data"] = self._adc_reordering(s_offset)
+            self._result["r_fine_slope"]["data"] = self._adc_reordering(r_slope)
+            self._result["r_fine_offset"]["data"] = self._adc_reordering(r_offset)
