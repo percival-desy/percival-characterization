@@ -1,6 +1,6 @@
 import argparse
 import json
-#from _version import __version__
+from _version import __version__
 import multiprocessing as mp
 import os
 import sys
@@ -258,17 +258,17 @@ class CorrectionBase(object):
 
             # write metadata
 
-#            metadata_base_path = "collection"
-#
-#            today = str(date.today())
-#            out_f.create_dataset("{}/creation_date".format(metadata_base_path),
-#                                 data=today)
+            metadata_base_path = "collection"
 
-#            name = "{}/{}".format(metadata_base_path, "version")
-#            out_f.create_dataset(name, data=__version__)
-#
-#            name = "{}/{}".format(metadata_base_path, "method")
-#            out_f.create_dataset(name, data=self._method)
+            today = str(date.today())
+            out_f.create_dataset("{}/creation_date".format(metadata_base_path),
+                                 data=today)
+
+            name = "{}/{}".format(metadata_base_path, "version")
+            out_f.create_dataset(name, data=__version__)
+
+            name = "{}/{}".format(metadata_base_path, "method")
+            out_f.create_dataset(name, data=self._method)
 
             out_f.flush()
 
