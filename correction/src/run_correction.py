@@ -1,5 +1,5 @@
 import argparse
-from _version import __version__
+#from _version import __version__
 import os
 import sys
 import time
@@ -273,7 +273,6 @@ class CorrectionBase(object):
 
 
 def get_arguments():
-    global CONFIG_DIR
 
     parser = argparse.ArgumentParser(description="Correction tools for P2M")
     parser.add_argument('-i', '--input',
