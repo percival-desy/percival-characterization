@@ -1,16 +1,13 @@
-import copy
+from plot_base import PlotBase
+from load_correction import LoadCorrection
 import matplotlib
 # Generate images without having a window appear:
 # this prevents sending remote data to locale PC for rendering
 matplotlib.use('TkAgg')  # Must be before importing matplotlib.pyplot or pylab!
 import matplotlib.pyplot as plt  # noqa E402
-from matplotlib.colors import LogNorm
-import numpy as np
 
 import __init__  # noqa E402
 #from plot_base import PlotBase  # noqa E402
-from plot_base import PlotBase
-from load_correction import LoadCorrection
 
 
 class Plot(PlotBase):
@@ -69,15 +66,15 @@ class Plot(PlotBase):
 
         out = self._output_dir + "/"
         self._generate_single_hist(data=self._data["reset"]["r_adc_corrected"],
-                              plot_title="Reset corrected",
-                              label="Reset",
-                              out_fname=out+"reset_corrected")
+                                   plot_title="Reset corrected",
+                                   label="Reset",
+                                   out_fname=out+"reset_corrected")
 
     def plot_combined(self):
         self.create_dir()
 
         out = self._output_dir + '/'
         self._generate_single_hist(data=self._data["cds"]["cds"],
-                              plot_title="CDS",
-                              label="CDS",
-                              out_fname=out+"cds")
+                                   plot_title="CDS",
+                                   label="CDS",
+                                   out_fname=out+"cds")
