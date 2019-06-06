@@ -74,7 +74,7 @@ class PlotBase():
 
         pos = "frame={}".format(self._frame)
         suffix = "_frame{}".format(self._frame)
-        out = self._output_dir+"/"
+        out = self._output_dir+"/sample/"
 
         self._generate_single_plot(data=self._data["s_coarse"],
                                    plot_title="Sample Coarse, "+pos,
@@ -94,7 +94,7 @@ class PlotBase():
 
         pos = "frame={}".format(self._frame)
         suffix = "_frame{}".format(self._frame)
-        out = self._output_dir+"/"
+        out = self._output_dir+"/reset/"
 
         self._generate_single_plot(data=self._data["r_coarse"],
                                    plot_title="Reset Coarse, "+pos,
