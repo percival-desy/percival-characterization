@@ -1,7 +1,7 @@
 import argparse
 import json
 #from _version import __version__
-import multiprocessing
+import multiprocessing as mp
 import os
 import sys
 import time
@@ -77,6 +77,7 @@ class CorrectionBase(object):
         filename = "col{col_start}-{col_stop}_corrected.h5"
 
         return dirname, filename
+
     def _initiate(self):
         shapes = {
           "data_structure": (self._n_frames,
@@ -116,14 +117,10 @@ class CorrectionBase(object):
             The final output is adcs corrected
         '''
 
-#        print("Start loading data from {} ".format(self._in_fname_gathered),
-#              "and  data from {}... ".format(self._in_fname_processed),
-#              end="")
-
         s_offset_crs = self._constants["s_coarse"]["offset"]
         r_offset_crs = self._constants["r_coarse"]["offset"]
-        s_slope_crs = self._constants["s_coarse"]["slope"]
-        r_slope_crs = self._constants["r_coarse"]["slope"]
+        s_slope_crs = np.abs(self._constants["s_coarse"]["slope"])
+        r_slope_crs = np.abs(self._constants["r_coarse"]["slope"])
         s_offset_fn = self._constants["s_fine"]["offset"]
         r_offset_fn = self._constants["r_fine"]["offset"]
         s_slope_fn = self._constants["s_fine"]["slope"]
@@ -137,19 +134,19 @@ class CorrectionBase(object):
             s_crs_cor = self.correction_crs_fn(self._s_crs[frame, :, :],
                                                s_offset_crs,
                                                s_slope_crs,
-                                               -ADU_MAX/2)
+                                               ADU_MAX/2)
             s_fn_cor = self.correction_crs_fn(self._s_fn[frame, :, :],
                                               s_offset_fn,
                                               s_slope_fn,
-                                              ADU_MAX)
+                                              ADU_MAX/2)
             r_crs_cor = self.correction_crs_fn(self._r_crs[frame, :, :],
                                                r_offset_crs,
                                                r_slope_crs,
-                                               -ADU_MAX/2)
+                                               ADU_MAX/2)
             r_fn_cor = self.correction_crs_fn(self._r_fn[frame, :, :],
                                               r_offset_fn,
                                               r_slope_fn,
-                                              ADU_MAX)
+                                              ADU_MAX/2)
             self._sample_corrected[frame, :, :] = s_crs_cor - s_fn_cor + ADU_MAX
             self._reset_corrected[frame, :, :] = r_crs_cor - r_fn_cor + ADU_MAX
 
@@ -161,14 +158,15 @@ class CorrectionBase(object):
 
             Example:
                 >>> correction_crs_fn(29.3, 31.0, 19.2, -2047.5)
-                    -56 685,890625
+                    -181,2447916667
         '''
 
-        return (adc_ramp - offset) / slope * adu_max
+        return ((adc_ramp - offset) / slope) * adu_max
 
     def _calculate_cds(self):
         self._cds = self._sample_corrected[1:, :, :] - self._reset_corrected[:-1, :, :]
         self._result["cds"]["data"] = self._cds
+
 
     def run(self):
         ''' Run correction procedure
@@ -185,6 +183,7 @@ class CorrectionBase(object):
         self._initiate()
 
         self._calculate()
+
         self._calculate_cds()
 
         print('Start saving results as {} ...'.format(self._out_fname),
@@ -274,22 +273,41 @@ class CorrectionBase(object):
             out_f.flush()
 
 
+def get_arguments():
+    global CONFIG_DIR
+
+    parser = argparse.ArgumentParser(description="Correction tools for P2M")
+    parser.add_argument('-i', '--input',
+                        dest="input",
+                        type=str,
+                        help=("Path of the raw data to correct (HDF5 file)"))
+    parser.add_argument('-c', '--constants',
+                        dest="constants",
+                        type=str,
+                        help=("Path of constants data to apply on raw data"))
+    parser.add_argument('-o', '--output',
+                         dest='output',
+                         type=str,
+                         help=("Path of output directory for storing files"))
+
+    args = parser.parse_args()
+
+    return args
+
+
 if __name__ == '__main__':
 
-    total_time = time.time()
+    args = get_arguments()
 
-#    data_fname = '/Volumes/LACIE_SHARE/Percival/Data_lab_october18/Coarse_scan/crs-scan_Vin=31600_DLSraw.h5'
-    data_fname = '/Volumes/LACIE_SHARE/Percival/2018.12.08_3G/DLSraw/gathered/2018.10.17h1527_seqMode_10hrs_dscrmbld_DLSraw.h5'
+    data_fname = args.input
     dark_fname = None
-    output_dir = '/Volumes/LACIE_SHARE/Percival/Data_lab_october18/DLSraw/corrected/col0-1439_corrected.h5'
-    contants_dir = '/Volumes/LACIE_SHARE/Percival/Data_lab_october18/DLSraw/processed/col0-1439_processed.h5'
+    output_dir = args.output
+    constants_dir = args.constants
     method = 'correction_adc_default'
 
     obj = CorrectionBase(data_fname,
                          dark_fname,
-                         contants_dir,
+                         constants_dir,
                          output_dir,
                          method)
     obj.run()
-
-    print("Process took time: {}\n".format(time.time() - total_time))
