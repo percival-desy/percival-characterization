@@ -1,7 +1,5 @@
 import argparse
-import json
 from _version import __version__
-import multiprocessing as mp
 import os
 import sys
 import time
@@ -147,7 +145,8 @@ class CorrectionBase(object):
                                               r_offset_fn,
                                               r_slope_fn,
                                               ADU_MAX/2)
-            self._sample_corrected[frame, :, :] = s_crs_cor - s_fn_cor + ADU_MAX
+            self._sample_corrected[frame, :, :] = (s_crs_cor -
+                                                   s_fn_cor + ADU_MAX)
             self._reset_corrected[frame, :, :] = r_crs_cor - r_fn_cor + ADU_MAX
 
         self._result["s_adc_corrected"]["data"] = self._sample_corrected
@@ -164,9 +163,9 @@ class CorrectionBase(object):
         return ((adc_ramp - offset) / slope) * adu_max
 
     def _calculate_cds(self):
-        self._cds = self._sample_corrected[1:, :, :] - self._reset_corrected[:-1, :, :]
+        self._cds = (self._sample_corrected[1:, :, :] -
+                     self._reset_corrected[:-1, :, :])
         self._result["cds"]["data"] = self._cds
-
 
     def run(self):
         ''' Run correction procedure
@@ -286,9 +285,9 @@ def get_arguments():
                         type=str,
                         help=("Path of constants data to apply on raw data"))
     parser.add_argument('-o', '--output',
-                         dest='output',
-                         type=str,
-                         help=("Path of output directory for storing files"))
+                        dest='output',
+                        type=str,
+                        help=("Path of output directory for storing files"))
 
     args = parser.parse_args()
 
