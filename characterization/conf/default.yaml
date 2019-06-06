@@ -1,5 +1,5 @@
 general:
-    data_type: correction
+    data_type: corrected
     run: DLSraw
 
     plot_sample: True
@@ -7,13 +7,9 @@ general:
     plot_combined: True
 
 all:
-#    output: &output /Volumes/LACIE_SHARE/Beamtime_17122018/DLSraw/gathered/DLSraw
-#    output: &output /Volumes/LACIE_SHARE/Beamtime_17122018/pinhole3
-#    input: &input /Volumes/LACIE_SHARE/Beamtime_17122018/ek26
-    output: &output /Volumes/LACIE_SHARE/Percival/Data_lab_october18/Fine_scan
-
+    output: &output /Volumes/LACIE_SHARE/Percival/Data_lab_october18
 raw:
-    input: /Volumes/LACIE_SHARE/Percival/2018.12.08_3G/DLSraw/gathered/2018.10.17h1527_seqMode_10hrs_dscrmbld_DLSraw.h5
+    input: /Volumes/LACIE_SHARE/Percival/Data_lab_october18/Coarse_scan/crs-scan_Vin=30400_DLSraw.h5
     metadata_fname: null
 
     output: *output
@@ -21,17 +17,16 @@ raw:
     measurement: adccal
 
     adc: null
-    frame: 2
+    frame: 8
     col: 500
     row: 100
-    adc_part: fine
 
-    interactive: False
-    method: [viewer]
+    interactive: True
+    method: [plot_coarse-fine_vs_image]
 
     viewer:
       err_below: -0.1
-    #method: [image, plot_coarse-fine_vs_image]
+    #method: [image, plot_coarse-fine_vs_image, viewer]
 
 gathered:
     input: *output
@@ -43,7 +38,6 @@ gathered:
     frame: null
     col: 60
     row: 10
-    adc_part: fine
     interactive: False
 
     method: [plot, hist, hist_2d]
@@ -55,35 +49,33 @@ processed:
 
     measurement: adccal
 
-    adc: [0]
+    adc: 0
     frame: null
     col: 100
     row: 100
 
-    adc_part: fine
     interactive: false
     method: [viewer]
     viewer:
         all_cols: True
 
 
-correction:
+corrected:
     input: *output
-#    input_dark: *input
     output: *output
 
     measurement: adccal
 
     adc: 2
-    frame: 3
-    col: 530
+    frame: 4
+    col: 61
     row: 10
-
-    adc_part: None
 
     interactive: True
 
-    method: [plot]
+    method: [viewer]
 
     plot:
+        all_cols: False
+    viewer:
         all_cols: True
