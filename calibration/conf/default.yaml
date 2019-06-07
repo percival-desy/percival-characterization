@@ -53,7 +53,6 @@ gather:
             clean_memory: True
             verbose: True
             multiple_save_files: True
-            # multiple_metadata_file: /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testFramework/2018.05.25/try1/VRST=10k_AD_10frames_meta.dat
             multiple_metadata_file: /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testFramework/2018.05.25/try1/p2018.03.15crdAD_h20_meta.dat
             multiple_imgperfile: 1
 
