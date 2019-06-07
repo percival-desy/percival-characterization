@@ -37,9 +37,7 @@ class Plot(PlotBase):
         fig, axs = plt.subplots(nrows=1, sharex=True)
 
         plt.imshow(data,
-                   cmap=plt.cm.jet,
-                   clim=(0, 5000))
-#        plt.imshow(data)
+                   cmap=plt.cm.jet)
         plt.colorbar()
         axs.invert_xaxis()
 
