@@ -1,5 +1,5 @@
 import argparse
-#from _version import __version__
+from _version import __version__
 import os
 import sys
 import time
@@ -102,6 +102,11 @@ class CorrectionBase(object):
                 "path": "cds/cds",
                 "type": np.float
             },
+            "gain": {
+                "data": np.zeros(shapes["data_structure"], dtype=np.uint8),
+                "path": "gain/gain",
+                "thme": np.uint8
+            },
             "n_frames_per_run": {
                 "data": np.zeros(self._n_frames, dtype=np.uint8),
                 "path": "collection/n_frames_per_run",
@@ -181,6 +186,8 @@ class CorrectionBase(object):
 
         self._initiate()
 
+        self.save_gain_info()
+
         self._calculate()
 
         self._calculate_cds()
@@ -207,6 +214,9 @@ class CorrectionBase(object):
         print("n_rows", self._n_rows)
         print("n_cols:", self._n_cols)
         print("n_frames:", self._n_frames)
+
+    def save_gain_info(self):
+        self._result["gain"]["data"] = self._s_gn
 
     def load_data(self):
         ''' Load raw data and convert adc output into coarse/fine/gain output
