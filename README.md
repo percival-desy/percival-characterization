@@ -238,3 +238,25 @@ To run the characterization with a configuration file different from the default
 % python3 characterization/src/run_characterization.py --config_file my_config.yaml
 ```
 
+### Correction
+
+#### Run
+
+
+```
+% cd /path/to/percival-characterisation
+% python3 correction/src/run_correction.py --help
+usage: run_correction.py [-h] [-i INPUT] [-c CONSTANTS] [-o OUTPUT]
+
+Correction tools for P2M
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i INPUT, --input INPUT
+                        Path of the raw data to correct (HDF5 file)
+  -c CONSTANTS, --constants CONSTANTS
+                        Path of constants data to apply on raw data
+  -o OUTPUT, --output OUTPUT
+                        Path of output directory for storing files
+```
+
