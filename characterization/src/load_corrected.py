@@ -3,7 +3,7 @@ import h5py
 import os
 
 
-class LoadCorrection():
+class LoadCorrected():
     def __init__(self, input_fname_templ,
                  output_dir, adc, row, col, frame):
 

@@ -1,5 +1,5 @@
 from plot_base import PlotBase
-from load_correction import LoadCorrection
+from load_corrected import LoadCorrected
 import matplotlib
 # Generate images without having a window appear:
 # this prevents sending remote data to locale PC for rendering
@@ -14,7 +14,7 @@ class Plot(PlotBase):
     def __init__(self, **kwargs):  # noqa F401
         super().__init__(**kwargs)
 
-        correction_loader = LoadCorrection(
+        correction_loader = LoadCorrected(
             input_fname_templ=self._input_fname,
             output_dir=self._output_dir,
             adc=self._adc,

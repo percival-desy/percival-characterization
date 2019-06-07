@@ -1,9 +1,8 @@
 from collections import namedtuple
 import os
 
-from load_correction import LoadCorrection
+from load_corrected import LoadCorrected
 import utils
-import numpy as np
 
 
 class PlotBase():
@@ -19,7 +18,7 @@ class PlotBase():
         self._all_cols = self._method_properties["all_cols"]
         self._loaded_data = loaded_data
 
-        corrected_loader = LoadCorrection(
+        corrected_loader = LoadCorrected(
             input_fname_templ=self._input_fname,
             output_dir=self._output_dir,
             adc=self._adc,
@@ -27,44 +26,14 @@ class PlotBase():
             col=self._col,
             frame=self._frame
         )
-#        if self._all_cols:
-#            # Prepare empty data for showing 2D plots
-#            # Read all files contain in a folder and stack data together
-#            nb_files = corrected_loader.get_number_files(self._input_fname)
-#            n_frame = corrected_loader.load_data_all()["sample"]["s_adc_corrected"].shape[2]
-#            self._stack = np.zeros((1484, 0, n_frame))
-#            for file in range(nb_files):
-#                col = file * 32
-#                corrected_loader.set_col(col)
-#                corrected_loader.set_input_fname()
-#                if loaded_data is None or self._dims_overwritten:
-#                    self._data = corrected_loader.load_data_all()
-#                self._stack = np.concatenate((self._stack,
-#                                              self._data["sample"]
-#                                                        ["s_adc_corrected"]),
-#                                             axis=1)
-#        else:
-#            if loaded_data is None or self._dims_overwritten:
-#                self._data = corrected_loader.load_data()
-#                self._stack = np.concatenate((self._stack,
-#                                              self._data["sample"]
-#                                                        ["s_adc_corrected"]),
-#                                             axis=1)
-#            else:
-#                self._data = loaded_data.adc_corrected
-#                self._stack = np.concatenate((self._stack,
-#                                              self._data["sample"]
-#                                                        ["s_adc_corrected"]),
-#                                             axis=1)
+
         if (loaded_data is None or self._dims_overwritten and
-              self._all_cols is False):
+                    self._all_cols is False):
             self._data = corrected_loader.load_data()
-#            self._vin = self._vin["vin"]["vin"]
             self._corrected = self._data["sample"]["s_adc_corrected"]
         else:
             self._data = loaded_data.adc_corrected
         print("Column {}".format(self._col))
-#        print("Vin {}".format(self._vin.shape))
 
         if self._dims_overwritten:
             print("Overwritten configuration " +
