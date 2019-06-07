@@ -13,7 +13,6 @@ class Plot(PlotBase):
     def __init__(self, **kwargs):  # noqa F401
         # overwrite the configured col and row indices
         new_kwargs = copy.deepcopy(kwargs)
-#        new_kwargs["dims_overwritten"] = True
         super().__init__(**new_kwargs)
 
     def _generate_single_plot(self,

@@ -27,7 +27,6 @@ class ViewerBase():
             self._data = corrected_loader.load_data_all()
         else:
             self._data = self._loaded_data.corrected_data
-            # self._data = self._data["sample"]["s_adc_corrected"]
 
         if self._dims_overwritten:
             print("Overwritten configuration " +
