@@ -7,7 +7,6 @@ matplotlib.use('TkAgg')  # Must be before importing matplotlib.pyplot or pylab!
 import matplotlib.pyplot as plt  # noqa E402
 
 import __init__  # noqa E402
-#from plot_base import PlotBase  # noqa E402
 
 
 class Plot(PlotBase):
@@ -42,7 +41,6 @@ class Plot(PlotBase):
         axs.invert_xaxis()
 
         fig.show()
-        input('Press enter to end')
 
         fig.suptitle(plot_title)
         fig.savefig(out_fname)
