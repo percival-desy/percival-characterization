@@ -1,5 +1,4 @@
 import argparse
-from _version import __version__
 import os
 import sys
 import time
@@ -20,6 +19,7 @@ ADC_CORRECTION_DIR = os.path.join(SRC_DIR, "methods")
 if SHARED_DIR not in sys.path:
     sys.path.insert(0, SHARED_DIR)
 
+from _version import __version__
 import utils  # noqa E402
 
 
