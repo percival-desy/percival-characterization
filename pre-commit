@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# git pre-commit hook that runs a python-format stylecheck.
+# It aborts commit when commit does not comply with the coding guidelines
+
+echo "Pre-commit checking for PEP8 compliance: "
+
+FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -e '\.py$')
+
+if [ -n "$FILES" ]; then
+    flake8 -r $FILES
+fi

@@ -47,6 +47,7 @@ class Process(ProcessAdccalBase):
                 }
             }
 
+
     def _calculate(self):
         ''' Perform a linear fit on sample ADC coarse and fine.
             The offsets and slopes are stored in a HDF5 file.
@@ -125,3 +126,4 @@ class Process(ProcessAdccalBase):
             self._result["s_fine_slope"]["data"] = slope
             self._result["s_fine_offset"]["data"] = offset
             self._result["s_fine_residuals"]["data"] = residuals
+

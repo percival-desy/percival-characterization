@@ -1,5 +1,6 @@
 general:
     data_type: corrected
+
     run: DLSraw
 
     plot_sample: True
@@ -10,11 +11,17 @@ all:
     output: &output /Volumes/LACIE_SHARE/Percival/Data_lab_october18
 raw:
     input: /Volumes/LACIE_SHARE/Percival/Data_lab_october18/Coarse_scan/crs-scan_Vin=30400_DLSraw.h5
+
     metadata_fname: null
 
     output: *output
 
     measurement: adccal
+
+    interactive: True
+    
+    viewer:
+        err_below: -0.1
 
     adc: null
     frame: 8
@@ -40,6 +47,8 @@ gathered:
     row: 10
     interactive: False
 
+    interactive: True
+    
     method: [plot, hist, hist_2d]
     #method: [plot_sample_vs_reset]
 
