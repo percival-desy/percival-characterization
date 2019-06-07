@@ -25,14 +25,6 @@ PROCESS_DIR = os.path.join(SRC_DIR, "process")
 ADCCAL_PROCESS_METHOD_DIR = os.path.join(PROCESS_DIR, "adccal", "methods")
 PTCCAL_PROCESS_METHOD_DIR = os.path.join(PROCESS_DIR, "ptccal", "methods")
 
-CORRECTION_DIR = os.path.join(SRC_DIR, "correction")
-ADCCAL_CORRECTION_METHOD_DIR = os.path.join(CORRECTION_DIR,
-                                            "adccal",
-                                            "methods")
-PTCCAL_CORRECTION_METHOD_DIR = os.path.join(CORRECTION_DIR,
-                                            "ptccal",
-                                            "methods")
-
 if SHARED_DIR not in sys.path:
     sys.path.insert(0, SHARED_DIR)
 
@@ -42,7 +34,6 @@ import utils  # noqa E402
 class Analyse(object):
     def __init__(self,
                  in_base_dir,
-                 in_base_dir_processed,
                  out_base_dir,
                  create_outdir,
                  run_id,
@@ -54,7 +45,6 @@ class Analyse(object):
                  n_processes):
 
         self._in_base_dir = in_base_dir
-        self._in_base_dir_processed = in_base_dir_processed
         self._out_base_dir = out_base_dir
 
         self._create_outdir = create_outdir
@@ -98,8 +88,6 @@ class Analyse(object):
             self.run_gather()
         elif self._run_type == "process":
             self.run_process()
-        elif self._run_type == "correction":
-            self.run_correction()
         else:
             print("Unsupported argument: run_type {}".format(self._run_type))
 
@@ -127,12 +115,6 @@ class Analyse(object):
     def generate_process_path(self, base_dir):
         dirname = os.path.join(base_dir)
         filename = "col{col_start}-{col_stop}_processed.h5"
-
-        return dirname, filename
-
-    def generate_correction_path(self, base_dir):
-        dirname = os.path.join(base_dir)
-        filename = "col{col_start}-{col_stop}_corrected.h5"
 
         return dirname, filename
 
@@ -210,7 +192,6 @@ class Analyse(object):
     def run_process(self):
         # define input files
         # the input files for process is the output from gather
-
         in_dir, in_file_name = self.generate_gather_path(self._in_base_dir)
 
         # define output files
@@ -223,7 +204,7 @@ class Analyse(object):
                 col_stop = (p+1) * self._n_cols - 1
 
                 in_fname = in_file_name.format(col_start=col_start,
-                                               col_stop=col_stop)
+                                           col_stop=col_stop)
                 # doing the join here and outside of loop because if in_dir
                 # contains a placeholder it will not work otherwise
                 in_fname = os.path.join(in_dir, in_fname)
@@ -257,84 +238,6 @@ class Analyse(object):
 
             for job in jobs:
                 job.join()
-
-    def run_correction(self):
-        # Test for correction
-
-        # Input files for correction are the output from gather and process
-        in_base_dir_gathered = os.path.join(self._in_base_dir, "gathered")
-        in_base_dir_processed = os.path.join(self._in_base_dir_processed, "processed")
-
-
-        in_dir_gathered, in_file_name_gathered = self.generate_gather_path(in_base_dir_gathered)
-        in_dir_processed, in_file_name_processed = self.generate_process_path(in_base_dir_processed)
-
-        # Define output files
-        out_dir, out_file_name = self.generate_correction_path(self._out_base_dir)
-
-        for job_set in self._job_sets:
-            jobs = []
-            for p in job_set:
-                col_start = p * self._n_cols
-                col_stop = (p+1) * self._n_cols - 1
-
-                in_fname_gathered = in_file_name_gathered.format(col_start=col_start,
-                                                                 col_stop=col_stop)
-                in_fname_processed = in_file_name_processed.format(col_start=col_start,
-                                                                 col_stop=col_stop)
-
-
-                # doing the join here and outside of loop because if in_dir
-                # contains a placeholder it will not work otherwise
-                in_fname_gathered = os.path.join(in_dir_gathered, in_fname_gathered)
-                in_fname_processed = os.path.join(in_dir_processed, in_fname_processed)
-
-                out_fname = out_file_name.format(col_start=col_start,
-                                                 col_stop=col_stop)
-                # doing the join here and outside of loop because if out_dir
-                # contains a placeholder it will not work otherwise
-                out_fname = os.path.join(out_dir, out_fname)
-
-#                if os.path.exists(out_f):
-#                    print("output filename = {}".format(out_f))
-#                    print("WARNING: output file already exist. "
-#                          "Skipping process.")
-#                else:
-                if self._create_outdir:
-                    utils.create_dir(out_dir)
-
-                kwargs = dict(
-                    in_fname_gathered=in_fname_gathered,
-                    in_fname_processed=in_fname_processed,
-                    out_fname=out_fname,
-                    run=self._run_id,
-                    method=self._method,
-                    method_properties=self._method_properties
-                )
-
-                proc = multiprocessing.Process(target=self._call_correction,
-                                               kwargs=kwargs)
-                jobs.append(proc)
-                proc.start()
-
-            for job in jobs:
-                job.join()
-
-        print(in_fname_gathered)
-        print(in_fname_processed)
-
-    def _call_correction(self, **kwargs):
-        if self._measurement == "adccal":
-            if ADCCAL_CORRECTION_METHOD_DIR not in sys.path:
-                sys.path.insert(0, ADCCAL_CORRECTION_METHOD_DIR)
-        elif self.measurement == "ptccal":
-            if PTCCAL_CORRECTION_METHOD_DIR not in sys.path:
-                sys.path.inster(0, PTCCAL_CORRECTION_METHOD_DIR)
-
-        correction_m = __import__(self._method).Correction
-
-        obj = correction_m(**kwargs)
-        obj.run()
 
     def _call_process(self, **kwargs):
         if self._measurement == "adccal":
@@ -513,7 +416,6 @@ if __name__ == "__main__":
 
     out_base_dir = config[run_type]["output"]
     in_base_dir = config[run_type]["input"]
-    in_base_dir_processed = config[run_type]["input_constants"]
     method = config[run_type]["method"]
     method_properties = config[run_type][method]
 
@@ -521,23 +423,15 @@ if __name__ == "__main__":
     if run_type == "gather":
         in_base_dir = in_base_dir
         # to allow additional directories for descramble
-
-        # out_base_dir = os.path.join(out_base_dir, run_id, "{run_dir}")
+#        out_base_dir = os.path.join(out_base_dir, run_id, "{run_dir}")
         out_base_dir = os.path.join(out_base_dir, run_id, "gathered")
         create_outdir = False
-    elif run_type == "process":
+    else:
         in_base_dir = os.path.join(in_base_dir, run_id, "gathered")
         out_base_dir = os.path.join(out_base_dir, run_id, "processed")
         create_outdir = True
-    elif run_type == "correction":
-        in_base_dir_gathered = os.path.join(in_base_dir, run_id, "gathered")
-        in_base_dir_processed = os.path.join(in_base_dir_processed, run_id, "processed")
-        in_base_dir = os.path.join(in_base_dir, run_id)
-        out_base_dir = os.path.join(out_base_dir, run_id, "corrected")
-        create_outdir = True
 
     obj = Analyse(in_base_dir=in_base_dir,
-                  in_base_dir_processed=in_base_dir_processed,
                   out_base_dir=out_base_dir,
                   create_outdir=create_outdir,
                   run_id=run_id,
@@ -546,5 +440,5 @@ if __name__ == "__main__":
                   n_cols=n_cols,
                   method=method,
                   method_properties=method_properties,
-                  n_processes=n_processes)
+                  n_processes=n_processes,)
     obj.run()

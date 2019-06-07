@@ -25,8 +25,7 @@ class Plot(PlotBase):
         m = constants["slope"]
         b = constants["offset"]
         # Set ROI for fitting from HDF files
-
-        self._set_roi(self._s_coarse, self._roi)
+        self._set_roi(self._s_coarse)
 
         # Recalculate offset position (according to roi)
         offset = self._recalculate_offset(x[self._roi], constants)
@@ -72,7 +71,7 @@ class Plot(PlotBase):
         '''
 
         # Set ROI for fitting from HDF files
-        self._set_roi(self._s_coarse, self._roi)
+        self._set_roi(self._s_coarse)
 
         # Get gaussian fit parameters from data
         (mu, sigma) = norm.fit(x[self._roi])

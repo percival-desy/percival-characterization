@@ -36,7 +36,7 @@ class Process(ProcessAdccalBase):
                 }
             }
             self._metadata = {
-                    "fit_roi": self._method_properties["coarse_fitting_range"]
+                    "roi_crs": self._method_properties["coarse_fitting_range"]
             }
 
         if self._method_properties["fit_adc_part"] == "fine":
@@ -59,7 +59,7 @@ class Process(ProcessAdccalBase):
                 }
             }
             self._metadata = {
-                    "fit_roi": self._method_properties["fine_fitting_range"]
+                    "roi_fn": self._method_properties["fine_fitting_range"]
             }
 
     def get_coarse_parameters(self, channel, vin, slope, offset):
@@ -107,6 +107,21 @@ class Process(ProcessAdccalBase):
 
         return slope, offset
 
+    def _adc_reordering(self, adc_to_reorder):
+        ''' Reshuffle adc arrays
+                Input data (4D arrays):
+                    (n_adcs, n_cols, n_groups)
+                Output data (3D arrays):
+                    (n_rows, n_cols)
+        '''
+        adc_shaped = np.zeros((self._n_rows, self._n_cols))
+        for grp in range(self._n_groups):
+            for adc in range(self._n_adcs):
+                row = (grp * 7) + adc
+                adc_shaped[row] = adc_to_reorder[adc, :, grp]
+
+        return adc_shaped
+
     def _calculate(self):
         ''' Perform a linear fit on sample ADC coarse and fine.
             The offsets and slopes are stored in a HDF5 file.
@@ -135,10 +150,10 @@ class Process(ProcessAdccalBase):
                                                            r_slope,
                                                            r_offset)
 
-            self._result["s_coarse_slope"]["data"] = s_slope
-            self._result["s_coarse_offset"]["data"] = s_offset
-            self._result["r_coarse_slope"]["data"] = r_slope
-            self._result["r_coarse_offset"]["data"] = r_offset
+            self._result["s_coarse_slope"]["data"] = self._adc_reordering(s_slope)
+            self._result["s_coarse_offset"]["data"] = self._adc_reordering(s_offset)
+            self._result["r_coarse_slope"]["data"] = self._adc_reordering(r_slope)
+            self._result["r_coarse_offset"]["data"] =  self._adc_reordering(r_offset)
 
         if self._method_properties["fit_adc_part"] == "fine":
             print("Data loaded, fitting coarse data...")
@@ -165,7 +180,7 @@ class Process(ProcessAdccalBase):
                                                          r_slope,
                                                          r_offset)
 
-            self._result["s_fine_slope"]["data"] = s_slope
-            self._result["s_fine_offset"]["data"] = s_offset
-            self._result["r_fine_slope"]["data"] = r_slope
-            self._result["r_fine_offset"]["data"] = r_offset
+            self._result["s_fine_slope"]["data"] = self._adc_reordering(s_slope)
+            self._result["s_fine_offset"]["data"] = self._adc_reordering(s_offset)
+            self._result["r_fine_slope"]["data"] = self._adc_reordering(r_slope)
+            self._result["r_fine_offset"]["data"] = self._adc_reordering(r_offset)
