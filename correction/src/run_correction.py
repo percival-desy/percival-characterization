@@ -23,7 +23,7 @@ from _version import __version__
 import utils  # noqa E402
 
 
-class CorrectionBase(object):
+class CorrectionBase():
     def __init__(self,
                  data_fname,
                  dark_fname,
@@ -44,24 +44,34 @@ class CorrectionBase(object):
         self._n_frames = None
         self._constants = None
 
+        self._s_crs = None
+        self._s_fn = None
+        self._s_gn = None
+        self._r_crs = None
+        self._r_fn = None
+        self._r_gn = None
+
+        self._sample_corrected = None
+        self._reset_corrected = None
+
         self._paths_constants = {
-                "s_coarse": {
-                        "slope": "sample/coarse/slope",
-                        "offset": "sample/coarse/offset"
-                        },
-                "s_fine": {
-                        "slope": "sample/fine/slope",
-                        "offset": "sample/fine/offset"
-                        },
-                "r_coarse": {
-                        "slope": "reset/coarse/slope",
-                        "offset": "reset/coarse/offset"
-                        },
-                "r_fine": {
-                        "slope": "reset/fine/slope",
-                        "offset": "reset/fine/offset"
-                        }
-                }
+            "s_coarse": {
+                "slope": "sample/coarse/slope",
+                "offset": "sample/coarse/offset"
+            },
+            "s_fine": {
+                "slope": "sample/fine/slope",
+                "offset": "sample/fine/offset"
+            },
+            "r_coarse": {
+                "slope": "reset/coarse/slope",
+                "offset": "reset/coarse/offset"
+            },
+            "r_fine": {
+                "slope": "reset/fine/slope",
+                "offset": "reset/fine/offset"
+            }
+        }
         self._result = {}
 
     def generate_raw_path(self, base_dir):
@@ -78,12 +88,12 @@ class CorrectionBase(object):
 
     def _initiate(self):
         shapes = {
-          "data_structure": (self._n_frames,
-                             self._n_rows,
-                             self._n_cols),
-          "cds_structure": (self._n_frames - 1,
-                            self._n_rows,
-                            self._n_cols)
+            "data_structure": (self._n_frames,
+                               self._n_rows,
+                               self._n_cols),
+            "cds_structure": (self._n_frames - 1,
+                              self._n_rows,
+                              self._n_cols)
         }
 
         self._result = {
