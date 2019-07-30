@@ -19,19 +19,23 @@ class LoadProcessed():
         self._paths = {
             "s_coarse": {
                 "slope": "sample/coarse/slope",
-                "offset": "sample/coarse/offset"
+                "offset": "sample/coarse/offset",
+                "r_squared": "sample/coarse/r_squared"
             },
             "r_coarse": {
                 "slope": "reset/coarse/slope",
-                "offset": "reset/coarse/offset"
+                "offset": "reset/coarse/offset",
+                "r_squared": "reset/coarse/r_squared"
             },
             "s_fine": {
                 "slope": "sample/fine/slope",
-                "offset": "sample/fine/offset"
+                "offset": "sample/fine/offset",
+                "r_squared": "sample/fine/r_squared"
             },
             "r_fine": {
                 "slope": "reset/fine/slope",
-                "offset": "reset/fine/offset"
+                "offset": "reset/fine/offset",
+                "r_squared": "reset/fine/r_squared"
             }
         }
         self._metadata_paths = {"roi_crs": "collection/roi_crs",

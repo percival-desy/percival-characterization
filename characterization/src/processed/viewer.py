@@ -55,8 +55,10 @@ class Plot(PlotBase):
         out = self._output_dir + "/"
         s_crs_slope = self._constants["s_coarse"]["slope"]
         s_crs_offset = self._constants["s_coarse"]["offset"]
+        s_crs_r_squared = self._constants["s_coarse"]["r_squared"]
         s_fn_slope = self._constants["s_fine"]["slope"]
         s_fn_offset = self._constants["s_fine"]["offset"]
+        s_fn_r_squared = self._constants["s_fine"]["r_squared"]
 
         self._generate_plot_2d(x=s_crs_offset,
                                plot_title="Offset Sample Coarse",
@@ -68,6 +70,11 @@ class Plot(PlotBase):
                                label="Coarse",
                                out_fname=out+"slope_sample_crs")
 
+        self._generate_plot_2d(x=s_crs_r_squared,
+                               plot_title="Map R^2 Sample Coarse",
+                               label="Coarse",
+                               out_fname=out+"r2_sample_crs")
+
         self._generate_plot_2d(x=s_fn_offset,
                                plot_title="Offset Sample Fine",
                                label="Fine",
@@ -77,6 +84,11 @@ class Plot(PlotBase):
                                plot_title="Slope Sample Fine",
                                label="Fine",
                                out_fname=out+"slope_sample_fn")
+
+        self._generate_plot_2d(x=s_fn_r_squared,
+                               plot_title="Map R^2 Sample Fine",
+                               label="Fine",
+                               out_fname=out+"r2_sample_fn")
 
     def plot_reset(self):
         self.create_dir()
