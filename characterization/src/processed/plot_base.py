@@ -20,15 +20,21 @@ class PlotBase():
         self._dims_overwritten = dims_overwritten
         self._loaded_data = loaded_data
         self._roi = None
-
-        self._gathered_loader = LoadGathered(
-            input_fname_templ=self._input_fname,
-            output_dir=self._output_dir,
-            adc=self._adc,
-            frame=self._frame,
-            row=self._row,
-            col=self._col
-        )
+#        file_name = "col{col_start}-{col_stop}_{data_type}.h5"
+#        file_name = os.path.join("gathered", file_name)
+#        self._input_fname_gather = os.path.join(self._input_gather,
+#                                               "DLSraw",
+#                                               file_name)
+#        print(self._input_fname_gather)
+#
+#        self._gathered_loader = LoadGathered(
+#            input_fname_templ=self._input_fname_gather,
+#            output_dir=self._output_dir,
+#            adc=self._adc,
+#            frame=self._frame,
+#            row=self._row,
+#            col=self._col
+#        )
 
         processed_loader = LoadProcessed(
             input_fname_templ=self._input_fname,
@@ -39,13 +45,41 @@ class PlotBase():
         )
 
         if self._loaded_data is None or self._dims_overwritten:
-            self._vin, self._data = self._gathered_loader.load_data()
             self._constants = processed_loader.load_data()
-            self._roi_crs, self._roi_fn = processed_loader.load_metadata()
+            self._metadata = processed_loader.load_metadata()
+        else:
+            self._constants = self._loaded_data.constants
+
+        self._roi_fn = self._metadata["roi_fn"]
+        self._roi_crs = self._metadata["roi_crs"]
+        dir_crs_gathered = self._metadata["crs_gathered"]
+        filename = "col{col_start}-{col_stop}_{data_type}.h5"
+        self._input_fname_gather = os.path.join(dir_crs_gathered, filename)
+
+        self._gathered_loader = LoadGathered(
+            input_fname_templ=self._input_fname_gather,
+            output_dir=self._output_dir,
+            adc=self._adc,
+            frame=self._frame,
+            row=self._row,
+            col=self._col
+        )
+
+        if self._loaded_data is None or self._dims_overwritten:
+            self._vin, self._data = self._gathered_loader.load_data()
         else:
             self._vin = self._loaded_data.vin
             self._data = self._loaded_data.gathered_data
-            self._constants = self._loaded_data.constants
+
+
+#        if self._loaded_data is None or self._dims_overwritten:
+#            self._vin, self._data = self._gathered_loader.load_data()
+#            self._constants = processed_loader.load_data()
+#            self._roi_crs, self._roi_fn = processed_loader.load_metadata()
+#        else:
+#            self._vin = self._loaded_data.vin
+#            self._data = self._loaded_data.gathered_data
+#            self._constants = self._loaded_data.constants
 
         if self._dims_overwritten:
             print("Overwritten configuration " +

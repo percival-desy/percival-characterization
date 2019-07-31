@@ -38,8 +38,12 @@ class LoadProcessed():
                 "r_squared": "reset/fine/r_squared"
             }
         }
-        self._metadata_paths = {"roi_crs": "collection/roi_crs",
-                                "roi_fn": "collection/roi_fn"}
+        self._metadata_paths = {
+                "roi_crs": "collection/roi_crs",
+                "roi_fn": "collection/roi_fn",
+                "crs_gathered": "collection/gathered_directory_coarse",
+                "fn_gathered": "collection/gathered_directory_fine"
+        }
 
     def set_input_fname(self):
         self._input_fname = self._get_input_fname(self._input_fname_templ)
@@ -71,8 +75,15 @@ class LoadProcessed():
         ''' For a defined input fine, give dictionaries of the region of
             interest used during fitting procedure of coarse and fine.
         '''
+        metadata = {}
         with h5py.File(self._input_fname, "r") as f:
-            roi_crs = f[self._metadata_paths["roi_crs"]][()]
-            roi_fn = f[self._metadata_paths["roi_fn"]][()]
+            for key in self._metadata_paths:
+                print(key)
+                metadata[key] = f[self._metadata_paths[key]][()]
+#                metadata[key] = {}
+#                for subkey, metadata_path in self._metadata_paths[key].items():
+#                    metadata[key][subkey] = f[metadata_path][()]
+#            roi_crs = f[self._metadata_paths["roi_crs"]][()]
+#            roi_fn = f[self._metadata_paths["roi_fn"]][()]
 
-        return roi_crs, roi_fn
+        return metadata

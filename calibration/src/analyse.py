@@ -225,6 +225,7 @@ class Analyse(object):
 
                 kwargs = dict(
                     in_fname=in_fname,
+                    in_dir=self._in_base_dir,
                     out_fname=out_fname,
                     run=self._run_id,
                     method=self._method,

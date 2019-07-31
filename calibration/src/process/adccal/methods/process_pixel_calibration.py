@@ -96,7 +96,6 @@ class Process(ProcessAdccalBase):
                 offset[adc, col, row] = slope[adc, col, row] * vin[roi][0]
                 offset[adc, col, row] += fit.solution[1]
                 r_squared[adc, col, row] = fit.r_squared
-                print(fit.r_squared)
 
         return slope, offset, r_squared
 
@@ -175,7 +174,6 @@ class Process(ProcessAdccalBase):
                                                                        r_slope,
                                                                        r_offset,
                                                                        r_rsquared)
-            print(r_rsquared, s_rsquared)
 
             self._result["s_coarse_slope"]["data"] = self._adc_reordering(s_slope)
             self._result["s_coarse_offset"]["data"] = self._adc_reordering(s_offset)
@@ -183,7 +181,6 @@ class Process(ProcessAdccalBase):
             self._result["r_coarse_offset"]["data"] =  self._adc_reordering(r_offset)
             self._result["r_coarse_r_squared"]["data"] = self._adc_reordering(r_rsquared)
             self._result["s_coarse_r_squared"]["data"] = self._adc_reordering(s_rsquared)
-
 
         if self._method_properties["fit_adc_part"] == "fine":
             print("Data loaded, fitting coarse data...")
