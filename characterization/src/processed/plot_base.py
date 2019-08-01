@@ -7,8 +7,10 @@ import utils
 import numpy as np
 
 class PlotBase():
-    LoadedData = namedtuple("loaded_data", ["vin",
-                                            "gathered_data",
+    LoadedData = namedtuple("loaded_data", ["vin_crs",
+                                            "vin_fn",
+                                            "gathered_data_crs",
+                                            "gathered_data_fn",
                                             "constants"])
 
     def __init__(self, loaded_data=None, dims_overwritten=False, **kwargs):
@@ -20,21 +22,6 @@ class PlotBase():
         self._dims_overwritten = dims_overwritten
         self._loaded_data = loaded_data
         self._roi = None
-#        file_name = "col{col_start}-{col_stop}_{data_type}.h5"
-#        file_name = os.path.join("gathered", file_name)
-#        self._input_fname_gather = os.path.join(self._input_gather,
-#                                               "DLSraw",
-#                                               file_name)
-#        print(self._input_fname_gather)
-#
-#        self._gathered_loader = LoadGathered(
-#            input_fname_templ=self._input_fname_gather,
-#            output_dir=self._output_dir,
-#            adc=self._adc,
-#            frame=self._frame,
-#            row=self._row,
-#            col=self._col
-#        )
 
         processed_loader = LoadProcessed(
             input_fname_templ=self._input_fname,
@@ -52,12 +39,22 @@ class PlotBase():
 
         self._roi_fn = self._metadata["roi_fn"]
         self._roi_crs = self._metadata["roi_crs"]
-        dir_crs_gathered = self._metadata["crs_gathered"]
-        filename = "col{col_start}-{col_stop}_{data_type}.h5"
-        self._input_fname_gather = os.path.join(dir_crs_gathered, filename)
 
-        self._gathered_loader = LoadGathered(
-            input_fname_templ=self._input_fname_gather,
+        self._input_fname_crs_gather = self.get_gathered_files()[0]
+
+        self._gathered_loader_crs = LoadGathered(
+            input_fname_templ=self._input_fname_crs_gather,
+            output_dir=self._output_dir,
+            adc=self._adc,
+            frame=self._frame,
+            row=self._row,
+            col=self._col
+        )
+
+        self._input_fname_fn_gather = self.get_gathered_files()[1]
+
+        self._gathered_loader_fn = LoadGathered(
+            input_fname_templ=self._input_fname_fn_gather,
             output_dir=self._output_dir,
             adc=self._adc,
             frame=self._frame,
@@ -66,20 +63,11 @@ class PlotBase():
         )
 
         if self._loaded_data is None or self._dims_overwritten:
-            self._vin, self._data = self._gathered_loader.load_data()
+            self._vin_crs, self._data_crs = self._gathered_loader_crs.load_data()
+            self._vin_fn, self._data_fn = self._gathered_loader_fn.load_data()
         else:
             self._vin = self._loaded_data.vin
             self._data = self._loaded_data.gathered_data
-
-
-#        if self._loaded_data is None or self._dims_overwritten:
-#            self._vin, self._data = self._gathered_loader.load_data()
-#            self._constants = processed_loader.load_data()
-#            self._roi_crs, self._roi_fn = processed_loader.load_metadata()
-#        else:
-#            self._vin = self._loaded_data.vin
-#            self._data = self._loaded_data.gathered_data
-#            self._constants = self._loaded_data.constants
 
         if self._dims_overwritten:
             print("Overwritten configuration " +
@@ -92,6 +80,21 @@ class PlotBase():
         self._row_title = utils.convert_slice_to_tuple(self._row)
         self._col_title = utils.convert_slice_to_tuple(self._col)
 
+    def get_gathered_files(self):
+        ''' Return pathes of gathered data used for calculating fine and coarse
+            fit parameters
+        '''
+
+        filename = "col{col_start}-{col_stop}_{data_type}.h5"
+
+        dir_crs_gathered = self._metadata["crs_gathered"]
+        dir_fn_gathered = self._metadata["fn_gathered"]
+
+        self._dir_fname_crs_gather = os.path.join(dir_crs_gathered, filename)
+        self._dif_fname_fn_gather = os.path.join(dir_fn_gathered, filename)
+
+        return self._dir_fname_crs_gather, self._dif_fname_fn_gather
+
     def create_dir(self):
         if not os.path.exists(self._output_dir):
             print("Output directory {} does not exist. Create it."
@@ -99,6 +102,14 @@ class PlotBase():
             os.makedirs(self._output_dir)
 
     def get_gathered_loader(self):
+        self._gathered_loader = LoadGathered(
+            input_fname_templ=self._input_fname_gather,
+            output_dir=self._output_dir,
+            adc=self._adc,
+            frame=self._frame,
+            row=self._row,
+            col=self._col
+        )
         return self._gathered_loader
 
     def get_input_fname(self):
@@ -122,8 +133,10 @@ class PlotBase():
 
         """
 
-        return PlotBase.LoadedData(vin=self._vin,
-                                   gathered_data=self._data,
+        return PlotBase.LoadedData(vin_crs=self._vin_crs,
+                                   vin_fn=self._vin_fn,
+                                   gathered_data_crs=self._data_crs,
+                                   gathered_data_fn=self._data_fn,
                                    constants=self._constants)
 
     def _recalculate_offset(self, vin, constants):
@@ -182,12 +195,12 @@ class PlotBase():
                                              self._col_title)
         out = self._output_dir + "/"
 
-        self._s_coarse = self._data["s_coarse"]
-        res = self._calculate_residuals(self._vin,
-                                        self._data["s_coarse"],
+        self._s_coarse = self._data_crs["s_coarse"]
+        res = self._calculate_residuals(self._vin_crs,
+                                        self._data_crs["s_coarse"],
                                         self._constants["s_coarse"])
-        self._generate_single_plot(x=self._vin,
-                                   data=self._data["s_coarse"],
+        self._generate_single_plot(x=self._vin_crs,
+                                   data=self._data_crs["s_coarse"],
                                    constants=self._constants["s_coarse"],
                                    plot_title="Sample Coarse, "+pos,
                                    label="Coarse",
@@ -198,13 +211,13 @@ class PlotBase():
                                  label="Coarse",
                                  out_fname=out+"s_residuals_coarse"+suffix)
 
-        self._s_coarse = self._data["s_coarse"]
-        res = self._calculate_residuals(self._vin,
-                                        self._data["s_fine"],
+        self._s_coarse = self._data_fn["s_coarse"]
+        res = self._calculate_residuals(self._vin_fn,
+                                        self._data_fn["s_fine"],
                                         self._constants["s_fine"])
 
-        self._generate_single_plot(x=self._vin,
-                                   data=self._data["s_fine"],
+        self._generate_single_plot(x=self._vin_fn,
+                                   data=self._data_fn["s_fine"],
                                    constants=self._constants["s_fine"],
                                    plot_title="Sample Fine, "+pos,
                                    label="Fine",
@@ -226,12 +239,12 @@ class PlotBase():
                                              self._col_title)
         out = self._output_dir + "/"
 
-        self._s_coarse = self._data["r_coarse"]
-        res = self._calculate_residuals(self._vin,
-                                        self._data["r_coarse"],
+        self._s_coarse = self._data_crs["r_coarse"]
+        res = self._calculate_residuals(self._vin_crs,
+                                        self._data_crs["r_coarse"],
                                         self._constants["r_coarse"])
-        self._generate_single_plot(x=self._vin,
-                                   data=self._data["r_coarse"],
+        self._generate_single_plot(x=self._vin_crs,
+                                   data=self._data_crs["r_coarse"],
                                    constants=self._constants["r_coarse"],
                                    plot_title="Reset Coarse, "+pos,
                                    label="Coarse",
@@ -242,13 +255,13 @@ class PlotBase():
                                  label="Coarse",
                                  out_fname=out+"r_residuals_coarse"+suffix)
 
-        self._s_coarse = self._data["r_coarse"]
-        res = self._calculate_residuals(self._vin,
-                                        self._data["r_fine"],
+        self._s_coarse = self._data_fn["r_coarse"]
+        res = self._calculate_residuals(self._vin_fn,
+                                        self._data_fn["r_fine"],
                                         self._constants["r_fine"])
 
-        self._generate_single_plot(x=self._vin,
-                                   data=self._data["r_fine"],
+        self._generate_single_plot(x=self._vin_fn,
+                                   data=self._data_fn["r_fine"],
                                    constants=self._constants["r_fine"],
                                    plot_title="Reset Fine, "+pos,
                                    label="Fine",
