@@ -6,6 +6,7 @@ from load_processed import LoadProcessed
 import utils
 import numpy as np
 
+
 class PlotBase():
     LoadedData = namedtuple("loaded_data", ["vin_crs",
                                             "vin_fn",
@@ -63,8 +64,10 @@ class PlotBase():
         )
 
         if self._loaded_data is None or self._dims_overwritten:
-            self._vin_crs, self._data_crs = self._gathered_loader_crs.load_data()
-            self._vin_fn, self._data_fn = self._gathered_loader_fn.load_data()
+            (self._vin_crs,
+             self._data_crs) = self._gathered_loader_crs.load_data()
+            (self._vin_fn,
+             self._data_fn) = self._gathered_loader_fn.load_data()
         else:
             self._vin = self._loaded_data.vin
             self._data = self._loaded_data.gathered_data
