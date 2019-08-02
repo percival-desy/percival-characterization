@@ -1,6 +1,5 @@
 from load_processed import LoadProcessed
 from plot_base import PlotBase
-import numpy as np
 import matplotlib
 # Generate images without having a window appear:
 # this prevents sending remote data to locale PC for rendering

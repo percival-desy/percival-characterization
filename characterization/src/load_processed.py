@@ -20,27 +20,31 @@ class LoadProcessed():
             "s_coarse": {
                 "slope": "sample/coarse/slope",
                 "offset": "sample/coarse/offset",
-                "r_squared": "sample/coarse/r_squared"
+                "r_squared": "sample/coarse/r_squared",
+                "roi": "sample/coarse/roi"
             },
             "r_coarse": {
                 "slope": "reset/coarse/slope",
                 "offset": "reset/coarse/offset",
-                "r_squared": "reset/coarse/r_squared"
+                "r_squared": "reset/coarse/r_squared",
+                "roi": "reset/coarse/roi"
             },
             "s_fine": {
                 "slope": "sample/fine/slope",
                 "offset": "sample/fine/offset",
-                "r_squared": "sample/fine/r_squared"
+                "r_squared": "sample/fine/r_squared",
+                "roi": "sample/fine/roi"
             },
             "r_fine": {
                 "slope": "reset/fine/slope",
                 "offset": "reset/fine/offset",
-                "r_squared": "reset/fine/r_squared"
+                "r_squared": "reset/fine/r_squared",
+                "roi": "reset/fine/roi"
             }
         }
         self._metadata_paths = {
-                "roi_crs": "collection/roi_crs",
-                "roi_fn": "collection/roi_fn",
+                "roi_crs": "collection/roi_coarse",
+                "roi_fn": "collection/roi_fine",
                 "crs_gathered": "collection/gathered_directory_coarse",
                 "fn_gathered": "collection/gathered_directory_fine"
         }

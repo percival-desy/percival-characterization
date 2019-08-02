@@ -179,13 +179,17 @@ class PlotBase():
         offset = self._recalculate_offset(x, constants)
         return data - constants['slope'] * x - offset
 
-    def _set_roi(self, data):
-        print("Determine roi for s_coarse {}".format(self._roi_fn))
-        self._roi_fine = np.where(data == self._roi_fn)
-        print("Determine roi for coarse plotting")
+    def _set_roi_fn(self, data, roi_fn):
+        print("Determine roi for s_coarse {}".format(roi_fn))
+        self._roi = np.where(data == roi_fn)
+        print("ROIIIIIED {}".format(self._roi))
+
+    def _set_roi_crs(self, data):
         print(self._roi_crs[1], self._roi_crs[0])
         self._roi = np.where(np.logical_and(data < self._roi_crs[1],
                                             data > self._roi_crs[0]))
+
+
 
     def plot_sample(self):
         self.create_dir()
@@ -199,6 +203,8 @@ class PlotBase():
         out = self._output_dir + "/"
 
         self._s_coarse = self._data_crs["s_coarse"]
+        self._constants_fine = self._constants["s_fine"]
+        self._set_roi_crs(self._data_crs["s_coarse"])
         res = self._calculate_residuals(self._vin_crs,
                                         self._data_crs["s_coarse"],
                                         self._constants["s_coarse"])
@@ -214,7 +220,10 @@ class PlotBase():
                                  label="Coarse",
                                  out_fname=out+"s_residuals_coarse"+suffix)
 
+        print("Start fine parameters plotting")
         self._s_coarse = self._data_fn["s_coarse"]
+        self._constants_fine = self._constants["s_fine"]
+        self._set_roi_fn(self._s_coarse, self._constants_fine["roi"])
         res = self._calculate_residuals(self._vin_fn,
                                         self._data_fn["s_fine"],
                                         self._constants["s_fine"])
@@ -242,7 +251,10 @@ class PlotBase():
                                              self._col_title)
         out = self._output_dir + "/"
 
+        self._constants_fine = self._constants["r_fine"]
         self._s_coarse = self._data_crs["r_coarse"]
+        self._set_roi_crs(self._data_crs["r_coarse"])
+
         res = self._calculate_residuals(self._vin_crs,
                                         self._data_crs["r_coarse"],
                                         self._constants["r_coarse"])
@@ -259,6 +271,9 @@ class PlotBase():
                                  out_fname=out+"r_residuals_coarse"+suffix)
 
         self._s_coarse = self._data_fn["r_coarse"]
+        self._constants_fine = self._constants["r_fine"]
+        self._set_roi_fn(self._s_coarse, self._constants_fine["roi"])
+
         res = self._calculate_residuals(self._vin_fn,
                                         self._data_fn["r_fine"],
                                         self._constants["r_fine"])
