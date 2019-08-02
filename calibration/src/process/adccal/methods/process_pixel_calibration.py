@@ -6,6 +6,7 @@ import numpy as np
 from itertools import product
 import __init__  # noqa F401
 from process_adccal_base import ProcessAdccalBase
+import operator
 
 
 class Process(ProcessAdccalBase):
@@ -16,69 +17,57 @@ class Process(ProcessAdccalBase):
             "vin_size": (self._n_frames * self._n_groups)
         }
 
-        if self._method_properties["fit_adc_part"] == "coarse":
-            self._result = {
-                "s_coarse_offset": {
-                    "data": np.NaN * np.zeros(shapes["offset"]),
-                    "path": "sample/coarse/offset"
-                },
-                "s_coarse_slope": {
-                    "data": np.NaN * np.zeros(shapes["offset"]),
-                    "path": "sample/coarse/slope"
-                },
-                "s_coarse_r_squared": {
-                    "data": np.NaN * np.zeros(shapes["offset"]),
-                    "path": "sample/coarse/r_squared"
-                },
-                "r_coarse_offset": {
-                    "data": np.NaN * np.zeros(shapes["offset"]),
-                    "path": "reset/coarse/offset"
-                },
-                "r_coarse_slope": {
-                    "data": np.NaN * np.zeros(shapes["offset"]),
-                    "path": "reset/coarse/slope"
-                },
-                "r_coarse_r_squared": {
-                    "data": np.NaN * np.zeros(shapes["offset"]),
-                    "path": "reset/coarse/r_squared"
-                }
-            }
-            self._metadata = {
-                    "roi_crs": self._method_properties["coarse_fitting_range"]
-            }
+        adc_part = self._method_properties["fit_adc_part"]
+        s_offset = "s_" + adc_part + "_offset"
+        r_offset = "r_" + adc_part + "_offset"
+        s_slope = "s_" + adc_part + "_slope"
+        r_slope = "r_" + adc_part + "_slope"
+        s_rsquared = "s_" + adc_part + "_r_squared"
+        r_rsquared = "r_" + adc_part + "_r_squared"
+        s_roi = "s_" + adc_part + "_roi"
+        r_roi = "r_" + adc_part + "_roi"
 
-        if self._method_properties["fit_adc_part"] == "fine":
-            self._result = {
-                "s_fine_offset": {
-                    "data": np.NaN * np.zeros(shapes["offset"]),
-                    "path": "sample/fine/offset"
-                },
-                "s_fine_slope": {
-                    "data": np.NaN * np.zeros(shapes["offset"]),
-                    "path": "sample/fine/slope"
-                },
-                "s_fine_r_squared": {
-                    "data": np.NaN * np.zeros(shapes["offset"]),
-                    "path": "sample/fine/r_squared"
-                },
-                "r_fine_offset": {
-                    "data": np.NaN * np.zeros(shapes["offset"]),
-                    "path": "reset/fine/offset"
-                },
-                "r_fine_slope": {
-                    "data": np.NaN * np.zeros(shapes["offset"]),
-                    "path": "reset/fine/slope"
-                },
-                "r_fine_r_squared": {
-                    "data": np.NaN * np.zeros(shapes["offset"]),
-                    "path": "reset/fine/r_squared"
-                }
+        self._result = {
+            s_offset: {
+                "data": np.NaN * np.zeros(shapes["offset"]),
+                "path": "sample/" + adc_part + "/offset"
+            },
+            r_offset: {
+                "data": np.NaN * np.zeros(shapes["offset"]),
+                "path": "reset/" + adc_part + "/offset"
+            },
+            s_slope: {
+                "data": np.NaN * np.zeros(shapes["offset"]),
+                "path": "sample/" + adc_part + "/slope"
+            },
+            r_slope: {
+                "data": np.NaN * np.zeros(shapes["offset"]),
+                "path": "reset/" + adc_part + "/slope"
+            },
+            s_rsquared: {
+                "data": np.NaN * np.zeros(shapes["offset"]),
+                "path": "sample/" + adc_part + "/r_squared"
+            },
+            r_rsquared: {
+                "data": np.NaN * np.zeros(shapes["offset"]),
+                "path": "reset/" + adc_part + "/r_squared"
+            },
+            s_roi: {
+                "data": np.NaN * np.zeros(shapes["offset"]),
+                "path": "sample/" + adc_part + "/roi"
+            },
+            r_roi: {
+                "data": np.NaN * np.zeros(shapes["offset"]),
+                "path": "reset/" + adc_part + "/roi"
             }
-            self._metadata = {
-                    "roi_fn": self._method_properties["fine_fitting_range"]
-            }
+        }
 
-    def get_coarse_parameters(self, channel, vin, slope, offset, r_squared):
+        roi = "roi_" + adc_part
+        self._metadata = {
+                roi: self._method_properties[adc_part+"_fitting_range"]
+        }
+
+    def get_coarse_parameters(self, channel, vin, slope, offset, r_squared, roi_map):
         ''' Return the offset and slope from fit of coarse data
             according to the channel (sample or reset)
         '''
@@ -90,6 +79,7 @@ class Process(ProcessAdccalBase):
             adu = channel[adc, col, :, row]
             roi = np.where(np.logical_and(adu < fit_roi[1],
                                           adu > fit_roi[0]))
+            roi_map[adc, col, row] = fit_roi[0]
             if np.any(roi):
                 fit = self._fit_linear(vin[roi], adu[roi], enable_r_squared=True)
                 slope[adc, col, row] = fit.solution[0]
@@ -97,9 +87,18 @@ class Process(ProcessAdccalBase):
                 offset[adc, col, row] += fit.solution[1]
                 r_squared[adc, col, row] = fit.r_squared
 
-        return slope, offset, r_squared
+        return slope, offset, r_squared, roi_map
 
-    def get_fine_parameters(self, channel, coarse, vin, slope, offset, r_squared):
+    def get_list_crs_values(self, coarse):
+        return set(coarse)
+
+    def get_length_crs_values(self, coarse, coarse_value):
+
+        print(coarse_value)
+        length = np.where(coarse == coarse_value)
+        return length
+
+    def get_fine_parameters(self, channel, coarse, vin, slope, offset, r_squared, roi_map):
         ''' Return the offset and slope from fit of fine data
             according to the channel (sample or reset)
         '''
@@ -110,7 +109,13 @@ class Process(ProcessAdccalBase):
                                      range(self._n_groups)):
             adu = channel[adc, col, :, row]
             crs = coarse[adc, col, :, row]
-            roi = np.where(crs == fit_roi)
+            unique, counts = np.unique(crs, return_counts=True)
+            length_values = dict(zip(unique, counts))
+            better_coarse = max(length_values.items(),
+                         key=operator.itemgetter(1))[0]
+
+            roi = np.where(crs == better_coarse)
+            roi_map[adc, col, row] = better_coarse
             if np.any(roi):
                 fit = self._fit_linear(vin[roi], adu[roi], enable_r_squared=True)
                 slope[adc, col, row] = fit.solution[0]
@@ -126,7 +131,7 @@ class Process(ProcessAdccalBase):
                     slope[adc, col, row] < 0):
                 slope[adc, col, row] = np.NaN
 
-        return slope, offset, r_squared
+        return slope, offset, r_squared, roi_map
 
     def _adc_reordering(self, adc_to_reorder):
         ''' Reshuffle adc arrays
@@ -163,17 +168,22 @@ class Process(ProcessAdccalBase):
             r_slope = self._result["s_coarse_slope"]["data"]  # Slope reset
             s_rsquared = self._result["s_coarse_r_squared"]["data"]
             r_rsquared = self._result["r_coarse_r_squared"]["data"]
+            s_roi = self._result["s_coarse_roi"]["data"]
+            r_roi = self._result["r_coarse_roi"]["data"]
 
-            s_slope, s_offset, s_rsquared = self.get_coarse_parameters(sample,
+
+            s_slope, s_offset, s_rsquared, s_roi = self.get_coarse_parameters(sample,
                                                                        vin,
                                                                        s_slope,
                                                                        s_offset,
-                                                                       s_rsquared)
-            r_slope, r_offset, r_rsquared = self.get_coarse_parameters(reset,
+                                                                       s_rsquared,
+                                                                       s_roi)
+            r_slope, r_offset, r_rsquared, r_roi = self.get_coarse_parameters(reset,
                                                                        vin,
                                                                        r_slope,
                                                                        r_offset,
-                                                                       r_rsquared)
+                                                                       r_rsquared,
+                                                                       r_roi)
 
             self._result["s_coarse_slope"]["data"] = self._adc_reordering(s_slope)
             self._result["s_coarse_offset"]["data"] = self._adc_reordering(s_offset)
@@ -181,6 +191,8 @@ class Process(ProcessAdccalBase):
             self._result["r_coarse_offset"]["data"] =  self._adc_reordering(r_offset)
             self._result["r_coarse_r_squared"]["data"] = self._adc_reordering(r_rsquared)
             self._result["s_coarse_r_squared"]["data"] = self._adc_reordering(s_rsquared)
+            self._result["s_coarse_roi"]["data"] = self._adc_reordering(s_roi)
+            self._result["r_coarse_roi"]["data"] = self._adc_reordering(r_roi)
 
         if self._method_properties["fit_adc_part"] == "fine":
             print("Data loaded, fitting coarse data...")
@@ -198,22 +210,29 @@ class Process(ProcessAdccalBase):
             r_slope = self._result["r_fine_slope"]["data"]
             s_rsquared = self._result["s_fine_r_squared"]["data"]
             r_rsquared = self._result["r_fine_r_squared"]["data"]
+            s_roi = self._result["s_fine_roi"]["data"]
+            r_roi = self._result["r_fine_roi"]["data"]
 
-            s_slope, s_offset, s_rsquared = self.get_fine_parameters(sample,
+            s_slope, s_offset, s_rsquared, s_roi = self.get_fine_parameters(sample,
                                                                      sample_coarse,
                                                                      vin,
                                                                      s_slope,
                                                                      s_offset,
-                                                                     s_rsquared)
-            r_slope, r_offset, r_rsquared = self.get_fine_parameters(reset,
+                                                                     s_rsquared,
+                                                                     s_roi)
+            r_slope, r_offset, r_rsquared, r_roi = self.get_fine_parameters(reset,
                                                                      reset_coarse,
                                                                      vin,
                                                                      r_slope,
                                                                      r_offset,
-                                                                     r_rsquared)
+                                                                     r_rsquared,
+                                                                     r_roi)
             self._result["s_fine_slope"]["data"] = self._adc_reordering(s_slope)
             self._result["s_fine_offset"]["data"] = self._adc_reordering(s_offset)
             self._result["r_fine_slope"]["data"] = self._adc_reordering(r_slope)
             self._result["r_fine_offset"]["data"] = self._adc_reordering(r_offset)
             self._result["s_fine_r_squared"]["data"] = self._adc_reordering(s_rsquared)
             self._result["r_fine_r_squared"]["data"] = self._adc_reordering(r_rsquared)
+            self._result["s_fine_roi"]["data"] = self._adc_reordering(s_roi)
+            self._result["r_fine_roi"]["data"] = self._adc_reordering(r_roi)
+
