@@ -37,8 +37,8 @@ class PlotBase():
             self._metadata = processed_loader.load_metadata()
         else:
             self._constants = self._loaded_data.constants
+            self._metadata = processed_loader.load_metadata()
 
-        self._roi_fn = self._metadata["roi_fn"]
         self._roi_crs = self._metadata["roi_crs"]
 
         self._input_fname_crs_gather = self.get_gathered_files()[0]
@@ -69,8 +69,10 @@ class PlotBase():
             (self._vin_fn,
              self._data_fn) = self._gathered_loader_fn.load_data()
         else:
-            self._vin = self._loaded_data.vin
-            self._data = self._loaded_data.gathered_data
+            (self._vin_crs,
+             self._data_crs) = self._gathered_loader_crs.load_data()
+            (self._vin_fn,
+             self._data_fn) = self._gathered_loader_fn.load_data()
 
         if self._dims_overwritten:
             print("Overwritten configuration " +
@@ -180,16 +182,13 @@ class PlotBase():
         return data - constants['slope'] * x - offset
 
     def _set_roi_fn(self, data, roi_fn):
-        print("Determine roi for s_coarse {}".format(roi_fn))
+        print("Fine ROI for a coarse value of {}".format(roi_fn))
         self._roi = np.where(data == roi_fn)
-        print("ROIIIIIED {}".format(self._roi))
 
     def _set_roi_crs(self, data):
-        print(self._roi_crs[1], self._roi_crs[0])
+        print("Coarse ROI {}, {}".format(self._roi_crs[1], self._roi_crs[0]))
         self._roi = np.where(np.logical_and(data < self._roi_crs[1],
                                             data > self._roi_crs[0]))
-
-
 
     def plot_sample(self):
         self.create_dir()

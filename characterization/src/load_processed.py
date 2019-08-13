@@ -44,7 +44,6 @@ class LoadProcessed():
         }
         self._metadata_paths = {
                 "roi_crs": "collection/roi_coarse",
-                "roi_fn": "collection/roi_fine",
                 "crs_gathered": "collection/gathered_directory_coarse",
                 "fn_gathered": "collection/gathered_directory_fine"
         }
