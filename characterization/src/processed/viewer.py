@@ -21,8 +21,10 @@ class Plot(PlotBase):
 
         if self._loaded_data is None or self._dims_overwritten:
             self._constants = processed_loader.load_data()
+            self._metadata = processed_loader.load_metadata()
         else:
             self._constants = self._loaded_data.constants
+            self._metadata = processed_loader.load_metadata()
 
     def _generate_plot_2d(self,
                           x,
