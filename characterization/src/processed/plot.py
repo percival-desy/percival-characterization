@@ -24,9 +24,8 @@ class Plot(PlotBase):
         # Get offset and slope values
         m = constants["slope"]
         b = constants["offset"]
-        # Set ROI for fitting from HDF files
-#        self._set_roi(self._s_coarse, constants["roi"])
-        print("ROI {}".format(self._roi))
+        r_squared = constants["r_squared"]
+
         # Recalculate offset position (according to roi)
         offset = self._recalculate_offset(x[self._roi], constants)
 
@@ -51,8 +50,10 @@ class Plot(PlotBase):
         axs[0].set(ylabel='ADC output [ADU]')
         axs[0].legend(['data', 'fit'], loc='best')
         axs[0].set_title(plot_title)
-        fig.text(0.5, 0.78,
-                 "slope: {0:.2f} \noffset: {1:.2f}".format(m, b),
+        fig.text(0.6, 0.72,
+                 "slope: {0:.2f} \n"
+                 "offset: {1:.2f} \n"
+                 "r^2: {2:.2f}".format(m, b, r_squared),
                  fontsize=12)
 
         # Plot residuals below data and fit plot
@@ -69,9 +70,6 @@ class Plot(PlotBase):
                             out_fname):
         ''' Create a 1D-histogram
         '''
-
-        # Set ROI for fitting from HDF files
-#        self._set_roi(self._s_coarse, self._constants_fine)
 
         # Get gaussian fit parameters from data
         (mu, sigma) = norm.fit(x[self._roi])
