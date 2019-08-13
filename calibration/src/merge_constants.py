@@ -64,6 +64,7 @@ class MergeConstants(object):
                 in_fname = os.path.join(self._input_dir, fname)
                 file_content = utils.load_file_content(in_fname)
                 for key, value in file_content.items():
+#                    print(key, value)
                     if (key.startswith("collection") and
                        key not in data_to_concatenate):
                             data_to_concatenate[key] = value
@@ -74,8 +75,7 @@ class MergeConstants(object):
 
             for key, value in data_to_concatenate.items():
                 data[columns][key] = value
-                if (not key.startswith('collection') and
-                        not key.startswith('vin')):
+                if not key.startswith('collection'):
                     data_shape = value.shape
 
         return data, data_shape
@@ -86,6 +86,7 @@ class MergeConstants(object):
         for columns, file_list in data_crs.items():
             data[columns] = {}
             for key, value in data_crs[columns].items():
+                print(key)
                 data[columns][key] = value
             for key, value in data_fn[columns].items():
                 data[columns][key] = value
@@ -102,8 +103,7 @@ class MergeConstants(object):
                 list_keys.append(subkey)
 
         for subkey in list_keys:
-            if (not subkey.startswith("collection") and not
-                    subkey.startswith("vin")):
+            if not subkey.startswith("collection"):
                 dict_t[subkey] = {}
                 stack = np.zeros((n_rows, 0))
                 for key, value, in list_data.items():
