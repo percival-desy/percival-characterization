@@ -15,7 +15,7 @@ def load_config(config_file):
     """
 
     with open(config_file) as f:
-        config = yaml.load(f)
+        config = yaml.safe_load(f)
 
     # check for "None" entries
     fix_none_entries(d=config)
