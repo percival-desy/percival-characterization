@@ -39,7 +39,6 @@ class Plot(PlotBase):
 
 #       Inversion of axis for corresponding to the output of the sensor
         axs.invert_xaxis()
-#        axs.invert_yaxis()
         plt.xlabel("Columns")
         plt.ylabel("Rows")
         fig.suptitle(plot_title)
