@@ -62,7 +62,6 @@ class LoadProcessed():
         return file[0]
 
     def load_data(self):
-        print(self._row, self._col)
 
         data = {}
         with h5py.File(self._input_fname, "r") as f:
@@ -78,15 +77,10 @@ class LoadProcessed():
         ''' For a defined input fine, give dictionaries of the region of
             interest used during fitting procedure of coarse and fine.
         '''
+
         metadata = {}
         with h5py.File(self._input_fname, "r") as f:
             for key in self._metadata_paths:
-                print(key)
                 metadata[key] = f[self._metadata_paths[key]][()]
-#                metadata[key] = {}
-#                for subkey, metadata_path in self._metadata_paths[key].items():
-#                    metadata[key][subkey] = f[metadata_path][()]
-#            roi_crs = f[self._metadata_paths["roi_crs"]][()]
-#            roi_fn = f[self._metadata_paths["roi_fn"]][()]
 
         return metadata
