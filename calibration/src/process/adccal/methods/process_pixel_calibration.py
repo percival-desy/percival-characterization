@@ -92,8 +92,10 @@ class Process(ProcessAdccalBase):
                 slope[adc, col, row] = fit.solution[0]
                 offset[adc, col, row] = slope[adc, col, row] * vin[roi][0]
                 offset[adc, col, row] += fit.solution[1]
-                r_squared[adc, col, row] = fit.r_squared
-
+                if fit.r_squared:
+                    r_squared[adc, col, row] = fit.r_squared
+                else:
+                    r_squared[adc, col, row] = np.NaN
         return slope, offset, r_squared, roi_map
 
     def get_list_crs_values(self, coarse):
