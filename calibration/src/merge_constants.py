@@ -64,10 +64,9 @@ class MergeConstants(object):
                 in_fname = os.path.join(self._input_dir, fname)
                 file_content = utils.load_file_content(in_fname)
                 for key, value in file_content.items():
-#                    print(key, value)
                     if (key.startswith("collection") and
                        key not in data_to_concatenate):
-                            data_to_concatenate[key] = value
+                        data_to_concatenate[key] = value
                     else:
                         if key not in data_to_concatenate:
                             data_to_concatenate[key] = {}
@@ -86,7 +85,6 @@ class MergeConstants(object):
         for columns, file_list in data_crs.items():
             data[columns] = {}
             for key, value in data_crs[columns].items():
-                print(key)
                 data[columns][key] = value
             for key, value in data_fn[columns].items():
                 data[columns][key] = value
@@ -128,7 +126,7 @@ class MergeConstants(object):
         fine = self.get_list_of_files()
         files_fn = self.get_files(fine)
         data_fn, fn_shape = self.get_file_content(files_fn)
-
+        print(crs_shape[0], fn_shape[0])
         data = self.merge_constants(data_crs, data_fn)
         merged_data = self.merge_dictionaries(data,
                                               crs_shape[0])
