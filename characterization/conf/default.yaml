@@ -1,5 +1,5 @@
 general:
-    data_type: corrected
+    data_type: raw
     run: DLSraw
 
     plot_sample: True
@@ -9,7 +9,7 @@ general:
 all:
     output: &output /Volumes/LACIE_SHARE/Percival/Data_lab_october18
 raw:
-    input: /Volumes/LACIE_SHARE/Percival/Data_lab_october18/Coarse_scan/crs-scan_Vin=30400_DLSraw.h5
+    input: /Volumes/LACIE_SHARE/Percival/2018.12.08_3G/DLSraw/gathered/2018.10.17h1527_seqMode_10hrs_dscrmbld_DLSraw.h5
     metadata_fname: null
 
     output: *output
@@ -22,7 +22,7 @@ raw:
     row: 100
 
     interactive: True
-    method: [plot_coarse-fine_vs_image]
+    method: [viewer]
 
     viewer:
       err_below: -0.1
@@ -49,16 +49,16 @@ processed:
 
     measurement: adccal
 
-    adc: 0
+    adc: 2
     frame: null
     col: 100
     row: 100
 
     interactive: false
     method: [viewer]
+
     viewer:
         all_cols: True
-
 
 corrected:
     input: *output

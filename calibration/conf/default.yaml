@@ -1,6 +1,6 @@
 general:
-    run_type: process
-    n_cols: 32
+    run_type: gather
+    n_cols: 1440
 
     measurement: adccal
 
@@ -9,11 +9,12 @@ general:
     n_processes: 1
 
 all:
-    input: &input /Volumes/LACIE_SHARE/Percival/Data_lab_october18/Fine_scan
-    output: &output /Volumes/LACIE_SHARE/Percival/Data_lab_october18/Fine_scan
+    input: &input /Volumes/LACIE_SHARE/Percival/2018.12.08_3G
+    output: &output /Volumes/LACIE_SHARE/Percival/2018.12.08_3G
 
 gather:
-    method: file_per_vin_and_register_file
+#    method: file_per_vin_and_register_file
+    method: descramble_tcpdump
 
     input: *input
     output: *output
@@ -87,9 +88,7 @@ process:
     process_adccal_default:
         fit_adc_part: coarse
         coarse_fitting_range: [1, 29]
-        fine_fitting_range: 20
 
     process_pixel_calibration:
-        fit_adc_part: fine
+        fit_adc_part: coarse
         coarse_fitting_range: [2, 29]
-        fine_fitting_range: 20

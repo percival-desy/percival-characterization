@@ -38,7 +38,8 @@ class MergeConstants(object):
     def get_list_of_files(self):
         ''' Return a list of files contained inside the input directory
         '''
-        files_list = os.listdir(self._input_dir)
+        files_list = sorted(os.listdir(self._input_dir),
+                            key=lambda x: int(x.split(".")[0]))
 
         return files_list
 
@@ -126,7 +127,6 @@ class MergeConstants(object):
         fine = self.get_list_of_files()
         files_fn = self.get_files(fine)
         data_fn, fn_shape = self.get_file_content(files_fn)
-        print(crs_shape[0], fn_shape[0])
         data = self.merge_constants(data_crs, data_fn)
         merged_data = self.merge_dictionaries(data,
                                               crs_shape[0])
@@ -152,7 +152,6 @@ def get_arguments():
                         type=str,
                         required=True,
                         help="Input directory to load Fine data")
-
     parser.add_argument("--output_dir",
                         type=str,
                         required=True,
