@@ -1,11 +1,8 @@
+import os  # noqa E402
 import copy
 import matplotlib
-# Generate images without having a window appear:
-# this prevents sending remote data to locale PC for rendering
-matplotlib.use('Agg')  # Must be before importing matplotlib.pyplot or pylab!
+matplotlib.use('TkAgg')  # Must be before importing matplotlib.pyplot or pylab!
 import matplotlib.pyplot as plt  # noqa E402
-import os  # noqa E402
-
 from plot_base import PlotBase  # noqa E402
 
 
@@ -31,7 +28,8 @@ class Plot(PlotBase):
                                    data_coarse=self._data["s_coarse"],
                                    data_fine=self._data["s_fine"],
                                    plot_title=title,
-                                   out_fname=out)
+                                   out_fname=out,
+                                   interactive_flag=self._interactive)
 
     def plot_reset(self):
         self.create_dir()
@@ -46,7 +44,8 @@ class Plot(PlotBase):
                                    data_coarse=self._data["r_coarse"],
                                    data_fine=self._data["r_fine"],
                                    plot_title=title,
-                                   out_fname=out)
+                                   out_fname=out,
+                                   interactive_flag=self._interactive)
 
     def plot_combined(self):
         pass
@@ -56,7 +55,8 @@ class Plot(PlotBase):
                               data_coarse,
                               data_fine,
                               plot_title,
-                              out_fname):
+                              out_fname,
+                              interactive_flag):
         fig, ax1 = plt.subplots()
 
         ax2 = ax1.twinx()
@@ -72,6 +72,10 @@ class Plot(PlotBase):
 
         fig.suptitle(plot_title)
         fig.savefig(out_fname)
+
+        if interactive_flag is True:
+            fig.show()
+            input('Press enter to end')
 
         fig.clf()
         plt.close(fig)
