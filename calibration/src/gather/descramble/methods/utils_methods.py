@@ -5,6 +5,7 @@ import h5py
 import numpy as np
 import matplotlib.pyplot as plt
 import itertools
+import re
 from scipy import stats  # linear regression
 
 from utils import split as aggregate_crsfngn  # aggregate bits to crs,fn,gn
@@ -513,4 +514,3 @@ def perc_plot_6x2d(smpl_gn, smpl_crs, smpl_fn,
     # plt.show(block=False)
     plt.show()
     return fig
-
