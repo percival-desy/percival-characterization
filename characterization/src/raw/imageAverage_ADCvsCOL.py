@@ -1,4 +1,4 @@
-''' Show image of average data from a given ADC over many rows and many frames 
+''' Show image of average data from a given ADC over many rows and many frames
 '''
 
 import os  # noqa E402
@@ -12,15 +12,16 @@ import matplotlib.pyplot as plt  # noqa E402
 
 from plot_base import PlotBase  # noqa E402
 
+
 class Plot(PlotBase):
     def __init__(self, **kwargs):  # noqa F401
         new_kwargs = copy.deepcopy(kwargs)
-        new_kwargs["col"] = None    
+        new_kwargs["col"] = None
         new_kwargs["row"] = None
         new_kwargs["dims_overwritten"] = True
 
         super().__init__(**new_kwargs)
-        
+
     def plot_sample(self):
         #_check_dimension(self._data["s_fine"])
 
@@ -54,10 +55,10 @@ class Plot(PlotBase):
         fig = plt.figure(figsize=None)
 
         print("Shape of input data:", data.shape)
-	
+
         prepare_data_per_adc = data.reshape((212, 7, 1440))
-        average_data_per_adc = np.average(prepare_data_per_addc, axis=0)
-    
+        average_data_per_adc = np.average(prepare_data_per_adc, axis=0)
+
         plt.imshow(average_data_per_adc, aspect='auto', interpolation='none')
         plt.colorbar()
         plt.xlabel("columns")
