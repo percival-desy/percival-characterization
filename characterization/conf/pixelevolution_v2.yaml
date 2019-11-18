@@ -23,6 +23,7 @@ raw:
     frame: null
 
     # there are row, col of the pixels that will be evaluated
+
     row: [140, 147] # means: [140,141,142,143,144,145,146]
     col: [100, 102] # means: [100, 101]
 
@@ -31,7 +32,6 @@ raw:
 
     #row: [280, 294] 
     #col: [160, 257] 
-
 
     method: [pixelevolution_v2]
 

@@ -5,8 +5,11 @@ OdinDAQ-further-scrambled) format to a data format
 readable in gather.
 mezzanine Firmware >= 2018.06.18_AY (same subnet)
 """
+
+import sys
 import os  # to list files in a directory
 import time  # to have time
+import h5py
 import numpy as np
 
 import matplotlib
@@ -128,6 +131,7 @@ class Descramble(DescrambleBase):
             if((i_img % 2 == 1) & ((i_img // 2) < n_img_fl1)):
                 scrmbl_smpl[i_img, ...] = data_fl1_smpl[i_img // 2, ...]
                 scrmbl_rst[i_img, ...] = data_fl1_rst[i_img // 2, ...]
+
         if self._clean_memory:
             del data_fl0_smpl
             del data_fl0_rst
@@ -179,6 +183,7 @@ class Descramble(DescrambleBase):
             aux_reordered[..., 1, :] = aux_reord[..., 1, 0, :]
             aux_reordered[..., 2, :] = aux_reord[..., 0, 1, :]
             aux_reordered[..., 3, :] = aux_reord[..., 1, 1, :]
+
             aux_reordered = aux_reordered.reshape(
                 (aux_n_img, n_grp, n_adc * aux_ncol))
             aux_reordered = aux_reordered.reshape(
@@ -214,6 +219,7 @@ class Descramble(DescrambleBase):
         missing_rowgrp_tracker = np.ones(
             (aux_n_img, n_smplrst, n_grp)).astype(bool)
         missing_rowgrp_tracker = data_2_srcmbl_norefcol[..., 0, 0] == err_dlsraw
+
         # - - -
         #
         # descramble proper
@@ -227,6 +233,7 @@ class Descramble(DescrambleBase):
             dot()
             auxil_thisimg = data_2_srcmbl_norefcol[
                 i_img, ...].reshape((n_smplrst, n_grp, n_adc*aux_ncol))
+
             # (n_smplrst,NRowGrpInShot,n_adc*aux_ncol)
 
             auxil_thisimg = auxil_thisimg.reshape(
@@ -247,6 +254,7 @@ class Descramble(DescrambleBase):
             # n_smplrst,n_grp,n_data_pads,n_adc*aux_ncol//n_data_pads,15bits
 
             auxil_thisimg_bitted = auxil_thisimg_16bitted[..., 1:]
+
             # n_smplrst,n_grp,n_data_pads,n_adc*aux_ncol//n_data_pads,15bits
 
             auxil_thisimg_bitted = auxil_thisimg_bitted.reshape(
@@ -276,6 +284,7 @@ class Descramble(DescrambleBase):
             totalvector_xd_ar = np.sum(auxil_thisimg_bitted[...,
                 aux_frombit:aux_tobit_puls1] * aux_power_matr, axis=4)
             auxil_thisimg_aggr[..., ign] = totalvector_xd_ar.astype('uint8')
+
             #
             # binary aggregate Crs bit(10,11,12,13,14)
             aux_bits2descr = 5
@@ -288,6 +297,7 @@ class Descramble(DescrambleBase):
             totalvector_xd_ar = np.sum(auxil_thisimg_bitted[...,
                 aux_frombit:aux_tobit_puls1] * aux_power_matr, axis=4)
             auxil_thisimg_aggr[..., icrs] = totalvector_xd_ar
+
             #
             # binary aggregate Fn bit(2,3,4,5,6,7,8,9)
             aux_bits2descr = 8
@@ -300,6 +310,7 @@ class Descramble(DescrambleBase):
             totalvector_xd_ar = np.sum(auxil_thisimg_bitted[...,
                 aux_frombit:aux_tobit_puls1] * aux_power_matr, axis=4)
             auxil_thisimg_aggr[..., ifn] = totalvector_xd_ar
+
             #
             if self._clean_memory:
                 del auxil_thisimg_bitted
@@ -318,6 +329,7 @@ class Descramble(DescrambleBase):
                 del auxil_thisimg_aggr
             #
             multiimg_aggr_withref[i_img, ...] = auxil_thisImg_aggr_withref[...]
+
         print(" ")
         if self._clean_memory:
             del auxil_thisImg_aggr_withref
@@ -335,6 +347,7 @@ class Descramble(DescrambleBase):
                 multiimg_grpdscrmbld[
                     i_img, i_smplrst, ...] = reorder_pixels_gncrsfn(multiimg_aggr_withref[
                         i_img, i_smplrst, ...], n_adc, n_col_in_blk)
+
         # - - -
         #
         # add error tracking
@@ -351,6 +364,7 @@ class Descramble(DescrambleBase):
                         multiimg_grpdscrmbld[
                             i_img, i_smplrst, i_grp, ...] = err_gncrsfn
         multiimg_grpdscrmbld[..., 0, :, :, :] = err_gncrsfn
+
         # also err tracking for ref col
         # - - -
         #
@@ -359,6 +373,7 @@ class Descramble(DescrambleBase):
             (aux_n_img, n_smplrst, n_grp,
              n_pad, n_adc, n_col_in_blk, 3)).astype('int16')
         dscrmbld_gncrsfn = multiimg_grpdscrmbld
+
         dscrmbld_gncrsfn = np.transpose(dscrmbld_gncrsfn,
                                         (0, 1, 2, 4, 3, 5, 6)).astype('int16')
         # (NImg,Smpl/Rst,n_grp,n_adc,n_pad,NColInBlk,Gn/Crs/Fn)
@@ -402,6 +417,7 @@ class Descramble(DescrambleBase):
                               ...] = dscrmbld_smpl_dlsraw[:, 2:212:2, ...]
             reord_rst_dlsraw[:, 0:105,
                              ...] = dscrmbld_rst_dlsraw[:, 0:210:2, ...]
+
             # (aux_n_img, n_grp, n_adc, NCol)
         else:
             reord_smpl_dlsraw = dscrmbld_smpl_dlsraw
@@ -435,6 +451,7 @@ class Descramble(DescrambleBase):
                     reread_gncrsfn[aux_thisimg, irst, ..., ign],
                     reread_gncrsfn[aux_thisimg, irst, ..., icrs],
                     reread_gncrsfn[aux_thisimg, irst, ..., ifn],
+
                     aux_title, aux_err_below)
             # ingnoreme = input("press enter to continue")
         # - - -
@@ -526,6 +543,7 @@ class Descramble(DescrambleBase):
                     reread_gncrsfn[aux_thisimg, irst, ..., ign],
                     reread_gncrsfn[aux_thisimg, irst, ..., icrs],
                     reread_gncrsfn[aux_thisimg, irst, ..., ifn],
+
                     aux_title, aux_err_below)
             # ingnoreme = input("press enter to continue")
         # - - -
