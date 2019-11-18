@@ -1,5 +1,6 @@
 general:
-    data_type: raw
+    data_type: corrected
+
     run: DLSraw
 
     plot_sample: True
@@ -7,26 +8,32 @@ general:
     plot_combined: True
 
 all:
-    output: &output /Users/ben/PostDoc/P2M_HDF5/Data_0918/Coarse_scan
-
+    output: &output /Volumes/LACIE_SHARE/Percival/Data_lab_october18
 raw:
-    input: /Users/ben/PostDoc/P2M_HDF5/Data_0918/DLSraw/correction/col0-1439_correction.h5
-    metadata_fname: null 
+    input: /Volumes/LACIE_SHARE/Percival/Data_lab_october18/Coarse_scan/crs-scan_Vin=30400_DLSraw.h5
+
+    metadata_fname: null
 
     output: *output
 
     measurement: adccal
 
+    interactive: True
+
+    viewer:
+        err_below: -0.1
+
     adc: null
-    frame: 2
-    col: 100
+    frame: 8
+    col: 500
     row: 100
 
+    interactive: True
     method: [viewer]
 
     viewer:
       err_below: -0.1
-    #method: [image, plot_coarse-fine_vs_image]
+    #method: [image, plot_coarse-fine_vs_image, viewer]
 
 gathered:
     input: *output
@@ -36,8 +43,11 @@ gathered:
 
     adc: 0
     frame: null
-    col: 100
-    row: null
+    col: 60
+    row: 10
+    interactive: False
+
+    interactive: True
 
     method: [plot, hist, hist_2d]
     #method: [plot_sample_vs_reset]
@@ -48,9 +58,33 @@ processed:
 
     measurement: adccal
 
-    adc: 0
+    adc: 2
     frame: null
-    col: 10
-    row: null
+    col: 100
+    row: 100
 
-    method: [plot]
+    interactive: false
+    method: [viewer]
+
+    viewer:
+        all_cols: True
+
+corrected:
+    input: *output
+    output: *output
+
+    measurement: adccal
+
+    adc: 2
+    frame: 4
+    col: 61
+    row: 10
+
+    interactive: True
+
+    method: [viewer]
+
+    plot:
+        all_cols: False
+    viewer:
+        all_cols: True

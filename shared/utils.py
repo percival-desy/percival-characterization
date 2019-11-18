@@ -158,6 +158,12 @@ class IndexTracker(object):
         msg = "update_plots is not implemented. Abort."
         raise Exception(msg)
 
+    def save_plots(self):
+        """ Save plots to a specific folder.
+        """
+        msg = "save_plots is not implemented. Abort"
+        raise Exception(msg)
+
     def get_fig(self):
         """Returns the self._fig figure on which the canvas was created.
 

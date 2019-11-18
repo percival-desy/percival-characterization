@@ -32,6 +32,7 @@ class ProcessBase(object):
     def __init__(self, **kwargs):
 
         self._in_fname = None
+        self._in_dir = None
         self._out_fname = None
         self._method = None
 
@@ -39,10 +40,13 @@ class ProcessBase(object):
         for key, value in kwargs.items():
             setattr(self, "_" + key, value)
 
+        self._adc_part = self._method_properties["fit_adc_part"]
         self._result = {}
+        self._metadata = {}
 
         print("\n\nStart process")
         print("in_fname:", self._in_fname)
+        print("in_dir:", self._in_dir)
         print("out_fname:", self._out_fname)
         print()
 
@@ -138,17 +142,18 @@ class ProcessBase(object):
             #                residuals,
             #                rank,
             #                singular values
-            res = np.linalg.lstsq(A, y_masked)
+            res = np.linalg.lstsq(A, y_masked, rcond=-1)
 
         if enable_r_squared:
             if all_zero:
                 r_squared = 1
             else:
                 try:
-                    ss_tot = np.dot(y_diff, y_diff)
-                    ss_res = res[1]  # this are the residuals given by lstsq
-
+#                    ss_tot = np.dot(y_diff, y_diff)
+                    ss_tot = y_diff.size * y_diff.var()
+                    ss_res = res[1]
                     r_squared = 1 - ss_res/ss_tot
+
                 except:
                     print("ERROR when calculating r squared.")
                     print("ss_tot", ss_tot)
@@ -196,5 +201,21 @@ class ProcessBase(object):
 
             name = "{}/{}".format(metadata_base_path, "method")
             out_f.create_dataset(name, data=self._method)
+
+            name = "{}/{}".format(metadata_base_path,
+                                  "gathered_directory_"+self._adc_part)
+            out_f.create_dataset(name, data=self._in_dir)
+
+#            name = "{}/{}".format(metadata_base_path, "adc_part")
+#            out_f.create_dataset(name, data=self._adc_part)
+
+            gname = "collection"
+            for key, value in iter(self._metadata.items()):
+                name = "{}/{}".format(gname, key)
+                try:
+                    out_f.create_dataset(name, data=value)
+                except:
+                    print("Error in", name, value.dtype)
+                    raise
 
             out_f.flush()

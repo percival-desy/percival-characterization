@@ -9,76 +9,78 @@ class LoadProcessed():
         self._input_fname_templ = input_fname_templ
         self._output_dir = os.path.normpath(output_dir)
         self._adc = adc
-        self._row = row
         self._col = col
+        self._row = row
 
         self._data_type = "processed"
 
-        self._input_fname, self._col_offset = self._get_input_fname(
-            self._input_fname_templ,
-            self._col
-        )
+        self._input_fname = self._get_input_fname(self._input_fname_templ)
 
         self._paths = {
             "s_coarse": {
                 "slope": "sample/coarse/slope",
-                "offset": "sample/coarse/offset"
+                "offset": "sample/coarse/offset",
+                "r_squared": "sample/coarse/r_squared",
+                "roi": "sample/coarse/roi"
+            },
+            "r_coarse": {
+                "slope": "reset/coarse/slope",
+                "offset": "reset/coarse/offset",
+                "r_squared": "reset/coarse/r_squared",
+                "roi": "reset/coarse/roi"
+            },
+            "s_fine": {
+                "slope": "sample/fine/slope",
+                "offset": "sample/fine/offset",
+                "r_squared": "sample/fine/r_squared",
+                "roi": "sample/fine/roi"
+            },
+            "r_fine": {
+                "slope": "reset/fine/slope",
+                "offset": "reset/fine/offset",
+                "r_squared": "reset/fine/r_squared",
+                "roi": "reset/fine/roi"
             }
         }
+        self._metadata_paths = {
+                "roi_crs": "collection/roi_coarse",
+                "crs_gathered": "collection/gathered_directory_coarse",
+                "fn_gathered": "collection/gathered_directory_fine"
+        }
 
-        self._n_frames_per_vin = None
+    def set_input_fname(self):
+        self._input_fname = self._get_input_fname(self._input_fname_templ)
 
-        self._n_frames = None
-        self._n_groups = None
-        self._n_total_frames = None
-
-    def _get_input_fname(self, input_fname_templ, col):
+    def _get_input_fname(self, input_fname_templ):
 
         input_fname = input_fname_templ.format(data_type=self._data_type,
                                                col_start="*",
                                                col_stop="*")
 
-        files = glob.glob(input_fname)
+        file = glob.glob(input_fname)
 
-        # TODO do not use file name but "collections/columns_used" entry in
-        # files
-        prefix, middle = input_fname_templ.split("{col_start}")
-        middle, suffix = middle.split("{col_stop}")
-
-        prefix = prefix.format(data_type=self._data_type)
-        middle = middle.format(data_type=self._data_type)
-        suffix = suffix.format(data_type=self._data_type)
-#        print("prefix", prefix)
-#        print("middle", middle)
-#        print("suffix", suffix)
-
-        searched_file = None
-        for f in files:
-            cols = f[len(prefix):-len(suffix)]
-            cols = map(int, cols.split(middle))
-            # convert str into int
-            cols = list(map(int, cols))
-
-            if cols[0] <= col and col <= cols[1]:
-                searched_file = f
-                col_offset = cols[0]
-                break
-
-        if searched_file is None:
-            print("input tmplates:", input_fname_templ)
-            raise Exception("No files found which contains column {}."
-                            .format(col))
-
-        return searched_file, col_offset
+        return file[0]
 
     def load_data(self):
-        col = self._col - self._col_offset
 
         data = {}
         with h5py.File(self._input_fname, "r") as f:
+
             for key in self._paths:
                 data[key] = {}
                 for subkey, path in self._paths[key].items():
-                    data[key][subkey] = f[path][self._adc, col]
+                    data[key][subkey] = f[path][self._row, self._col]
 
         return data
+
+    def load_metadata(self):
+        ''' For a defined input fine, give dictionaries of the region of
+            interest used during fitting procedure of coarse and fine.
+        '''
+
+        metadata = {}
+        with h5py.File(self._input_fname, "r") as f:
+            for key in self._metadata_paths:
+                metadata[key] = f[self._metadata_paths[key]][()]
+
+        return metadata

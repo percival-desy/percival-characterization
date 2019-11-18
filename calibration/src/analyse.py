@@ -204,7 +204,7 @@ class Analyse(object):
                 col_stop = (p+1) * self._n_cols - 1
 
                 in_fname = in_file_name.format(col_start=col_start,
-                                           col_stop=col_stop)
+                                               col_stop=col_stop)
                 # doing the join here and outside of loop because if in_dir
                 # contains a placeholder it will not work otherwise
                 in_fname = os.path.join(in_dir, in_fname)
@@ -225,6 +225,7 @@ class Analyse(object):
 
                 kwargs = dict(
                     in_fname=in_fname,
+                    in_dir=self._in_base_dir,
                     out_fname=out_fname,
                     run=self._run_id,
                     method=self._method,
@@ -423,8 +424,8 @@ if __name__ == "__main__":
     if run_type == "gather":
         in_base_dir = in_base_dir
         # to allow additional directories for descramble
-        out_base_dir = os.path.join(out_base_dir, run_id, "{run_dir}")
-        #out_base_dir = os.path.join(out_base_dir, run_id, "gathered")
+#        out_base_dir = os.path.join(out_base_dir, run_id, "{run_dir}")
+        out_base_dir = os.path.join(out_base_dir, run_id, "gathered")
         create_outdir = False
     else:
         in_base_dir = os.path.join(in_base_dir, run_id, "gathered")

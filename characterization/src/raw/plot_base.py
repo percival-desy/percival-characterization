@@ -1,5 +1,6 @@
 from collections import namedtuple
 import os
+import numpy as np
 
 from load_raw import LoadRaw
 import utils
@@ -21,7 +22,8 @@ class PlotBase():
                          output_dir=self._output_dir,
                          frame=self._frame,
                          row=self._row,
-                         col=self._col)
+                         col=self._col,
+                         interactive=self._interactive)
 
         if loaded_data is None or self._dims_overwritten:
             self._data = loader.load_data()
@@ -66,15 +68,21 @@ class PlotBase():
 
         return PlotBase.LoadedData(data=self._data)
 
-    def _generate_single_plot(self, data, plot_title, label, out_fname):
+    def _generate_single_plot(self, data, plot_title, label, out_fname, interactive_flag):
         print("_generate_single_plot method is not implemented.")
+    
+    def _get_range(self, input_data):
+        ''' Return boundary limits of a vector
+        '''
+
+        return np.min(input_data), np.max(input_data)
 
     def plot_sample(self):
         self.create_dir()
 
         pos = "frame={}".format(self._frame)
         suffix = "_frame{}".format(self._frame)
-        out = self._output_dir+"/"
+        out = self._output_dir+"/sample/"
 
         self._generate_single_plot(data=self._data["s_coarse"],
                                    plot_title="Sample Coarse, "+pos,
@@ -94,7 +102,7 @@ class PlotBase():
 
         pos = "frame={}".format(self._frame)
         suffix = "_frame{}".format(self._frame)
-        out = self._output_dir+"/"
+        out = self._output_dir+"/reset/"
 
         self._generate_single_plot(data=self._data["r_coarse"],
                                    plot_title="Reset Coarse, "+pos,
