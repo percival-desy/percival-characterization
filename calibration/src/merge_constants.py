@@ -49,14 +49,9 @@ class MergeConstants(object):
         return [self.tryint(c) for c in re.split('([0-9]+)',
                                                  input_string)]
 
-    def sort_nicely(input_list):
-        """Sort the given list in the way that humans expect.
-        """
-        input_list.sort(key=alphanum_key)
-
     def get_list_of_files(self):
-        ''' Return a list of files contained inside the input directory
-        '''
+        """Return a list of files contained inside the input directory.
+        """
         files_list = os.listdir(self._input_dir)
         files_list.sort(key=self.alphanum_key)
 
