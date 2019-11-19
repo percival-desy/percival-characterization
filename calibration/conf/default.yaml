@@ -9,16 +9,17 @@ general:
     n_processes: 1
 
 all:
-    input: &input /Volumes/LACIE_SHARE/Percival/2018.12.08_3G
-    output: &output /Volumes/LACIE_SHARE/Percival/2018.12.08_3G
+    input: &input /Volumes/LACIE_SHARE/Percival/Data_lab_october18/Coarse_scan
+    output: &output /Volumes/LACIE_SHARE/Percival/Data_lab_october18/Coarse_scan
 
 gather:
-#    method: file_per_vin_and_register_file
-    method: descramble_tcpdump
+    method: file_per_vin_and_register_file
+#    method: descramble_tcpdump
 
     input: *input
     output: *output
 
+    metadata_fname: "coarse_metafile.dat"
     descramble_tcpdump:
         # to use it
         # (base) [prcvlusr@cfeld-percival01]~/PercAuxiliaryTools/Framework/percival-characterization% python3 ./calibration/src/analyse.py --config_file descramble_OdinDAQ_2018_06_18AY_2L2N_v01.yaml
