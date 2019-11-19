@@ -29,6 +29,7 @@ class MergeConstants(object):
         self._input_dir_fn = input_dir_fn
         self._output_dir = output_dir
         self._out_fname = out_fname
+        self._n_rows = None
 
     def set_input_dir(self, input_dir):
         self._input_dir = input_dir
