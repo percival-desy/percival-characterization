@@ -4,6 +4,7 @@ import os
 import sys
 import argparse
 import time
+import re
 import numpy as np
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -22,12 +23,12 @@ import utils
 
 class MergeConstants(object):
 
-    def __init__(self, input_dir_crs, input_dir_fn, outpur_dir, out_fname):
+    def __init__(self, input_dir_crs, input_dir_fn, out_fname):
         self._input_dir = None
         self._input_dir_crs = input_dir_crs
         self._input_dir_fn = input_dir_fn
-        self._output_dir = output_dir
         self._out_fname = out_fname
+        self._n_rows = None
 
     def set_input_dir(self, input_dir):
         self._input_dir = input_dir
@@ -35,11 +36,24 @@ class MergeConstants(object):
     def set_n_rows(self, n_rows):
         self._n_rows = n_rows
 
+    def tryint(self, s):
+        try:
+            return int(s)
+        except ValueError:
+            return s
+
+    def alphanum_key(self, input_string):
+        """Turn a string into a list of string and number chunks.
+           "z23a" -> ["z", 23, "a"]
+        """
+        return [self.tryint(c) for c in re.split('([0-9]+)',
+                                                 input_string)]
+
     def get_list_of_files(self):
-        ''' Return a list of files contained inside the input directory
-        '''
-        files_list = sorted(os.listdir(self._input_dir),
-                            key=lambda x: int(x.split(".")[0]))
+        """Return a list of files contained inside the input directory.
+        """
+        files_list = os.listdir(self._input_dir)
+        files_list.sort(key=self.alphanum_key)
 
         return files_list
 
@@ -83,7 +97,7 @@ class MergeConstants(object):
     def merge_constants(self, data_crs, data_fn):
 
         data = {}
-        for columns, file_list in data_crs.items():
+        for columns, _ in data_crs.items():
             data[columns] = {}
             for key, value in data_crs[columns].items():
                 data[columns][key] = value
@@ -134,8 +148,7 @@ class MergeConstants(object):
 
     def write_hdf5_file(self, files_to_merge):
 
-        out_fname = os.path.join(self._output_dir, self._out_fname)
-        with h5py.File(out_fname, "w") as f:
+        with h5py.File(self._out_fname, "w") as f:
             for key, value in files_to_merge.items():
                 f.create_dataset(key, data=value)
                 f.flush()
@@ -152,6 +165,7 @@ def get_arguments():
                         type=str,
                         required=True,
                         help="Input directory to load Fine data")
+
     parser.add_argument("--output_dir",
                         type=str,
                         required=True,
@@ -176,10 +190,11 @@ if __name__ == '__main__':
     inputdir_coarse = args.input_dir_crs
     inputdir_fine = args.input_dir_fn
     output_dir = args.output_dir
-    out_fname = args.output_file
+    out_file_name = args.output_file
+    out_fname = os.path.join(output_dir, out_file_name)
 
-    obj = MergeConstants(inputdir_coarse, inputdir_fine, output_dir, out_fname)
+    obj = MergeConstants(inputdir_coarse, inputdir_fine, out_fname)
     obj.run()
 
-    print("File {} written in directory {}".format(out_fname, output_dir))
+    print("File {} written".format(out_fname))
     print('Merging files took: {:.3f} s \n'.format(time.time() - total_time))

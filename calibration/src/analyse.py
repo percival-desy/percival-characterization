@@ -42,7 +42,8 @@ class Analyse(object):
                  n_cols,
                  method,
                  method_properties,
-                 n_processes):
+                 n_processes,
+                 metadata_fname):
 
         self._in_base_dir = in_base_dir
         self._out_base_dir = out_base_dir
@@ -69,6 +70,7 @@ class Analyse(object):
         self._measurement = measurement
         self._method = method
         self._method_properties = method_properties
+        self._metadata_fname = metadata_fname
 
     def _set_job_sets(self):
         all_jobs = range(self._n_parts)
@@ -102,7 +104,7 @@ class Analyse(object):
 
     def generate_metadata_path(self, base_dir):
         dirname = base_dir
-        filename = "file.dat"
+        filename = self._metadata_fname
 
         return dirname, filename
 
@@ -285,15 +287,17 @@ def get_arguments():
                         dest="run_type",
                         type=str,
                         help="Run type: gather, process")
-
     parser.add_argument("--n_cols",
                         help="The number of columns to be used for splitting "
                              "into subsets (to use all, set n_cols to None)")
-
     parser.add_argument("--config_file",
                         type=str,
                         default="default.yaml",
                         help="The name of the config file.")
+    parser.add_argument("--metadata_file",
+                        type=str,
+                        default="file.dat",
+                        help="File name containing metadata info to use.")
 
     args = parser.parse_args()
 
@@ -419,6 +423,7 @@ if __name__ == "__main__":
     in_base_dir = config[run_type]["input"]
     method = config[run_type]["method"]
     method_properties = config[run_type][method]
+    metadata_file = config[run_type]["metadata_fname"]
 
     # generate file paths
     if run_type == "gather":
@@ -441,5 +446,6 @@ if __name__ == "__main__":
                   n_cols=n_cols,
                   method=method,
                   method_properties=method_properties,
-                  n_processes=n_processes,)
+                  n_processes=n_processes,
+                  metadata_fname=metadata_file)
     obj.run()
