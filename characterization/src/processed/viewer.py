@@ -33,8 +33,9 @@ class Plot(PlotBase):
                           out_fname):
 
         fig, axs = plt.subplots(nrows=1, sharex=True)
+        cmap = matplotlib.pyplot.cm.jet
 
-        plt.imshow(x)
+        plt.imshow(x, cmap=cmap)
         plt.colorbar()
 
 #       Inversion of axis for corresponding to the output of the sensor
