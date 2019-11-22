@@ -34,6 +34,7 @@ class Plot(PlotBase):
 
         fig, axs = plt.subplots(nrows=1, sharex=True)
         cmap = matplotlib.pyplot.cm.jet
+        cmap.set_under(color='white')
 
         plt.imshow(x, cmap=cmap)
         plt.colorbar()
