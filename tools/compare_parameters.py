@@ -37,4 +37,4 @@ def get_arguments():
     pass
 
 if __name__ == "__main__":
-    print("Start script:":)
+    print("Start script:")
