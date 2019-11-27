@@ -11,6 +11,13 @@ import sys
 import matplotlib.pyplot as plt
 import argparse
 
+CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
+SHARED_DIR = os.path.join(CURRENT_DIR, "shared")
+
+if SHARED_DIR not in sys.path:
+    sys.path.insert(0, SHARED_DIR)
+
+import utils  # noqa E402
 
 class CompareParameters(object):
     """This class takes two arrays and compare them.
@@ -79,6 +86,7 @@ class CompareParameters(object):
 
     def run(self):
         self._set_input_fname(self._input_dir_1)
+        utils.create_dir(self._output_dir)
         self.load_data()
         keys, a_offset, a_slope = self.get_parameters()
 
@@ -98,6 +106,7 @@ class CompareParameters(object):
         fig, axs = plt.subplots(figsize=None)
 
         output_fname = title + ".png"
+
         output = os.path.join(output_dir, output_fname)
         masked_data = np.ma.masked_invalid(data)
         min_data = np.ceil(np.min(masked_data))
