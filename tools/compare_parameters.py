@@ -99,8 +99,8 @@ class CompareParameters(object):
                                                           b_offset[key])
             slope_subtract = self.subtraction_parameters(a_slope[key],
                                                          b_slope[key])
-            self.plot(offset_subtract, "Offset"+item, self._output_dir)
-            self.plot(slope_subtract, "Slope"+item, self._output_dir)
+            self.plot(offset_subtract, "Offset_"+item, self._output_dir)
+            self.plot(slope_subtract, "Slope_"+item, self._output_dir)
 
     def plot(self, data, title, output_dir):
         fig, axs = plt.subplots(figsize=None)
@@ -138,9 +138,7 @@ def get_arguments():
                         type=str,
                         help=("Path of output directory for storing files"))
 
-    args = parser.parse_args()
-
-    return args
+    return parser.parse_args()
 
 
 if __name__ == "__main__":
