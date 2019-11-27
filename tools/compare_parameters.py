@@ -103,21 +103,21 @@ class CompareParameters(object):
             self.plot(slope_subtract, "Slope_"+item, self._output_dir)
 
     def plot(self, data, title, output_dir):
-        fig, axs = plt.subplots(figsize=None)
 
         output_fname = title + ".png"
-
         output = os.path.join(output_dir, output_fname)
-        masked_data = np.ma.masked_invalid(data)
+
+        masked_data = np.ma.masked_invalid(data).ravel()
         min_data = np.ceil(np.min(masked_data))
         max_data = np.ceil(np.max(masked_data))
-        plt.hist(masked_data.ravel(),
+        fig, _ = plt.subplots(figsize=None)
+
+        plt.hist(masked_data,
                  bins='auto',
                  density=True,
                  range=(min_data, max_data))
         plt.xlabel("[ADU]")
         plt.title(title)
-        # plt.show()
         fig.savefig(output)
 
 
